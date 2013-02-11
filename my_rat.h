@@ -31,6 +31,13 @@ struct my_rat_s
 };
 typedef struct my_rat_s* my_rat;
 
+#define MY_RAT_TOTAL_NODE_NUM(n) ((n)?((n)->total_node_num):0)
+#define MY_RAT_USED_NODE_NUM(n) ((n)?((n)->used_node_num):0)
+#define MY_RAT_FREE_NODE_NUM(n) ((n)?((n)->total_node_num-(n)->used_node_num):0)
+#define MY_RAT_INIT(n) do {(n)->msn=(n)->lsn;(n)->used_node_num=0;(n)->sign=0;(n)->power=0;} while(0)
+#define MY_RAT_HAS_INITED(n) ((n)->sign !=0)
+
+
 /*
  *	功能：释放有理数
  *	参数：
@@ -53,4 +60,13 @@ void my_rat_free(my_rat n);
  */
 my_rat my_rat_from_str(my_rat n,const char* str);
 
+/*
+ *	功能：把my_rat转换为字符串
+ *	参数：
+ *		n：要处理的有理数
+ *	返回值：
+ * 		非NULL：字符串
+ * 		NULL：出错
+ */
+char* my_rat_to_str(my_rat n);
 #endif

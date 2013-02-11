@@ -20,4 +20,8 @@ typedef enum
 	MY_NEW_RES,	//计算结果作为新的数据返回
 	MY_ARG_RES,	//计算结果放在函数参数
 }my_result_saving_type;
+
+#define MY_MAX(a,b) ((a)>(b)?(a):(b))
+#define MY_INT64_MIN_STR_LEN 20
+
 #endif
