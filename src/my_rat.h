@@ -31,12 +31,41 @@ struct my_rat_s
 };
 typedef struct my_rat_s* my_rat;
 
-#define MY_RAT_TOTAL_NODE_NUM(n) ((n)?((n)->total_node_num):0)
-#define MY_RAT_USED_NODE_NUM(n) ((n)?((n)->used_node_num):0)
-#define MY_RAT_FREE_NODE_NUM(n) ((n)?((n)->total_node_num-(n)->used_node_num):0)
-#define MY_RAT_INIT(n) do {(n)->msn=(n)->lsn;(n)->used_node_num=0;(n)->sign=0;(n)->power=0;} while(0)
-#define MY_RAT_HAS_INITED(n) ((n)->sign !=0)
+#define MY_RAT_TOTAL_NODE_NUM(rat) ((rat)?((rat)->total_node_num):0)
+#define MY_RAT_USED_NODE_NUM(rat) ((rat)?((rat)->used_node_num):0)
+#define MY_RAT_FREE_NODE_NUM(rat) ((rat)?((rat)->total_node_num-(rat)->used_node_num):0)
+#define MY_RAT_INIT(rat) do {(rat)->msn=(rat)->lsn;(rat)->used_node_num=0;(rat)->sign=0;(rat)->power=0;} while(0)
+#define MY_RAT_HAS_INITED(rat) ((rat)->sign !=0)
+#define MY_RAT_DIGIT_NUM(node) ((node)->data>=1000? 4 : ((node)->data>=100 ? 3: ((node)->data>=10?2:1)))
 
+/*
+ *	功能：增加有理数的节点
+ *	参数：
+ *		n：要处理的有理数
+ *		num：增加的节点数
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_add_node(my_rat n,size_t num);
+
+/*
+ *	功能：把有理数的前置0去掉
+ *	参数：
+ *		n：要处理的有理数
+ *	返回值：
+ *		无
+ */
+void my_rat_strip_leading_zero(my_rat n);
+
+/*
+ *	功能：把有理数的后置0去掉
+ *	参数：
+ *		n：要处理的有理数
+ *	返回值：
+ *		无
+ */
+void my_rat_strip_ending_zero(my_rat n);
 
 /*
  *	功能：释放有理数
@@ -69,4 +98,30 @@ my_rat my_rat_from_str(my_rat n,const char* str);
  * 		NULL：出错
  */
 char* my_rat_to_str(my_rat n);
+
+/*
+ * 	功能：把int64_t转换为有理数
+ * 	参数：
+ *		n：	
+ *			NULL：新建有理数并返回
+ *			非NULL：保存有理数于此
+ *		num：要处理的数字
+ *	返回值：
+ * 		非NULL：返回生成的有理数
+ * 		NULL：出错
+ */
+my_rat my_rat_from_int64(my_rat n,int64_t num);
+
+/*
+ *	功能：复制有理数b
+ *	参数：
+ *		src：源有理数
+ *		dest：目的有理数，取以下值：
+ *			NULL：返回新建的副本
+ *			非NULL：副本保存于此
+ *	返回值：
+ *		非NULL：返回副本
+ *		NULL：出错
+ */
+my_rat my_rat_copy(my_rat src,my_rat dest);
 #endif

@@ -5,13 +5,13 @@
  *	功能：有理数相关定义和函数
  */
 
-#include <assert.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <stdlib.h>
 #include "my_rat.h"
 #include "my_log.h"
-
 
 /*
  *	功能：增加有理数的节点
@@ -22,16 +22,10 @@
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-static int my_rat_add_node(my_rat n,size_t num)
+int my_rat_add_node(my_rat n,size_t num)
 {
 	my_node p,q;
 	
-	if(num==0)
-	{
-		my_log("num is 0");
-		return MY_ERROR;
-	}
-
 	//开始增加节点
 	while(num)
 	{
@@ -144,7 +138,7 @@ static int my_rat_str_is_valid(const char* str,const char** point)
  *	返回值：
  *		无
  */
-static void my_rat_strip_leading_zero(my_rat n)
+void my_rat_strip_leading_zero(my_rat n)
 {
 	my_node p;
 	p=n->msn;
@@ -164,7 +158,7 @@ static void my_rat_strip_leading_zero(my_rat n)
  *	返回值：
  *		无
  */
-static void my_rat_strip_ending_zero(my_rat n)
+void my_rat_strip_ending_zero(my_rat n)
 {
 	my_node p;
 	p=n->lsn;
@@ -345,22 +339,9 @@ my_rat my_rat_from_str(my_rat n,const char* str)
  */
 my_rat my_rat_from_int64(my_rat n,int64_t num)
 {
-	MY_INT64_MIN_STR_LEN
-
-	const char *lastdigit,*point;
-	size_t len;
-	int bases[]={1,10,100,1000};
-	int i;
 	my_rat m;
 	my_node p;
 		
-	//str格式验证
-	if(!my_rat_str_is_valid(str,&point))
-	{
-		my_log("invalid str %s",str);
-		return NULL;
-	}
-
 	if(n)
 	{
 		MY_RAT_INIT(n);
@@ -389,33 +370,40 @@ my_rat my_rat_from_int64(my_rat n,int64_t num)
 		}
 	}
 	
-	if(num>=0)
-		m->sign=1;
-	else
-		m->sign=-1;
-
 	p=m->lsn;
-	p->data=0;
-	i=0;
 	m->used_node_num=1;
-	while(lastdigit>=str) //从最低位向上构造digit部分
+
+	if(num>=0)
 	{
-		if(lastdigit!=point)
+		m->sign=1;
+		p->data=0;
+	}
+	else
+	{
+		m->sign=-1;
+		if(num==INT64_MIN)
 		{
-			p->data+=(*lastdigit-'0')*bases[i];
-			i++;
-			if(i==4)
-			{
-				i=0;
-				if(lastdigit > str)
-				{
-					p=p->next;
-					p->data=0;
-					m->used_node_num++;
-				}
-			}
+			p->data=1;
+			num=INT64_MAX;
 		}
-		lastdigit--;
+		else
+		{
+			p->data=0;
+			num=-num;
+		}
+			
+	}
+
+	while(num)
+	{
+		p->data+=num%10000;
+		num/=10000;
+		if(num)
+		{
+			p=p->next;
+			p->data=0;
+			m->used_node_num++;
+		}
 	}
 	m->msn=p;
 
@@ -563,6 +551,77 @@ char* my_rat_to_str(my_rat n)
 	return str;
 }
 
+/*
+ *	功能：复制有理数b
+ *	参数：
+ *		src：源有理数
+ *		dest：目的有理数，取以下值：
+ *			NULL：返回新建的副本
+ *			非NULL：副本保存于此
+ *	返回值：
+ *		非NULL：返回副本
+ *		NULL：出错
+ */
+my_rat my_rat_copy(my_rat src,my_rat dest)
+{
+	my_rat tmp;
+	my_node p,q;
+	size_t i;
+
+	//验证参数
+	if(!src)
+	{
+		my_log("src is NULL");
+		return NULL;	
+	}
+
+	if(!MY_RAT_HAS_INITED(src))
+	{
+		my_log("src is uninitialized");
+		return NULL;
+	}
+
+	if(dest)
+	{
+		MY_RAT_INIT(dest);
+		tmp=dest;
+	}
+	else
+	{
+		//分配空间
+		tmp=(my_rat)calloc(1,sizeof(*tmp));
+		if(!tmp)
+		{
+			my_log("calloc failed:%s",strerror(errno));
+			return NULL;			
+		}
+	}
+
+	if(MY_RAT_FREE_NODE_NUM(tmp) < MY_RAT_USED_NODE_NUM(src))
+	{
+		if(my_rat_add_node(tmp,MY_RAT_USED_NODE_NUM(src)-MY_RAT_FREE_NODE_NUM(tmp)) !=MY_SUCC)
+		{
+			my_log("my_rat_add_node failed");
+			if(!dest)
+				my_rat_free(tmp);
+			return NULL;
+		}
+	}
+
+	tmp->sign=src->sign;
+	tmp->power=src->power;
+	p=tmp->lsn;
+	q=src->lsn;
+	for(i=0;i<MY_RAT_USED_NODE_NUM(src);i++)
+	{
+		p->data=q->data;
+		p=p->next;
+		q=q->next;
+	}
+	tmp->msn=p->prev;
+	tmp->used_node_num=MY_RAT_USED_NODE_NUM(src);
+	return tmp;
+}
 
 #ifdef cyy
 
@@ -835,173 +894,8 @@ int ln_pointnum(ln n,cell q)
 	return pointnum;
 }
 
-/*
- * 功能：复制b的值给a
- * 参数：
- *	b:原ln
- *	a:目标ln,如果传入NULL则返回新创建的b的副本
- *	返回值：
- * 	成功:如果a非NULL,返回a,否则返回新创建的b的副本
- * 	失败:返回NULL
- */
-ln ln_copy(ln a,ln b)
-{
-	cell p,q;
-	int cell_num_a;
-	int cell_num_b;
-
-	//验证b
-	if(ln_checknull(b) !=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-
-	cell_num_b=ln_cell_num(b); //获取b的有效节点
-	if(cell_num_b==-1)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_cell_num fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-
-	if(!a)
-	{
-		a=ln_creat(cell_num_b);  //初始创建和b一样的有效节点数 省得再分配
-		if(a==NULL)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_creat fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-	}
-	else
-	{
-		if(ln_checknull(a) !=0)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-
-		cell_num_a=ln_cell_num(a);
-		if(cell_num_a==-1)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_cell_num fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-
-		if(cell_num_b>cell_num_a) //如果b的有效节点数比a多 
-		{
-			if(ln_addcell(a,cell_num_b-cell_num_a)!=LN_SUCC) //把a的长度设置成和b一样
-			{
-				fprintf(stderr,"[%s %d] %s error,reason: ln_addsize fail\n",__FILE__,__LINE__,__FUNCTION__);
-				return NULL;
-			}
-		}
-	}
-	a->sign=b->sign;
-	a->power=b->power;
-	p=a->lsn;
-	q=b->lsn;
-	while(cell_num_b>0)
-	{
-		p->data=q->data;
-		p=p->hcell;
-		q=q->hcell;
-		cell_num_b--;
-	}
-	a->msn=p->lcell;
-	return a;
-}
 
 
-/*
- * 功能：比较ln a和ln b的大小
- * 副功能：使用ln_stripleadingzero()把a,b整数部分前置0去掉
- * 参数：
- * 	a,b:待比较的ln
- *	返回值：
- * 	0: a=b
- * 	1: a>b
- * 	-1: a<b
- * 	-2: 出错
- */
-int ln_cmp(ln a,ln b)
-{
-	int res;
-	cell p,q;
-
-	//检查参数
-	if(ln_checknull(a)!=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return -2;	
-	}
-	if(ln_checknull(b)!=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return -2;	
-	}
-
-	ln_stripleadingzero(a);
-	ln_stripleadingzero(b);
-
-	if(a->msn->data==0 && b->msn->data==0) //a,b都是0
-		return 0;
-	if(a->msn->data==0) //a是0
-	{
-		if(b->sign==1) //正数
-			return -1;
-		else
-			return 1;
-	}
-	if(b->msn->data==0) //b是0
-	{
-		if(a->sign==1) //正数
-			return 1;
-		else
-			return -1;
-	}
-
-	//a,b一正一负
-	if(a->sign > b->sign)
-		return 1;
-	else if(a->sign < b->sign)
-		return -1;
-
-	//到这边a,b符号相等
-	//把指数调整为一致
-	if(a->power > b->power)
-		ln_adjustpower(a,b->power-a->power);
-	if(a->power < b->power)
-		ln_adjustpower(b,a->power-b->power);
-
-	p=a->lsn;
-	q=b->lsn;
-	res=0;
-	while(1)
-	{
-		if(p->data>q->data)
-			res=1;
-		else if(p->data<q->data)
-			res=-1;
-		if(p==a->msn)
-		{
-			if(q!=b->msn)
-				res=-1;
-			break;
-		}
-		if(q==b->msn)
-		{
-			if(p!= a->msn)
-				res=1;
-			break;
-		}
-		p=p->hcell;
-		q=q->hcell;
-	}
-	if(a->sign==-1) //负数
-		res*=-1;
-	return res;
-}
 
 /*
  * 功能：比较ln a和ln b的绝对值大小

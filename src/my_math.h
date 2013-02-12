@@ -22,6 +22,7 @@ typedef enum
 }my_result_saving_type;
 
 #define MY_MAX(a,b) ((a)>(b)?(a):(b))
+#define MY_MIX(a,b) ((a)<(b)?(a):(b))
 #define MY_INT64_MIN_STR_LEN 20
-
+#define MY_UNSIGNED_MOD_4(a) ((a)&3)
 #endif
