@@ -2,36 +2,36 @@
  *	程序名：ln_helper_test.c
  *	作者：陈源源
  *	日期：2013-02-06
- *	功能：包含ln_helper相关测试函数
+ *	功能：包含my_rat相关测试函数
  */
 #include <assert.h>
 #include <stdio.h>
 #include <my_rat.h>
 int main(int argc, char** argv)
 {
-	my_rat a;
-	puts("开始测试my_rat_str_is_valid");
-	puts("++测试my_rat_str_is_valid 00");
+	my_rat *a;
+	puts("开始测试my_rat_from_str");
+	puts("++测试my_rat_from_str 00");
 	a=my_rat_from_str(NULL,"00");
 	assert(a);
-	puts("++测试my_rat_str_is_valid NULL");
+	puts("++测试my_rat_from_str NULL");
 	assert(!my_rat_from_str(a,NULL));
-	puts("++测试my_rat_str_is_valid 空串");
+	puts("++测试my_rat_from_str 空串");
 	assert(!my_rat_from_str(a,""));
-	puts("++测试my_rat_str_is_valid -");
+	puts("++测试my_rat_from_str -");
 	assert(!my_rat_from_str(a,"-"));
-	puts("++测试my_rat_str_is_valid .");
+	puts("++测试my_rat_from_str .");
 	assert(!my_rat_from_str(a,"."));
-	puts("++测试my_rat_str_is_valid -0");
+	puts("++测试my_rat_from_str -0");
 	assert(my_rat_from_str(a,"-0"));
-	puts("++测试my_rat_str_is_valid -0.");
+	puts("++测试my_rat_from_str -0.");
 	assert(!my_rat_from_str(a,"-0."));
-	puts("++测试my_rat_str_is_valid -0.0");
+	puts("++测试my_rat_from_str -0.0");
 	assert(my_rat_from_str(a,"-0.0"));
-	puts("++测试my_rat_str_is_valid -0.0.0");
+	puts("++测试my_rat_from_str -0.0.0");
 	assert(!my_rat_from_str(a,"-0.0.0"));
 	my_rat_free(a);
-	puts("结束测试my_rat_str_is_valid");
+	puts("结束测试my_rat_from_str");
 
 	char* str;
 	puts("开始测试my_rat_to_str");

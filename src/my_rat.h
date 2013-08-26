@@ -11,25 +11,23 @@
 #include "my_math.h"
 
 //有理数数据节点
-struct my_node_s
+typedef struct my_node_s
 {
 	int32_t data;
-	struct my_node_s* prev;	//上一个
-	struct my_node_s* next; //下一个
-};
-typedef struct my_node_s* my_node;
+	struct my_node_s *prev;	//上一个
+	struct my_node_s *next; //下一个
+}my_node;
 
 //有理数表示成 (sign) (lsn ... msn)*(10^5)^power，10^5进制
-struct my_rat_s
+typedef struct
 {
-	my_node lsn;		//最低node
-	my_node msn;		//最低node
+	my_node *lsn;		//最低node
+	my_node *msn;		//最低node
 	ssize_t power; 		//指数
 	int8_t sign; 		//1-正数 0-未初始化 -1-负数
 	size_t used_node_num;	//已使用节点数量
 	size_t total_node_num;	//总节点数量
-};
-typedef struct my_rat_s* my_rat;
+}my_rat;
 
 #define MY_RAT_TOTAL_NODE_NUM(rat) ((rat)?((rat)->total_node_num):0)
 #define MY_RAT_USED_NODE_NUM(rat) ((rat)?((rat)->used_node_num):0)
@@ -47,7 +45,7 @@ typedef struct my_rat_s* my_rat;
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rat_add_node(my_rat n,size_t num);
+int my_rat_add_node(my_rat *n,size_t num);
 
 /*
  *	功能：把有理数的前置0去掉
@@ -56,7 +54,7 @@ int my_rat_add_node(my_rat n,size_t num);
  *	返回值：
  *		无
  */
-void my_rat_strip_leading_zero(my_rat n);
+void my_rat_strip_leading_zero(my_rat *n);
 
 /*
  *	功能：把有理数的后置0去掉
@@ -65,7 +63,7 @@ void my_rat_strip_leading_zero(my_rat n);
  *	返回值：
  *		无
  */
-void my_rat_strip_ending_zero(my_rat n);
+void my_rat_strip_ending_zero(my_rat *n);
 
 /*
  *	功能：释放有理数
@@ -74,7 +72,7 @@ void my_rat_strip_ending_zero(my_rat n);
  *	返回值：
  * 		无
  */
-void my_rat_free(my_rat n);
+void my_rat_free(my_rat *n);
 
 /*
  * 	功能:把字符串转换为my_rat
@@ -87,7 +85,7 @@ void my_rat_free(my_rat n);
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat my_rat_from_str(my_rat n,const char* str);
+my_rat *my_rat_from_str(my_rat *n,const char *str);
 
 /*
  *	功能：把my_rat转换为字符串
@@ -97,7 +95,7 @@ my_rat my_rat_from_str(my_rat n,const char* str);
  * 		非NULL：字符串
  * 		NULL：出错
  */
-char* my_rat_to_str(my_rat n);
+char *my_rat_to_str(my_rat *n);
 
 /*
  * 	功能：把int64_t转换为有理数
@@ -110,7 +108,7 @@ char* my_rat_to_str(my_rat n);
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat my_rat_from_int64(my_rat n,int64_t num);
+my_rat *my_rat_from_int64(my_rat *n,int64_t num);
 
 /*
  *	功能：复制有理数b
@@ -123,5 +121,5 @@ my_rat my_rat_from_int64(my_rat n,int64_t num);
  *		非NULL：返回副本
  *		NULL：出错
  */
-my_rat my_rat_copy(my_rat src,my_rat dest);
+my_rat *my_rat_copy(my_rat *src,my_rat *dest);
 #endif

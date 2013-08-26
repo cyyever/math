@@ -22,14 +22,14 @@
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rat_add_node(my_rat n,size_t num)
+int my_rat_add_node(my_rat* n,size_t num)
 {
-	my_node p,q;
+	my_node *p,*q;
 	
 	//开始增加节点
 	while(num)
 	{
-		p=(my_node)calloc(1,sizeof(*p));
+		p=(my_node*)calloc(1,sizeof(*p));
 		if(!p)
 		{
 			my_log("calloc failed:%s",strerror(errno));
@@ -138,9 +138,9 @@ static int my_rat_str_is_valid(const char* str,const char** point)
  *	返回值：
  *		无
  */
-void my_rat_strip_leading_zero(my_rat n)
+void my_rat_strip_leading_zero(my_rat* n)
 {
-	my_node p;
+	my_node *p;
 	p=n->msn;
 	while(p->data==0 && p != n->lsn)
 	{
@@ -158,9 +158,9 @@ void my_rat_strip_leading_zero(my_rat n)
  *	返回值：
  *		无
  */
-void my_rat_strip_ending_zero(my_rat n)
+void my_rat_strip_ending_zero(my_rat* n)
 {
-	my_node p;
+	my_node *p;
 	p=n->lsn;
 	while(p->data==0 && p != n->msn)
 	{
@@ -180,9 +180,9 @@ void my_rat_strip_ending_zero(my_rat n)
  *	返回值：
  * 		无
  */
-void my_rat_free(my_rat n)
+void my_rat_free(my_rat* n)
 {
-	my_node p;
+	my_node *p;
 	if(!n)
 		return;	
 
@@ -209,14 +209,14 @@ void my_rat_free(my_rat n)
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat my_rat_from_str(my_rat n,const char* str)
+my_rat* my_rat_from_str(my_rat* n,const char* str)
 {
 	const char *lastdigit,*point;
 	size_t len;
 	int bases[]={1,10,100,1000};
 	int i;
-	my_rat m;
-	my_node p;
+	my_rat* m;
+	my_node *p;
 		
 	//str格式验证
 	if(!my_rat_str_is_valid(str,&point))
@@ -233,7 +233,7 @@ my_rat my_rat_from_str(my_rat n,const char* str)
 	else
 	{
 		//分配空间
-		m=(my_rat)calloc(1,sizeof(*m));
+		m=(my_rat *)calloc(1,sizeof(*m));
 		if(!m)
 		{
 			my_log("calloc failed:%s",strerror(errno));
@@ -337,10 +337,10 @@ my_rat my_rat_from_str(my_rat n,const char* str)
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat my_rat_from_int64(my_rat n,int64_t num)
+my_rat* my_rat_from_int64(my_rat* n,int64_t num)
 {
-	my_rat m;
-	my_node p;
+	my_rat* m;
+	my_node *p;
 		
 	if(n)
 	{
@@ -350,7 +350,7 @@ my_rat my_rat_from_int64(my_rat n,int64_t num)
 	else
 	{
 		//分配空间
-		m=(my_rat)calloc(1,sizeof(*m));
+		m=(my_rat *)calloc(1,sizeof(*m));
 		if(!m)
 		{
 			my_log("calloc failed:%s",strerror(errno));
@@ -420,14 +420,14 @@ my_rat my_rat_from_int64(my_rat n,int64_t num)
  * 		非NULL：字符串
  * 		NULL：出错
  */
-char* my_rat_to_str(my_rat n)
+char* my_rat_to_str(my_rat* n)
 {
 	int bases[]={1000,100,10,1};
 	int i;
 	size_t j;
 	char *p,*str;
 	size_t len,node_num;
-	my_node node;
+	my_node *node;
 		
 	//检查参数
 	if(!n)
@@ -562,10 +562,10 @@ char* my_rat_to_str(my_rat n)
  *		非NULL：返回副本
  *		NULL：出错
  */
-my_rat my_rat_copy(my_rat src,my_rat dest)
+my_rat* my_rat_copy(my_rat* src,my_rat* dest)
 {
-	my_rat tmp;
-	my_node p,q;
+	my_rat* tmp;
+	my_node *p,*q;
 	size_t i;
 
 	//验证参数
@@ -589,7 +589,7 @@ my_rat my_rat_copy(my_rat src,my_rat dest)
 	else
 	{
 		//分配空间
-		tmp=(my_rat)calloc(1,sizeof(*tmp));
+		tmp=(my_rat *)calloc(1,sizeof(*tmp));
 		if(!tmp)
 		{
 			my_log("calloc failed:%s",strerror(errno));
@@ -626,40 +626,6 @@ my_rat my_rat_copy(my_rat src,my_rat dest)
 #ifdef cyy
 
 
-/*
- * 功能：创建ln,初始节点值为0
- * 参数：
- * 	cell_num:ln的初始节点数
- *	返回值：
- * 	成功:ln
- * 	失败:NULL
- */
-ln ln_creat(size_t cell_num)
-{
-	ln n;
-
-	if(cell_num==0)
-	{
-		my_log("cell_num is 0");
-		return NULL;
-	}
-
-	//分配空间
-	n=calloc(1,sizeof(struct _ln));
-	if(!n)
-	{
-		my_log("calloc failed:%s",strerror(errno));
-		return NULL;			
-	}
-
-	if(ln_addcell(n,cell_num)!=LN_SUCC)
-	{
-		ln_free(n);
-		return NULL;
-	}
-	return n;
-}
-
 
 /*
  * 功能：获取10的乘方,这个功能很常用
@@ -691,121 +657,7 @@ int power10(int power)
 	}
 }
 
-/*
- * 功能：检查ln是否合法(不包含NULL)
- * 参数：
- *	n:要检查的ln
- *	返回值：
- * 	成功:返回0
- * 	失败:返回-1
- */
-int ln_checknull(ln n)
-{
-	if(n==NULL) //空指针
-	{
-		fprintf(stderr,"[%s %d] %s error,reason:n=NULL\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
 
-	if(n->sign !=-1 && n->sign !=0 && n->sign !=1) //非法符号
-	{
-		fprintf(stderr,"[%s %d] %s error,reason:invalid sign [%d]\n",__FILE__,__LINE__,__FUNCTION__,n->sign);
-		return -1;	
-	}
-
-	if(n->msn==NULL)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason:n->msn=NULL\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
-
-	if(n->lsn==NULL)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason:n->lsn=NULL\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
-	return 0;
-}
-
-
-/*
- * 功能：查看ln的内存结构
- * 参数：
- *	n:要查看的ln
- *	返回值：
- * 	无
- */
-void ln_info(ln n)
-{
-	cell p=n->lsn;
-	if(ln_checknull(n) !=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason:ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return;	
-	}
-	printf("ln_addr=%d sign=%d \n",(int)n,n->sign);
-	printf("ln_addr=%d power=%d \n",(int)n,n->power);
-	if(p)
-	{
-		while(p!=n->msn)
-		{
-			printf("num_addr=%d num=%d \n",(int)p,p->data);
-			p=p->hcell;
-		}
-		printf("num_addr=%d num=%d \n",(int)p,p->data);
-	}
-	else
-		printf("ln_addr=%d not num",(int)n);
-	return;
-}
-
-/*
- * 功能：设置ln的值
- * 参数：
- *	n:要赋值的ln,如果为NULL则构造一个新ln
- *	value:ln的值
- *	返回值：
- * 	成功:返回ln
- * 	失败:NULL
- */
-ln ln_setval(ln n,int64_t value)
-{
-	char tmp[LN_INT64_MIN_STR_LEN+1];
-	sprintf(tmp,"%"PRIi64,value);
-	return str2ln(n,tmp);
-}
-
-
-/*
- * 功能：获取ln整数部分从lsn节点截止到q节点处的节点个数(包括q)
- * 参数：
- *	n:要计算的ln
- *	q:截止节点
- *	返回值：
- * 	成功:返回节点数
- * 	失败:返回-1
- */
-int ln_untilcell_num(ln n,cell q)
-{
-	int i=1;
-	cell p=n->lsn;
-	if(ln_checknull(n) !=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
-	while(p!=q)
-	{
-		p=p->hcell;
-		if(p==n->lsn) //指定的节点在n中不存在 导致又碰到lsn了
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: invalid cell\n",__FILE__,__LINE__,__FUNCTION__);
-			return -1;
-		}
-		i++;
-	}
-	return i;
-}
 
 
 /*

@@ -7,8 +7,6 @@ HEADERS=$(wildcard *.h)
 CC=gcc
 CFLAGS=-O2 -Wall -fPIC
 LDFLAGS=-shared 
-MAJOR_VERSION=1
-MINOR_VERSION=1
 .PHONY:all clean install
 all:
 	-make $(TARGET_LIB)
@@ -18,11 +16,10 @@ $(TARGET_LIB):$(OBJS)
 clean:
 	-$(RM) $(TARGET_LIB) $(DEPS) $(OBJS) *~
 install:all
-	install -D $(TARGET_LIB) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB).$(MAJOR_VERSION).$(MINOR_VERSION)
-	ln -fs $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB).$(MAJOR_VERSION).$(MINOR_VERSION) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB)
+	install -D $(TARGET_LIB) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB)
 	install -d $(DESTDIR)/usr/local/include/$(PKG_NAME)
 	install -t $(DESTDIR)/usr/local/include/$(PKG_NAME) $(HEADERS)
-	echo "/usr/local/lib/$(PKG_NAME)" > /etc/ld.so.conf.d/$(PKG_NAME).conf
+	echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
 	ldconfig
 %.d:%.c
 	@set -e; $(RM) $@; \
