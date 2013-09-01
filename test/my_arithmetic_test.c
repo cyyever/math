@@ -66,5 +66,35 @@ int main(int argc, char** argv)
 	}
 	puts("结束测试my_rats_cmp_abs");
 
+	
+	puts("开始测试my_rat_multiply_small_int");
+	my_rat *a;
+	char* str;
+	a=my_rat_from_int64(NULL,1);
+	if(!a)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	
+	for(i=0;i<10;i++)
+	{
+		if(my_rat_multiply_small_int(a,999,MY_ARG_RES)==NULL)
+		{
+			printf("++测试失败：%d\n",__LINE__);
+			return -1;
+		}
+		str=my_rat_to_str(a);
+		if(!str)
+		{
+			printf("++测试失败：%d\n",__LINE__);
+			my_rat_free(a);
+			return -1;
+		}
+		puts(str);
+		free(str);
+	}
+
+	my_rat_free(a);
 	return 0;
 }
