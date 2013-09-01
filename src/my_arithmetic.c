@@ -367,6 +367,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 				y=NULL;
 			z->data=carry%10000;
 			carry=carry/10000;
+			c->used_node_num++;
 			if(x==NULL&&y==NULL&&carry==0)
 			{
 				c->msn=z;
@@ -431,6 +432,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 			}
 			else
 				carry=0;
+			c->used_node_num++;
 			if(y==a->msn || y==b->msn)
 				y=NULL;
 			if(x==a->msn || x==b->msn)
