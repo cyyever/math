@@ -176,9 +176,6 @@ int my_rats_cmp_abs(my_rat* a,my_rat* b,int32_t* cmp_res)
 	return res;
 }
 
-
-
-
 /*
  *	功能：有理数乘以小整数
  *	参数:
@@ -254,11 +251,6 @@ my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type
 	c->used_node_num=node_num;
 	while(node_num)
 	{
-		/*
-		__asm__("imull %3, %%eax  \n\t xorl %%edx,%%edx \n\t movl $10000,%%ecx \n\t idivl %%ecx" 
-				: "=a" (tmp2), "=d" (q->data) 
-				:"a"(b) ,"g"(p->data):"%ecx","cc");
-*/
 		tmp=p->data*b;
 		q->data=tmp%10000+carry;
 		carry=tmp/10000;
@@ -276,9 +268,6 @@ my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type
 		c->msn=q->prev;
 	return c;
 }
-
-
-
 
 
 

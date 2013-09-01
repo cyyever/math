@@ -10,8 +10,12 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
+
 #include "my_rat.h"
+#include "my_arithmetic.h"
 #include "my_log.h"
+
+static unsigned int power10[]={1,10,100,1000};
 
 /*
  *	功能：增加有理数的节点
@@ -623,39 +627,84 @@ my_rat* my_rat_copy(my_rat* src,my_rat* dest)
 	return tmp;
 }
 
+/*
+ *	功能：减少有理数指数部分，作为0增加到整数部分
+ *	参数：
+ *		n：要处理的有理数
+ *		delta:指数减少量
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_reduce_power(my_rat *n,size_t delta)
+{
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;
+	}
+
+	if(delta==0) //指数不变
+		return MY_SUCC;
+	//溢出
+	if(n->power-delta > n->power);  
+	{
+		my_log("power will overflow");
+		return MY_ERROR;
+	}
+
+
+	//设置新的指数
+	n->power-=delta;  
+
+	//先乘上剩余部分的0
+	if(my_rat_multiply_small_int(n,power10[delta%4],MY_ARG_RES)==NULL)
+	{
+		my_log("my_rat_multiply_small_int failed");
+		return MY_ERROR;
+	}
+
+	while(delta>=4)
+	{
+		if(n->used_node_num!=n->total_node_num) //还有多余的节点，利用它
+		{
+			n->lsn=n->lsn->prev;
+			n->lsn->data=0;
+			n->used_node_num++;
+			delta-=4;
+		}
+		else //一次性分配剩下的节点
+		{
+			if(my_rat_add_node(n,delta/4)!=MY_SUCC)
+			{
+				my_log("my_rat_add_node failed");
+				return MY_ERROR;
+			}
+			n->lsn=n->msn->next;
+			break;
+		}
+	}
+	return MY_SUCC;
+}
+
+
+
+
+
+
+
+
 #ifdef cyy
 
 
 
-/*
- * 功能：获取10的乘方,这个功能很常用
- * 参数：
- *	power:乘方的指数，必须>=0
- *	返回值：
- * 	成功:乘方
- * 	失败:返回-1
- */
-int power10(int power)
-{
-	int i;
-	int base=10;
-	int res=1;
-	if(power<0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: power <0\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;
-	}
-	else if(power==0)
-		return 1;
-	else if(power==1)
-		return base;
-	else
-	{
-		for(i=0;i<power;i++)
-			res*=base;
-		return res;
-	}
-}
 
 
 
@@ -1051,7 +1100,7 @@ ln ln_fix(ln n,int prevcision,divide_mode mode)
 		}
 		if(pointnum==prevcision) //现在p所指的节点精度就是prevcision
 		{
-			if(mode==round_res && p->lcell->data>=UNIT/2) //四舍五入
+			if(mode==round_res && p->lcell->data>=10000/2) //四舍五入
 				p->data++;
 		}
 		else
@@ -1085,9 +1134,9 @@ ln ln_fix(ln n,int prevcision,divide_mode mode)
 	p=n->lsn;
 	while(1)
 	{
-		if(p->data>=UNIT)
+		if(p->data>=10000)
 		{
-			p->data-=UNIT;
+			p->data-=10000;
 			if(p==n->msn)
 			{
 				if(ln_addcell(n,INIT_SIZE) !=LN_SUCC)
@@ -1112,144 +1161,6 @@ ln ln_fix(ln n,int prevcision,divide_mode mode)
 	return n;
 }
 
-/*
- * 功能：调整指数部分
- * 参数：
- *	n:要处理的ln
- * 	inc_power:指数增量 >0 增加指数,把整数部分结尾的0去掉 <0 减少指数,增加整数部分结尾的0
- *	返回值：
- * 	成功:ln
- * 	失败:返回NULL
- */
-ln ln_adjustpower(ln n,int inc_power)
-{
-	int a;
-	int res,carry;
-	int zeronum;
-	cell p;
-
-	//验证参数
-	if(ln_checknull(n) !=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-
-	//如果n是0,让它随便设置指数,反正都一样
-	if(ln_cmp_int(n,0)==0)
-	{
-		//设置新的指数
-		n->power+=inc_power;  
-		return n;
-	}
-
-	if(inc_power==0) //指数不变
-		return n;
-	if(inc_power<0) //减少指数
-	{
-		//设置新的指数
-		n->power+=inc_power;  
-		//转正
-		inc_power*=-1;  
-
-		//先乘上剩余部分的0
-		a=power10(inc_power%DIGIT_NUM);
-		p=n->lsn;
-		res=0;
-		carry=0;
-		while(1)
-		{
-			res=a*p->data+carry;
-			p->data=res%UNIT;
-			carry=res/UNIT;
-			if(p==n->msn)
-			{
-				if(carry>0) //存在进位
-				{
-					if(n->lsn->lcell ==n->msn) //节点不够
-					{
-						if(ln_addcell(n,INIT_SIZE) !=LN_SUCC) //分配失败
-						{
-							fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
-							return NULL;
-						}
-					}
-					p->hcell->data=carry;
-					n->msn=p->hcell;
-				}
-				break;
-			}
-			p=p->hcell;
-		}
-
-		inc_power-=inc_power%DIGIT_NUM;
-		while(inc_power>0)
-		{
-			if(n->lsn->lcell !=n->msn) //还有多余的节点，利用它
-			{
-				n->lsn=n->lsn->lcell;
-				n->lsn->data=0;
-				inc_power-=DIGIT_NUM;
-			}
-			else //一次性分配剩下的节点
-			{
-				if(ln_addcell(n,inc_power/DIGIT_NUM)==LN_SUCC)
-				{
-					fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
-					return NULL;
-				}
-				n->lsn=n->msn->hcell;
-				break;
-			}
-		}
-	}
-	else
-	{
-		//获取结尾0的个数
-		zeronum=ln_endingzeronum(n);
-		if(zeronum==-1)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_endingzeronum fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-		//不能去掉这么多0
-		if(inc_power>zeronum)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: inc_power too large (%d)\n",__FILE__,__LINE__,__FUNCTION__,inc_power);
-			return NULL;
-		}
-		//设置新的指数
-		n->power+=inc_power;  
-
-		//先处理结尾的0节点
-		p=n->lsn;
-		while(p->data==0 && inc_power>=DIGIT_NUM)
-		{
-			inc_power-=DIGIT_NUM;
-			p=p->hcell;
-		}
-		n->lsn=p;
-
-		//除以剩下的0
-		if(inc_power==0)
-			return n;
-
-		a=power10(inc_power);
-		p=n->msn;
-		res=0;
-		carry=0;
-		while(1)
-		{
-			res=p->data+carry*UNIT;
-			p->data=res/a;
-			carry=res%a;
-			if(p==n->lsn)
-				break;
-			p=p->lcell;
-		}
-	}
-	return n;
-}
 
 /*
  * 功能：把字符串转换为ln
@@ -1356,7 +1267,7 @@ ln str2ln(ln n,const char* str)
 		{
 			p->data+=(*lastdigit-'0')*i;
 			lastdigit--;
-			if(i*10==UNIT)
+			if(i*10==10000)
 			{
 				if(lastdigit>=str)
 				{
@@ -1413,4 +1324,148 @@ void ln_output(ln n)
 	return;			
 }
 
+/*
+ *	功能：调整指数部分
+ *	参数：
+ *		n：要处理的有理数
+ *		inc_power:指数增量 >0 增加指数,把整数部分结尾的0去掉 <0 减少指数,增加整数部分结尾的0
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_change_power(my_rat *n,ssize_t inc_power)
+{
+	int a;
+	int res,carry;
+	int zeronum;
+	my_node *p;
+
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;
+	}
+
+	if(inc_power==SSIZE_T_MIN)
+	{
+		my_log("inc_power is SSIZE_T_MIN");
+		return MY_ERROR;
+	}
+
+	if(inc_power==0) //指数不变
+		return MY_SUCC;
+
+	if(inc_power<0) //减少指数
+	{
+		//设置新的指数
+		n->power+=inc_power;  
+		//转正
+		inc_power=-inc_power;  
+
+		//先乘上剩余部分的0
+		a=power10[inc_power%4];
+		p=n->lsn;
+		res=0;
+		carry=0;
+		while(1)
+		{
+			res=a*p->data+carry;
+			p->data=res%10000;
+			carry=res/10000;
+			if(p==n->msn)
+			{
+				if(carry>0) //存在进位
+				{
+					if(n->used_node_num==n->total_node_num) //节点不够
+					{
+						if(my_rat_add_node(n,1) !=MY_SUCC) //分配失败
+						{
+							my_log("my_rat_add_node failed");
+							return MY_ERROR;
+						}
+					}
+					p->next->data=carry;
+					n->msn=p->next;
+				}
+				break;
+			}
+			p=p->next;
+		}
+
+		inc_power-=inc_power%DIGIT_NUM;
+		while(inc_power>0)
+		{
+			if(n->used_node_num!=n->total_node_num) //还有多余的节点，利用它
+			{
+				n->lsn=n->lsn->prev;
+				n->lsn->data=0;
+				n->used_node_num++;
+				inc_power-=DIGIT_NUM;
+			}
+			else //一次性分配剩下的节点
+			{
+				if(my_rat_add_node(n,inc_power/4)==LN_SUCC)
+				{
+					my_log("my_rat_add_node failed");
+					return MY_ERROR;
+				}
+				n->lsn=n->msn->next;
+				break;
+			}
+		}
+	}
+	else
+	{
+		//获取结尾0的个数
+		zeronum=ln_endingzeronum(n);
+		if(zeronum==-1)
+		{
+			fprintf(stderr,"[%s %d] %s error,reason: ln_endingzeronum fail\n",__FILE__,__LINE__,__FUNCTION__);
+			return NULL;
+		}
+		//不能去掉这么多0
+		if(inc_power>zeronum)
+		{
+			fprintf(stderr,"[%s %d] %s error,reason: inc_power too large (%d)\n",__FILE__,__LINE__,__FUNCTION__,inc_power);
+			return NULL;
+		}
+		//设置新的指数
+		n->power+=inc_power;  
+
+		//先处理结尾的0节点
+		p=n->lsn;
+		while(p->data==0 && inc_power>=DIGIT_NUM)
+		{
+			inc_power-=DIGIT_NUM;
+			p=p->hcell;
+		}
+		n->lsn=p;
+
+		//除以剩下的0
+		if(inc_power==0)
+			return n;
+
+		a=power10(inc_power);
+		p=n->msn;
+		res=0;
+		carry=0;
+		while(1)
+		{
+			res=p->data+carry*10000;
+			p->data=res/a;
+			carry=res%a;
+			if(p==n->lsn)
+				break;
+			p=p->lcell;
+		}
+	}
+	return n;
+}
 #endif

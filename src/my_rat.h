@@ -122,4 +122,15 @@ my_rat *my_rat_from_int64(my_rat *n,int64_t num);
  *		NULL：出错
  */
 my_rat *my_rat_copy(my_rat *src,my_rat *dest);
+
+/*
+ *	功能：减少有理数指数部分，作为0增加到整数部分
+ *	参数：
+ *		n：要处理的有理数
+ *		delta:指数减少量
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_reduce_power(my_rat *n,size_t delta);
 #endif

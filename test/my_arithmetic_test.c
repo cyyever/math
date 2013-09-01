@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 			printf("++测试my_rats_cmp %zd %zd\n",num[i],num[j]);
 			if(my_rats_cmp(rat[i],rat[j],&cmp_res)!=MY_SUCC)
 			{
-				printf("++测试my_rats_cmp %zd %zd 失败：my_rats_cmp\n",num[i],num[j]);
+				printf("++测试失败：%d\n",__LINE__);
 				return -1;
 			}
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 			 || (num[i]==num[j] && cmp_res !=0)
 			 || (num[i]<num[j] && cmp_res !=-1))
 			{
-				printf("++测试my_rats_cmp %zd %zd 失败：%d\n",num[i],num[j],cmp_res);
+				printf("++测试失败：%d\n",__LINE__);
 				return -1;
 			}
 		}
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 			printf("++测试my_rats_cmp_abs %zd %zd\n",num[i],num[j]);
 			if(my_rats_cmp_abs(rat[i],rat[j],&cmp_res)!=MY_SUCC)
 			{
-				printf("++测试my_rats_cmp_abs %zd %zd 失败：my_rats_cmp_abs\n",num[i],num[j]);
+				printf("++测试失败：%d\n",__LINE__);
 				return -1;
 			}
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 			 || (imaxabs(num[i])==imaxabs(num[j]) && cmp_res !=0)
 			 || (imaxabs(num[i])<imaxabs(num[j]) && cmp_res !=-1))
 			{
-				printf("++测试my_rats_cmp_abs %zd %zd 失败：%d\n",num[i],num[j],cmp_res);
+				printf("++测试失败：%d\n",__LINE__);
 				return -1;
 			}
 		}
