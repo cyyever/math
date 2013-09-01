@@ -145,6 +145,17 @@ static int my_rat_str_is_valid(const char* str,const char** point)
 void my_rat_strip_leading_zero(my_rat* n)
 {
 	my_node *p;
+	if(!n)
+	{
+		my_log("n is NULL");
+		return;	
+	}
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return;	
+	}
+
 	p=n->msn;
 	while(p->data==0 && p != n->lsn)
 	{
@@ -410,9 +421,7 @@ my_rat* my_rat_from_int64(my_rat* n,int64_t num)
 		}
 	}
 	m->msn=p;
-
 	return m;
-
 }
 
 
@@ -558,15 +567,15 @@ char* my_rat_to_str(my_rat* n)
 /*
  *	功能：复制有理数b
  *	参数：
- *		src：源有理数
  *		dest：目的有理数，取以下值：
  *			NULL：返回新建的副本
  *			非NULL：副本保存于此
+ *		src：源有理数
  *	返回值：
  *		非NULL：返回副本
  *		NULL：出错
  */
-my_rat* my_rat_copy(my_rat* src,my_rat* dest)
+my_rat* my_rat_copy(my_rat* dest,my_rat* src)
 {
 	my_rat* tmp;
 	my_node *p,*q;

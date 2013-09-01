@@ -35,7 +35,7 @@ int my_rats_cmp(my_rat* a,my_rat* b,int32_t* cmp_res);
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rats_cmp_abs(my_rat* a,my_rat* b,int32_t* cmp_res);
+int my_rats_cmp_abs(my_rat* a,my_rat* b,int* cmp_res);
 
 /*
  *	功能：有理数乘以小整数

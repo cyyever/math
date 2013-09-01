@@ -22,7 +22,7 @@
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rats_cmp(my_rat* a,my_rat* b,int32_t* cmp_res)
+int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 {
 	size_t a_digit_num,b_digit_num;
 	my_node *p,*q;
@@ -130,7 +130,7 @@ int my_rats_cmp(my_rat* a,my_rat* b,int32_t* cmp_res)
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rats_cmp_abs(my_rat* a,my_rat* b,int32_t* cmp_res)
+int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
 {
 	int sign_a,sign_b;
 	int res;
@@ -188,9 +188,9 @@ int my_rats_cmp_abs(my_rat* a,my_rat* b,int32_t* cmp_res)
  *		非NULL：积
  *		NULL：出错
  */
-my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type)
+my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type)
 {
-	my_rat* c;
+	my_rat *c;
 	my_node *p,*q;
 	size_t node_num;
 	int32_t tmp,carry;
@@ -285,19 +285,17 @@ my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type
  *		非NULL：和
  *		NULL：出错
  */
-/*
-my_rat* my_rats_add(my_rat* a,my_rat* b,my_result_saving_type type)
+my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 {
-	ln c;
+	my_rat *c;
 	int carry;
-	cell x,y,z;
-	int cmp_res;
+	my_node *x,*y,*z;
 
 	//验证参数
 	if(!a)
 	{
 		my_log("a is NULL");
-		return MY_ERROR;	
+		return NULL;	
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
@@ -307,7 +305,7 @@ my_rat* my_rats_add(my_rat* a,my_rat* b,my_result_saving_type type)
 	if(!b)
 	{
 		my_log("b is NULL");
-		return MY_ERROR;	
+		return NULL;	
 	}
 	if(!MY_RAT_HAS_INITED(b))
 	{
@@ -321,125 +319,132 @@ my_rat* my_rats_add(my_rat* a,my_rat* b,my_result_saving_type type)
 
 	//把指数调整为一致
 	if(a->power > b->power)
-		ln_adjustpower(a,b->power-a->power);
-	if(a->power < b->power)
-		ln_adjustpower(b,a->power-b->power);
+		my_rat_reduce_power(a,a->power-b->power);
+	if(b->power > a->power)
+		my_rat_reduce_power(b,b->power-a->power);
 
 	//根据存放方式设置c
-	if(restype==firstln) 
+	if(type==MY_ARG_RES) 
 		c=a;
 	else
 	{
-		c=ln_creat(ln_cell_num(a));
-		if(c==NULL)
+		c=my_rat_copy(NULL,a);
+		if(!c)
 		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_creat fail\n",__FILE__,__LINE__,__FUNCTION__);
+			my_log("my_rat_copy failed");
 			return NULL;	
 		}
 	}
 
-	c->power=a->power;
 	//a,b符号相同,加法
 	if(a->sign==b->sign)	
 	{
-		//有可能会进位c多增加一个节点
-		if(c->msd->hcell==c->lsd)
+		//有可能会进位，c多增加一个节点
+		if(c->msn->next==c->lsn)
 		{
-			if(ln_addcell(c,1) !=LN_SUCC)
+			if(my_rat_add_node(c,1)!=MY_SUCC)
 			{
-				fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
+				my_log("my_rat_add_node failed");
+				if(c!=a)
+					my_rat_free(c);
 				return NULL;	
 			}
 		}
 		//调整指数部分一致
-		c->sign=a->sign;
-		x=a->lsd;
-		y=b->lsd;
-		z=c->lsd;
+		x=a->lsn;
+		y=b->lsn;
+		z=c->lsn;
 		carry=0;
 		while(1)
 		{
 			if(x)
-				carry+=x->num;
+				carry+=x->data;
 			if(y)
-				carry+=y->num;
-			if(x==a->msd)
+				carry+=y->data;
+			if(x==a->msn)
 				x=NULL;
-			if(y==b->msd)
+			if(y==b->msn)
 				y=NULL;
-			z->num=carry%UNIT;
-			carry=carry/UNIT;
+			z->data=carry%10000;
+			carry=carry/10000;
 			if(x==NULL&&y==NULL&&carry==0)
 			{
-				c->msd=z;
+				c->msn=z;
 				break;
 			}
 			if(x)
-				x=x->hcell;
+				x=x->next;
 			if(y)
-				y=y->hcell;
-			z=z->hcell;
+				y=y->next;
+			z=z->next;
 		}
-		return c;
 	}
 	else //减法
 	{
-		cmp_res=ln_cmp_abs(a,b);
-		if(cmp_res==2)
+		int cmp_res;
+		if(my_rats_cmp_abs(a,b,&cmp_res) !=MY_SUCC)
 		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_cmp_abs fail\n",__FILE__,__LINE__,__FUNCTION__);
+			my_log("my_rats_cmp_abs failed");
+			if(c!=a)
+				my_rat_free(c);
 			return NULL;	
 		}
 
 		if(cmp_res==0) //绝对值相等 为0
 		{
-			ln_setval(c,0);
+			if(my_rat_from_int64(c,0) !=MY_SUCC)
+			{
+				my_log("my_rat_from_int64 failed");
+				if(c!=a)
+					my_rat_free(c);
+				return NULL;	
+			}
 			return c;
 		}
+
 		//确定符号
 		if(cmp_res==1)
 		{
-			x=a->lsd;
-			y=b->lsd;
+			x=a->lsn;
+			y=b->lsn;
 			c->sign=a->sign;
 		}
 		else	
 		{
-			x=b->lsd;
-			y=a->lsd;
+			x=b->lsn;
+			y=a->lsn;
 			c->sign=b->sign;
 		}
 
-		z=c->lsd;
+		z=c->lsn;
 		carry=0;
 		while(1)
 		{
 			if(y)
-				z->num=x->num-carry-y->num;
+				z->data=x->data-carry-y->data;
 			else
-				z->num=x->num-carry;
-			if(z->num <0)
+				z->data=x->data-carry;
+			if(z->data <0)
 			{
 				carry=1;
-				z->num+=UNIT;	
+				z->data+=10000;	
 			}
 			else
 				carry=0;
-			if(y==a->msd || y==b->msd)
+			if(y==a->msn || y==b->msn)
 				y=NULL;
-			if(x==a->msd || x==b->msd)
+			if(x==a->msn || x==b->msn)
 			{
-				c->msd=z;
+				c->msn=z;
 				break;
 			}
-			x=x->hcell;
+			x=x->next;
 			if(y)
-				y=y->hcell;
-			z=z->hcell;
+				y=y->next;
+			z=z->next;
 		}	
 		//消除前置0
 		my_rat_strip_leading_zero(c);
-		return c;
 	}	
+	return c;
 }
-*/
