@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <my_rat.h>
+
 int main(int argc, char **argv)
 {
 	my_rat *a;
