@@ -269,11 +269,6 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
 	return c;
 }
 
-
-
-
-
-
 /*
  *	功能：有理数加法
  *	参数：
@@ -290,6 +285,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 	my_rat *c;
 	int carry;
 	my_node *x,*y,*z;
+	size_t used_node_num;
 
 	//验证参数
 	if(!a)
@@ -336,6 +332,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 		}
 	}
 
+	used_node_num=0;
 	//a,b符号相同,加法
 	if(a->sign==b->sign)	
 	{
@@ -367,10 +364,11 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 				y=NULL;
 			z->data=carry%10000;
 			carry=carry/10000;
-			c->used_node_num++;
+			used_node_num++;
 			if(x==NULL&&y==NULL&&carry==0)
 			{
 				c->msn=z;
+				c->used_node_num=used_node_num;
 				break;
 			}
 			if(x)
@@ -432,12 +430,13 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 			}
 			else
 				carry=0;
-			c->used_node_num++;
+			used_node_num++;
 			if(y==a->msn || y==b->msn)
 				y=NULL;
 			if(x==a->msn || x==b->msn)
 			{
 				c->msn=z;
+				c->used_node_num=used_node_num;
 				break;
 			}
 			x=x->next;
@@ -449,4 +448,143 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 		my_rat_strip_leading_zero(c);
 	}	
 	return c;
+}
+
+/*
+ *	功能：计算传入整数的阶乘
+ *	参数：
+ *		n：计算n!
+ *	返回值：
+ *		非NULL：对应的阶乘
+ *		NULL：出错
+ */
+my_rat *my_factorial(uint64_t n)
+{
+	uint64_t i;
+	my_rat *f;
+
+	f=my_rat_from_int64(NULL,1);
+	if(!f)
+	{
+		my_log("my_rat_from_int64 failed");
+		return NULL;
+	}
+
+	//0!=1
+	if(n==0)
+		return f;
+
+	for(i=2;i<=n;i++)
+	{
+		if(my_rat_multiply_small_int(f,i,MY_ARG_RES)==NULL)
+		{
+			my_log("my_rat_multiply_small_int failed");
+			my_rat_free(f);
+			return NULL;
+		}
+	}
+	return f;
+}
+
+/*
+ *	功能：如果有理数是一个整数，获取其每位上的数的和
+ *	参数：
+ *		n：要处理的有理数
+ *		digit_sum：保存和
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
+{
+	size_t i,j;
+	my_node *p;
+	int32_t data;
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;	
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;	
+	}
+
+	if(!digit_sum)
+	{
+		my_log("digit_sum is NULL");
+		return MY_ERROR;	
+	}
+
+	//剔除0
+	my_rat_strip_leading_zero(n);
+	my_rat_strip_ending_zero(n);
+
+	if(n->power<0)	//非整数
+	{
+		my_log("n is not interger");
+		return MY_ERROR;	
+	}
+
+	*digit_sum=0;
+	p=n->lsn;
+	for(i=0;i<MY_RAT_USED_NODE_NUM(n);i++)
+	{
+		data=p->data;
+
+		for(j=0;j<4;j++)
+		{
+			(*digit_sum)+=(data%10);
+			data/=10;
+		}
+		p=p->next;
+	}
+	return MY_SUCC;
+}
+
+/*
+ *	功能：如果有理数是一个整数，获取其数位的数量
+ *	参数：
+ *		n：要处理的有理数
+ *		digit_num：保存数量
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
+{
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;	
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;	
+	}
+
+	if(!digit_num)
+	{
+		my_log("digit_num is NULL");
+		return MY_ERROR;	
+	}
+
+	//剔除0
+	my_rat_strip_leading_zero(n);
+	my_rat_strip_ending_zero(n);
+
+	if(n->power<0)	//非整数
+	{
+		my_log("n is not interger");
+		return MY_ERROR;	
+	}
+
+	*digit_num=(MY_RAT_USED_NODE_NUM(n)-1)*4+n->power+MY_RAT_DIGIT_NUM(n->msn);
+	return MY_SUCC;
 }

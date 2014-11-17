@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 	my_rat_free(a);
 
 
-	puts("开始测试my_rats_a multiply_small_int");
+	puts("开始测试my_rats_add");
 	my_rat *b;
 	a=my_rat_from_int64(NULL,INT64_MAX);
 	if(!a)
@@ -152,5 +152,24 @@ int main(int argc, char** argv)
 
 	my_rat_free(a);
 	my_rat_free(b);
+
+	puts("开始测试my_factorial");
+	a=my_factorial(10);
+	if(!a)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	
+	str=my_rat_to_str(a);
+	if(!str)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	puts(str);
+	free(str);
+	my_rat_free(a);
+
 	return 0;
 }

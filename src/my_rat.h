@@ -22,7 +22,7 @@ typedef struct my_node_s
 typedef struct
 {
 	my_node *lsn;		//最低node
-	my_node *msn;		//最低node
+	my_node *msn;		//最高node
 	ssize_t power; 		//指数
 	int8_t sign; 		//1-正数 0-未初始化 -1-负数
 	size_t used_node_num;	//已使用节点数量
