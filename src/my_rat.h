@@ -48,22 +48,13 @@ typedef struct
 int my_rat_add_node(my_rat *n,size_t num);
 
 /*
- *	功能：把有理数的前置0去掉
+ *	功能：去除有理数的两端的0数据节点
  *	参数：
  *		n：要处理的有理数
  *	返回值：
  *		无
  */
-void my_rat_strip_leading_zero(my_rat *n);
-
-/*
- *	功能：把有理数的后置0去掉
- *	参数：
- *		n：要处理的有理数
- *	返回值：
- *		无
- */
-void my_rat_strip_ending_zero(my_rat *n);
+void my_rat_strip_zero_end_nodes(my_rat* n);
 
 /*
  *	功能：释放有理数

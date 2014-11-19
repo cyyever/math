@@ -171,5 +171,22 @@ int main(int argc, char** argv)
 	free(str);
 	my_rat_free(a);
 
+	uint64_t digit_sum;
+	puts("开始测试my_rat_sum_digits");
+	a=my_rat_from_str(NULL,"123450");
+	if(!a)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	a->power=-1;
+	if(my_rat_sum_digits(a,&digit_sum)!=MY_SUCC)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	printf("digit_sum=%"PRIu64"\n",digit_sum);
+	my_rat_free(a);
+
 	return 0;
 }

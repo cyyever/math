@@ -136,13 +136,13 @@ static int my_rat_str_is_valid(const char* str,const char** point)
 }
 
 /*
- *	功能：把有理数的前置0去掉
+ *	功能：去除有理数的两端的0数据节点
  *	参数：
  *		n：要处理的有理数
  *	返回值：
  *		无
  */
-void my_rat_strip_leading_zero(my_rat* n)
+void my_rat_strip_zero_end_nodes(my_rat* n)
 {
 	my_node *p;
 	if(!n)
@@ -163,19 +163,7 @@ void my_rat_strip_leading_zero(my_rat* n)
 		n->used_node_num--;
 	}
 	n->msn=p;
-	return;
-}
 
-/*
- *	功能：把有理数的后置0去掉
- *	参数：
- *		n：要处理的有理数
- *	返回值：
- *		无
- */
-void my_rat_strip_ending_zero(my_rat* n)
-{
-	my_node *p;
 	p=n->lsn;
 	while(p->data==0 && p != n->msn)
 	{
@@ -186,7 +174,6 @@ void my_rat_strip_ending_zero(my_rat* n)
 	n->lsn=p;
 	return;
 }
-
 
 /*
  *	功能：释放有理数
@@ -455,8 +442,7 @@ char* my_rat_to_str(my_rat* n)
 	}
 
 	//剔除0
-	my_rat_strip_leading_zero(n);
-	my_rat_strip_ending_zero(n);
+	my_rat_strip_zero_end_nodes(n);
 
 	node_num=MY_RAT_USED_NODE_NUM(n);
 	if(n->power>=0) //整数的显示
@@ -714,53 +700,6 @@ int my_rat_reduce_power(my_rat *n,size_t delta)
 
 
 
-
-/*
- * 功能：获取ln整数部分的十进制位数
- * 副功能：使用ln_stripleadingzero()把ln整数部分前置0去掉
- * 参数：
- *	n:要计算的ln
- *	q:截止节点
- *	返回值：
- * 	成功:返回十进制位数
- * 	失败:返回-1
- */
-int ln_digitnum(ln n)
-{
-	int i,j;
-	cell p;
-
-	//检查参数
-	if(ln_checknull(n) !=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
-
-	//去掉前置0,避免计算出错
-	ln_stripleadingzero(n);
-
-	//计算有效节点总数
-	i=ln_cell_num(n);
-	if(i==-1)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_cell_num fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return -1;	
-	}
-	i=(i-1)*4;
-
-	//计算最高节点的位数
-	p=n->msn;
-	j=1;
-	while(j<=p->data)
-	{
-		i++;
-		j*=10;
-	}
-	return i;
-}
-
-
 /*
  * 参数要求:n必须去掉前置0
  * 功能：获取节点的小数点位数,如果是在小数点前面,则取负值
@@ -801,45 +740,6 @@ int ln_pointnum(ln n,cell q)
 	return pointnum;
 }
 
-/*
- * 功能：获取ln的整数部分的结尾0的个数
- * 副功能：使用ln_stripleadingzero()把ln整数部分前置0去掉
- * 参数：
- *	n:要处理的ln
- *	返回值：
- * 	成功:返回个数
- * 	失败:-1
- */
-int ln_endingzeronum(ln n)
-{
-	cell p;
-	int i,j;
-
-	//去除前置0
-	ln_stripleadingzero(n);
-	if(n->msn->data==0)  //整数部分是0
-		return 0;
-
-	i=0;
-	p=n->lsn;
-	while(1)
-	{
-		if(p->data==0)
-			i+=DIGIT_NUM;
-		else
-		{
-			j=10;
-			while(p->data%j==0)
-			{
-				i++;
-				j*=10;
-			}
-			return i;
-		}
-		p=p->hcell;
-	}
-	return i;
-}
 
 /*
  * 功能：把ln取精度

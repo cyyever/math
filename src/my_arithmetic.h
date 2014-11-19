@@ -39,20 +39,6 @@ int my_rats_cmp(my_rat* a,my_rat* b,int32_t* cmp_res);
 int my_rats_cmp_abs(my_rat* a,my_rat* b,int* cmp_res);
 
 /*
- *	功能：有理数乘以小整数
- *	参数:
- *		a：有理数
- *		b：必须在[-9999,9999]区间
- *		type：结果存放方式，取值以下：
- *			MY_NEW_RES：积作为新的有理数返回
- *			MY_ARG_RES：积放在a
- *	返回值：
- *		非NULL：积
- *		NULL：出错
- */
-my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type);
-
-/*
  *	功能：有理数加法
  *	参数：
  *		a,b：要相加的有理数
@@ -66,6 +52,20 @@ my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type
 my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type);
 
 /*
+ *	功能：有理数乘以小整数
+ *	参数:
+ *		a：有理数
+ *		b：乘数，必须在[-9999,9999]区间
+ *		type：结果存放方式，取值以下：
+ *			MY_NEW_RES：积作为新的有理数返回
+ *			MY_ARG_RES：积放在a
+ *	返回值：
+ *		非NULL：积
+ *		NULL：出错
+ */
+my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type);
+
+/*
  *	功能：计算传入整数的阶乘
  *	参数：
  *		n：计算n!
@@ -76,7 +76,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type);
 my_rat *my_factorial(uint64_t n);
 
 /*
- *	功能：如果有理数是一个整数，获取其每位上的数的和
+ *	功能：如果有理数是一个正整数，获取其每位上的数的和
  *	参数：
  *		n：要处理的有理数
  *		digit_sum：保存和
@@ -87,7 +87,7 @@ my_rat *my_factorial(uint64_t n);
 int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum);
 
 /*
- *	功能：如果有理数是一个整数，获取其数位的数量
+ *	功能：如果有理数是一个正整数，获取其数位的数量
  *	参数：
  *		n：要处理的有理数
  *		digit_num：保存数量

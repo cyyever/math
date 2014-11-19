@@ -54,10 +54,8 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 		my_log("cmp_res is NULL");
 		return MY_ERROR;	
 	}
-	my_rat_strip_leading_zero(a);
-	my_rat_strip_ending_zero(a);
-	my_rat_strip_leading_zero(b);
-	my_rat_strip_ending_zero(b);
+	my_rat_strip_zero_end_nodes(a);
+	my_rat_strip_zero_end_nodes(b);
 
 	if(a->msn->data==0) //0
 		a->sign=1;
@@ -176,98 +174,6 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
 	return res;
 }
 
-/*
- *	功能：有理数乘以小整数
- *	参数:
- *		a：有理数
- *		b：必须在[-9999,9999]区间
- *		type：结果存放方式，取值以下：
- *			MY_NEW_RES：积作为新的有理数返回
- *			MY_ARG_RES：积放在a
- *	返回值：
- *		非NULL：积
- *		NULL：出错
- */
-my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type)
-{
-	my_rat *c;
-	my_node *p,*q;
-	size_t node_num;
-	int32_t tmp,carry;
-
-	//验证参数
-	if(b>9999 || b < -9999)
-	{
-		my_log("b is out of [-9999,9999]");
-		return NULL;	
-	}
-
-	if(a)
-	{
-		if(!MY_RAT_HAS_INITED(a))
-		{
-			my_log("a is uninitialized");
-			return NULL;	
-		}
-		c=a;
-	}
-	else
-	{
-		//分配空间
-		c=(my_rat *)calloc(1,sizeof(*c));
-		if(!c)
-		{
-			my_log("calloc failed:%s",strerror(errno));
-			return NULL;			
-		}
-	}
-
-	//去除0
-	my_rat_strip_leading_zero(a);
-	my_rat_strip_ending_zero(a);
-
-	//乘法可能导致溢出
-	if(MY_RAT_FREE_NODE_NUM(c)==0)
-	{
-		if(my_rat_add_node(c,1) !=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(!a)
-				my_rat_free(c);
-			return NULL;
-		}
-	}
-
-	if(b<0)
-	{
-		b=-b;
-		c->sign=-(c->sign);
-	}
-
-	carry=0;
-	p=a->lsn;
-	q=c->lsn;
-	node_num=MY_RAT_USED_NODE_NUM(a);
-	c->used_node_num=node_num;
-	while(node_num)
-	{
-		tmp=p->data*b;
-		q->data=tmp%10000+carry;
-		carry=tmp/10000;
-		p=p->next;
-		q=q->next;
-		node_num--;
-	}
-	if(carry)
-	{
-		c->msn=p;
-		q->data=carry;
-		c->used_node_num++;
-	}
-	else
-		c->msn=q->prev;
-	return c;
-}
 
 /*
  *	功能：有理数加法
@@ -309,9 +215,9 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 		return NULL;	
 	}
 
-	//去除前置0
-	my_rat_strip_leading_zero(a);
-	my_rat_strip_leading_zero(b);
+	//整理
+	my_rat_strip_zero_end_nodes(a);
+	my_rat_strip_zero_end_nodes(b);
 
 	//把指数调整为一致
 	if(a->power > b->power)
@@ -444,11 +350,254 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 				y=y->next;
 			z=z->next;
 		}	
-		//消除前置0
-		my_rat_strip_leading_zero(c);
 	}	
+	//整理
+	my_rat_strip_zero_end_nodes(c);
 	return c;
 }
+
+/*
+ *	功能：有理数乘以小整数
+ *	参数:
+ *		a：有理数
+ *		b：乘数，必须在[-9999,9999]区间
+ *		type：结果存放方式，取值以下：
+ *			MY_NEW_RES：积作为新的有理数返回
+ *			MY_ARG_RES：积放在a
+ *	返回值：
+ *		非NULL：积
+ *		NULL：出错
+ */
+my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type)
+{
+	my_rat *c;
+	my_node *p,*q;
+	size_t node_num;
+	int32_t tmp,carry;
+
+	//验证参数
+	if(b>9999 || b < -9999)
+	{
+		my_log("b is out of [-9999,9999]");
+		return NULL;	
+	}
+
+	if(a)
+	{
+		if(!MY_RAT_HAS_INITED(a))
+		{
+			my_log("a is uninitialized");
+			return NULL;	
+		}
+		c=a;
+	}
+	else
+	{
+		//分配空间
+		c=(my_rat *)calloc(1,sizeof(*c));
+		if(!c)
+		{
+			my_log("calloc failed:%s",strerror(errno));
+			return NULL;			
+		}
+	}
+
+	//去除0
+	my_rat_strip_zero_end_nodes(a);
+
+	//乘法可能导致溢出
+	if(MY_RAT_FREE_NODE_NUM(c)==0)
+	{
+		if(my_rat_add_node(c,1)!=MY_SUCC)
+		{
+			my_log("my_rat_add_node failed");
+			if(!a)
+				my_rat_free(c);
+			return NULL;
+		}
+	}
+
+	if(b<0)
+	{
+		b=-b;
+		c->sign=-(c->sign);
+	}
+
+	carry=0;
+	p=a->lsn;
+	q=c->lsn;
+	node_num=MY_RAT_USED_NODE_NUM(a);
+	c->used_node_num=node_num;
+	while(node_num)
+	{
+		tmp=p->data*b;
+		q->data=tmp%10000+carry;
+		carry=tmp/10000;
+		p=p->next;
+		q=q->next;
+		node_num--;
+	}
+	if(carry)
+	{
+		c->msn=p;
+		q->data=carry;
+		c->used_node_num++;
+	}
+	else
+		c->msn=q->prev;
+	return c;
+}
+
+#ifdef cyy
+/*
+ *	功能：有理数除以小整数
+ *	参数:
+ *		a:有理数
+ *		b:除数
+ *	precision:所需精度(保留的小数位数)
+ *	mode:指定截断或者四舍五入
+ *	restype:结果存放方式
+ *	返回值:
+ *		成功:商
+ *		失败:NULL
+ */
+ln ln_divide_int(ln a,int b,int precision,divide_mode mode,res_type restype)
+{
+	//TODO:如果a或者b=MIN_INT 这边会溢出要转换成ln除法
+	int res=0;
+	int carry=0;
+	int inc_prec=0; //累积精度
+	ln c,d;
+	cell x,z;
+
+	//验证参数
+	if(ln_checknull(a)!=0)
+	{
+		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
+		return NULL;
+	}
+
+	//精度参数有误
+	if(precision<0)
+	{
+		fprintf(stderr,"[%s %d] %s error,reason: precision error\n",__FILE__,__LINE__,__FUNCTION__);
+		return NULL;
+	}
+	//除数不能为0
+	if(b==0)
+	{
+		fprintf(stderr,"[%s %d] %s error,reason: b=0\n",__FILE__,__LINE__,__FUNCTION__);
+		return NULL;
+	}
+
+	//除数必须在-200000-200000之间否则下面计算有可能溢出,因此必须把b转化成ln再操作
+	//这个范围是根据INT_MAX/UNIT即2147483647/10000得出
+	if(b>200000 || b<-200000)
+	{
+		d=ln_init(b);
+		if(d==NULL)
+		{
+			fprintf(stderr,"[%s %d] %s error,reason: ln_init fail\n",__FILE__,__LINE__,__FUNCTION__);
+			return NULL;
+		}
+		c=ln_divide(a,d,precision,mode,restype);
+		if(c==NULL)
+		{
+			fprintf(stderr,"[%s %d] %s error,reason: ln_divide fail\n",__FILE__,__LINE__,__FUNCTION__);
+			return NULL;
+		}
+		return c;
+	}
+	
+
+	//去除前置0
+	ln_stripleadingzero(a);
+
+	//没指定商的精度 那就使用默认精度
+	if(precision<0)
+		precision=DIV_PREC;
+
+	if(restype==newln)
+	{
+		c=ln_creat(ln_cellnum(a));
+		if(c==NULL)
+		{
+			fprintf(stderr,"[%s %d] %s error,reason: ln_creat fail\n",__FILE__,__LINE__,__FUNCTION__);
+			return NULL;
+		}
+		c->msd=c->lsd->lcell;
+	}
+	else
+		c=a;
+
+	//确定符号
+	if(b>0)
+		c->sign=a->sign;
+	else
+	{
+		c->sign=-a->sign;
+		b=-b;
+	}
+
+	//算出初始精度
+	inc_prec=ln_pointnum(a,a->msd)-DIGIT_NUM;
+
+	//开始计算
+	carry=0;
+	x=a->msd;
+	z=c->msd;
+	res=x->num;
+	while(1)
+	{
+		res+=carry*UNIT;
+		z->num=res/b;
+		carry=res%b;
+		//开始计算当前精度
+		inc_prec+=DIGIT_NUM;
+		if(inc_prec>precision) //已经达到需要的精度
+		{
+			c->lsd=z;
+			//确定指数
+			c->power=-inc_prec;
+			break;
+		}
+		//必须这样标识，否则如果a和c一样，则下面会修改lsd
+		if(x==a->lsd)
+			x=NULL;
+		if(x==NULL)
+		{
+			if(carry==0) //除得尽
+			{
+				c->lsd=z;
+				//确定指数
+				c->power=-inc_prec;
+				break;
+			}
+			res=0;
+		}
+		else
+		{
+			x=x->lcell;
+			res=x->num;
+		}
+
+		if(z==c->lsd) //增加节点
+		{
+			if(ln_addcell(c,INIT_SIZE) ==NULL)
+			{
+				fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
+				return NULL;
+			}
+			c->lsd=c->msd->hcell;
+		}
+		z=z->lcell;
+	}
+
+	//获取精度
+	ln_fix(c,precision,mode);
+	return c;
+}
+#endif
 
 /*
  *	功能：计算传入整数的阶乘
@@ -487,7 +636,7 @@ my_rat *my_factorial(uint64_t n)
 }
 
 /*
- *	功能：如果有理数是一个整数，获取其每位上的数的和
+ *	功能：如果有理数是一个正整数，获取其每位上的数的和
  *	参数：
  *		n：要处理的有理数
  *		digit_sum：保存和
@@ -519,9 +668,14 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 		return MY_ERROR;	
 	}
 
+	if(n->sign!=1)
+	{
+		my_log("n isn't postive");
+		return MY_ERROR;	
+	}
+
 	//剔除0
-	my_rat_strip_leading_zero(n);
-	my_rat_strip_ending_zero(n);
+	my_rat_strip_zero_end_nodes(n);
 
 	if(n->power<0)	//非整数
 	{
@@ -546,7 +700,7 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 }
 
 /*
- *	功能：如果有理数是一个整数，获取其数位的数量
+ *	功能：如果有理数是一个正整数，获取其数位的数量
  *	参数：
  *		n：要处理的有理数
  *		digit_num：保存数量
@@ -574,10 +728,15 @@ int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
 		my_log("digit_num is NULL");
 		return MY_ERROR;	
 	}
+	
+	if(n->sign!=1)
+	{
+		my_log("n isn't postive");
+		return MY_ERROR;	
+	}
 
 	//剔除0
-	my_rat_strip_leading_zero(n);
-	my_rat_strip_ending_zero(n);
+	my_rat_strip_zero_end_nodes(n);
 
 	if(n->power<0)	//非整数
 	{
