@@ -26,7 +26,7 @@ static unsigned int power10[]={1,10,100,1000};
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rat_add_node(my_rat* n,size_t num)
+int my_rat_add_node(my_rat *n,size_t num)
 {
 	my_node *p,*q;
 	
@@ -72,11 +72,11 @@ int my_rat_add_node(my_rat* n,size_t num)
  *		1：合法
  *		0：非法
  */
-static int my_rat_str_is_valid(const char* str,const char** point)
+static int my_rat_str_is_valid(const char *str,const char **point)
 {
 	int needdigit;	//0-不需要数字 1-需要数字
-	const char* point2; 
-	const char* p;
+	const char *point2; 
+	const char *p;
 
 	if(!str || !*str)
 	{
@@ -97,7 +97,7 @@ static int my_rat_str_is_valid(const char* str,const char** point)
 				return 0;
 			}
 		}
-		else if(*p == '.')
+		else if(*p=='.')
 		{
 			if(p==str)
 			{
@@ -142,7 +142,7 @@ static int my_rat_str_is_valid(const char* str,const char** point)
  *	返回值：
  *		无
  */
-void my_rat_strip_zero_end_nodes(my_rat* n)
+void my_rat_strip_zero_end_nodes(my_rat *n)
 {
 	my_node *p;
 	if(!n)
@@ -157,7 +157,7 @@ void my_rat_strip_zero_end_nodes(my_rat* n)
 	}
 
 	p=n->msn;
-	while(p->data==0 && p != n->lsn)
+	while(p->data==0 && p!=n->lsn)
 	{
 		p=p->prev;
 		n->used_node_num--;
@@ -165,7 +165,7 @@ void my_rat_strip_zero_end_nodes(my_rat* n)
 	n->msn=p;
 
 	p=n->lsn;
-	while(p->data==0 && p != n->msn)
+	while(p->data==0 && p!=n->msn)
 	{
 		p=p->next;
 		n->power+=4;
@@ -182,7 +182,7 @@ void my_rat_strip_zero_end_nodes(my_rat* n)
  *	返回值：
  * 		无
  */
-void my_rat_free(my_rat* n)
+void my_rat_free(my_rat *n)
 {
 	my_node *p;
 	if(!n)
@@ -211,13 +211,13 @@ void my_rat_free(my_rat* n)
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat* my_rat_from_str(my_rat* n,const char* str)
+my_rat *my_rat_from_str(my_rat *n,const char *str)
 {
 	const char *lastdigit,*point;
 	size_t len;
 	int bases[]={1,10,100,1000};
 	int i;
-	my_rat* m;
+	my_rat *m;
 	my_node *p;
 		
 	//str格式验证
@@ -287,7 +287,7 @@ my_rat* my_rat_from_str(my_rat* n,const char* str)
 	size_t node_num=((lastdigit-str+1)>>2)+1;
 	if(MY_RAT_FREE_NODE_NUM(m) < node_num)
 	{
-		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m)) !=MY_SUCC)
+		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
 		{
 			my_log("my_rat_add_node failed");
 			if(!n)
@@ -339,9 +339,9 @@ my_rat* my_rat_from_str(my_rat* n,const char* str)
  * 		非NULL：返回生成的有理数
  * 		NULL：出错
  */
-my_rat* my_rat_from_int64(my_rat* n,int64_t num)
+my_rat *my_rat_from_int64(my_rat *n,int64_t num)
 {
-	my_rat* m;
+	my_rat *m;
 	my_node *p;
 		
 	if(n)
@@ -363,7 +363,7 @@ my_rat* my_rat_from_int64(my_rat* n,int64_t num)
 	size_t node_num=MY_INT64_MIN_STR_LEN>>2;
 	if(MY_RAT_FREE_NODE_NUM(m) < node_num)
 	{
-		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m)) !=MY_SUCC)
+		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
 		{
 			my_log("my_rat_add_node failed");
 			if(!n)
@@ -420,7 +420,7 @@ my_rat* my_rat_from_int64(my_rat* n,int64_t num)
  * 		非NULL：字符串
  * 		NULL：出错
  */
-char* my_rat_to_str(my_rat* n)
+char *my_rat_to_str(my_rat *n)
 {
 	int bases[]={1000,100,10,1};
 	int i;
@@ -533,13 +533,19 @@ char* my_rat_to_str(my_rat* n)
 
 		if(*(p+1)=='.')
 			*p--='0';
-		if(n->sign==-1)
-			*p--='-';
 
-		//整理
-		while(*lastdigit=='0')
+		//剔除结尾0
+		while((*lastdigit=='0' || *lastdigit=='.') && lastdigit!=p+1)
 			lastdigit--;
 		*(lastdigit+1)='\0';
+
+		//剔除结尾0后可能导致0
+		if(strcmp(p+1,"0")!=0)
+		{
+			if(n->sign==-1)
+				*p--='-';
+		}
+
 		if(str!=p+1)
 		{
 			len=lastdigit-p;
@@ -561,9 +567,9 @@ char* my_rat_to_str(my_rat* n)
  *		非NULL：返回副本
  *		NULL：出错
  */
-my_rat* my_rat_copy(my_rat* dest,my_rat* src)
+my_rat *my_rat_copy(my_rat *dest,my_rat *src)
 {
-	my_rat* tmp;
+	my_rat *tmp;
 	my_node *p,*q;
 	size_t i;
 
@@ -598,7 +604,7 @@ my_rat* my_rat_copy(my_rat* dest,my_rat* src)
 
 	if(MY_RAT_FREE_NODE_NUM(tmp) < MY_RAT_USED_NODE_NUM(src))
 	{
-		if(my_rat_add_node(tmp,MY_RAT_USED_NODE_NUM(src)-MY_RAT_FREE_NODE_NUM(tmp)) !=MY_SUCC)
+		if(my_rat_add_node(tmp,MY_RAT_USED_NODE_NUM(src)-MY_RAT_FREE_NODE_NUM(tmp))!=MY_SUCC)
 		{
 			my_log("my_rat_add_node failed");
 			if(!dest)
@@ -689,7 +695,72 @@ int my_rat_reduce_power(my_rat *n,size_t delta)
 	return MY_SUCC;
 }
 
+/*
+ *	功能：舍入有理数到指定小数位数
+ *	参数：
+ *		n：要处理的有理数
+ *		fraction：小数位数
+ *		round_mode：舍入模式
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode round_mode)
+{
+	my_node *p;
+	size_t i;
+	ssize_t cur_fraction;
 
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;
+	}
+
+	if(fraction<0)
+	{
+		my_log("invalid fraction:%zd",fraction);
+		return MY_ERROR;
+	}
+	//整理
+	my_rat_strip_zero_end_nodes(n);
+
+	if(n->power>=0)		//非小数
+		return MY_SUCC;
+
+	cur_fraction=-(n->power);
+	p=n->lsn;
+	for(i=0;i<MY_RAT_USED_NODE_NUM(n);i++)
+	{
+		if(cur_fraction-3<=fraction)
+			break;
+		cur_fraction-=4;
+		p=p->next;
+	}
+	if(cur_fraction-3>fraction)	//这意味着当前的第一个有效数字的小数位数大于要舍入的小数位数，那只能设置为0
+	{
+		if(my_rat_from_int64(n,0)==NULL)
+		{
+			my_log("my_rat_from_int64 failed");
+			return MY_ERROR;
+		}
+		return MY_SUCC;
+	}
+
+	if(cur_fraction<=fraction)	//当前已经比要舍入的小数位数小，直接返回成功
+		return MY_SUCC;
+
+	if(round_mode==MY_TRUNC)
+		p->data-=(p->data%power10[cur_fraction-fraction]);
+	return MY_SUCC;
+}
 
 
 
@@ -713,7 +784,7 @@ int ln_pointnum(ln n,cell q)
 	int pointnum;
 	cell p;
 	//检查参数
-	if(ln_checknull(n) !=0)
+	if(ln_checknull(n)!=0)
 	{
 		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
 		return -1;	
@@ -739,142 +810,6 @@ int ln_pointnum(ln n,cell q)
 	}
 	return pointnum;
 }
-
-
-/*
- * 功能：把ln取精度
- * 副功能：把ln前置0和后置0去掉
- * 参数：
- *	n:要处理的ln
- *	prevcision:所需精度(保留的小数位数)
- *	mode:指定截断或者四舍五入
- *	返回值：
- * 	成功:返回ln
- * 	失败:NULL
- */
-ln ln_fix(ln n,int prevcision,divide_mode mode)
-{
-	int pointnum;
-	int power;
-	cell p;
-	//验证参数
-	if(ln_checknull(n)!=0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-	//精度参数有误
-	if(prevcision<0)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: prevcision error\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-	//去除前置0
-	ln_stripleadingzero(n);
-	//去除后置0
-	ln_adjustpower(n,ln_endingzeronum(n));
-	//由于上一个函数可能导致前置0,再次去除
-	ln_stripleadingzero(n);
-
-	//获取最低节点的小数点位数
-	pointnum=ln_pointnum(n,n->lsn);
-	if(pointnum==-1)
-	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_pointnum fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
-	}
-
-	//大于pointnum,直接返回
-	if(prevcision >=pointnum)
-		return n;
-
-	//只存在一个节点
-	if(n->lsn==n->msn)
-	{
-		p=n->lsn;
-		power=power10(pointnum-prevcision);
-		if(mode==trunc_res) //截断
-			p->data-=p->data%power;
-		else
-		{
-			if(p->data%power>=5*power/10)
-				p->data=(p->data/power+1)*power;
-			else
-				p->data-=p->data%power;
-		}
-
-	}
-	else
-	{
-		p=n->lsn;
-		while(pointnum>prevcision)
-		{
-			p=p->hcell;
-			pointnum-=DIGIT_NUM;
-		}
-		if(pointnum==prevcision) //现在p所指的节点精度就是prevcision
-		{
-			if(mode==round_res && p->lcell->data>=10000/2) //四舍五入
-				p->data++;
-		}
-		else
-		{
-			p=p->lcell;
-			power=power10(DIGIT_NUM+pointnum-prevcision);
-			if(mode==trunc_res) //截断
-			{
-				p->data-=p->data%power;
-			}
-			else
-			{
-				if(p->data%power>=5*power/10)
-					p->data=(p->data/power+1)*power;
-				else
-					p->data-=p->data%power;
-			}
-		}
-		//p后面有效节点被舍去,因此重置为0
-		if(p!=n->lsn)	
-		{
-			do	
-			{
-				p=p->lcell;
-				p->data=0;
-			}
-			while(p!=n->lsn);
-		}
-	}
-	//有可能四舍五入导致溢出,需要做调整
-	p=n->lsn;
-	while(1)
-	{
-		if(p->data>=10000)
-		{
-			p->data-=10000;
-			if(p==n->msn)
-			{
-				if(ln_addcell(n,INIT_SIZE) !=LN_SUCC)
-				{
-					fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
-					return NULL;
-				}
-				n->msn=p->hcell;
-				n->msn->data=1;
-				break;
-			}
-			else
-			{
-				p=p->hcell;
-				p->data+=1;
-			}
-
-		}
-		else
-			break;
-	}
-	return n;
-}
-
 
 /*
  *	功能：调整指数部分
@@ -937,7 +872,7 @@ int my_rat_change_power(my_rat *n,ssize_t inc_power)
 				{
 					if(n->used_node_num==n->total_node_num) //节点不够
 					{
-						if(my_rat_add_node(n,1) !=MY_SUCC) //分配失败
+						if(my_rat_add_node(n,1)!=MY_SUCC) //分配失败
 						{
 							my_log("my_rat_add_node failed");
 							return MY_ERROR;

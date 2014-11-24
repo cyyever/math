@@ -29,6 +29,11 @@ typedef struct
 	size_t total_node_num;	//总节点数量
 }my_rat;
 
+//舍入模式
+typedef enum{
+	MY_TRUNC,	//截断
+}my_round_mode;
+
 #define MY_RAT_TOTAL_NODE_NUM(rat) ((rat)?((rat)->total_node_num):0)
 #define MY_RAT_USED_NODE_NUM(rat) ((rat)?((rat)->used_node_num):0)
 #define MY_RAT_FREE_NODE_NUM(rat) ((rat)?((rat)->total_node_num-(rat)->used_node_num):0)
@@ -124,4 +129,16 @@ my_rat* my_rat_copy(my_rat* dest,my_rat* src);
  *		MY_ERROR：出错
  */
 int my_rat_reduce_power(my_rat *n,size_t delta);
+
+/*
+ *	功能：舍入有理数到指定小数位数
+ *	参数：
+ *		n：要处理的有理数
+ *		fraction：小数位数
+ *		round_mode：舍入模式
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode mode);
 #endif
