@@ -10,6 +10,8 @@
 #include "my_arithmetic.h"
 #include "my_log.h"
 
+static unsigned int power10[]={1,10,100,1000};
+
 /*
  *	功能：比较有理数的大小
  *	参数：
@@ -77,8 +79,8 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	p=a->msn;
 	q=b->msn;
 	//FIXME:可能溢出
-	a_digit_num=MY_RAT_DIGIT_NUM(p)+((MY_RAT_USED_NODE_NUM(a)-1)<<2)+a->power;
-	b_digit_num=MY_RAT_DIGIT_NUM(q)+((MY_RAT_USED_NODE_NUM(b)-1)<<2)+b->power;
+	a_digit_num=MY_RAT_DIGIT_NUM(p)+((a->used_node_num-1)<<2)+a->power;
+	b_digit_num=MY_RAT_DIGIT_NUM(q)+((b->used_node_num-1)<<2)+b->power;
 
 	if(a_digit_num != b_digit_num)
 	{
@@ -90,7 +92,7 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	else
 	{
 		*cmp_res=0;
-		size_t min_node_num=MY_MIX(MY_RAT_USED_NODE_NUM(a),MY_RAT_USED_NODE_NUM(b));
+		size_t min_node_num=MY_MIX(a->used_node_num,b->used_node_num);
 		while(min_node_num)
 		{
 			if(p->data != q->data)
@@ -105,9 +107,9 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 
 		if(*cmp_res==0)
 		{
-			if(MY_RAT_USED_NODE_NUM(a)>MY_RAT_USED_NODE_NUM(b))
+			if(a->used_node_num>b->used_node_num)
 				*cmp_res=1;
-			else if(MY_RAT_USED_NODE_NUM(a)<MY_RAT_USED_NODE_NUM(b))
+			else if(a->used_node_num<b->used_node_num)
 				*cmp_res=-1;
 		}
 	}
@@ -174,6 +176,88 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
 	return res;
 }
 
+/*
+ *	功能：减少有理数指数部分，作为0增加到整数部分
+ *	参数：
+ *		n：要处理的有理数
+ *		delta:指数减少量
+ *	返回值：
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_rat_reduce_power(my_rat *n,size_t delta)
+{
+	unsigned int rest_power;
+	//检查参数
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;
+	}
+
+	if(!MY_RAT_HAS_INITED(n))
+	{
+		my_log("n is uninitialized");
+		return MY_ERROR;
+	}
+
+	if(delta==0) //指数不变
+		return MY_SUCC;
+	//溢出
+	if(n->power-delta > n->power);  
+	{
+		my_log("power will overflow");
+		return MY_ERROR;
+	}
+
+	//预先分配多余的节点来容纳
+	if(MY_RAT_FREE_NODE_NUM(n)<delta/4+1)
+	{
+		if(my_rat_add_node(n,delta/4+1-MY_RAT_FREE_NODE_NUM(n))!=MY_SUCC)
+		{
+			my_log("my_rat_add_node failed");
+			return MY_ERROR;
+		}
+	}
+
+	//设置新的指数
+	n->power-=delta;  
+
+	rest_power=power10[delta%4];
+	delta=delta-(delta%4);
+
+	//先乘上剩余的指数
+	if(rest_power!=1)
+	{
+	if(my_rat_multiply_small_int(n,power10[delta%4],MY_ARG_RES)==NULL)
+	{
+		my_log("my_rat_multiply_small_int failed");
+		return MY_ERROR;
+	}
+	}
+
+	while(delta>=4)
+	{
+		if(MY_RAT_FREE_NODE_NUM(n)>0) //还有多余的节点，利用它
+		{
+			n->lsn=n->lsn->prev;
+			n->lsn->data=0;
+			n->used_node_num++;
+			delta-=4;
+		}
+		else //一次性分配剩下的节点
+		{
+			if(my_rat_add_node(n,delta/4)!=MY_SUCC)
+			{
+				my_log("my_rat_add_node failed");
+				return MY_ERROR;
+			}
+			n->lsn=n->msn->next;
+			break;
+		}
+	}
+	return MY_SUCC;
+}
 
 /*
  *	功能：有理数加法
@@ -430,7 +514,7 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type savi
 	carry=0;
 	p=a->lsn;
 	q=c->lsn;
-	node_num=MY_RAT_USED_NODE_NUM(a);
+	node_num=a->used_node_num;
 	while(node_num)
 	{
 		tmp=p->data*b;
@@ -692,7 +776,7 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 
 	*digit_sum=0;
 	p=n->lsn;
-	for(i=0;i<MY_RAT_USED_NODE_NUM(n);i++)
+	for(i=0;i<n->used_node_num;i++)
 	{
 		data=p->data;
 
@@ -751,6 +835,6 @@ int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
 		return MY_ERROR;	
 	}
 
-	*digit_num=(MY_RAT_USED_NODE_NUM(n)-1)*4+n->power+MY_RAT_DIGIT_NUM(n->msn);
+	*digit_num=(n->used_node_num-1)*4+n->power+MY_RAT_DIGIT_NUM(n->msn);
 	return MY_SUCC;
 }

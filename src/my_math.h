@@ -12,7 +12,7 @@ typedef enum
 {
 	MY_SUCC,
 	MY_ERROR,
-}my_comm_return_value;
+}my_return_value;
 
 //计算结果保存类型
 typedef enum
@@ -20,6 +20,11 @@ typedef enum
 	MY_NEW_RES,	//计算结果作为新的数据返回
 	MY_ARG_RES,	//计算结果放在函数参数
 }my_result_saving_type;
+
+//舍入模式
+typedef enum{
+	MY_TRUNC=0,	//截断
+}my_round_mode;
 
 #define MY_MAX(a,b) ((a)>(b)?(a):(b))
 #define MY_MIX(a,b) ((a)<(b)?(a):(b))

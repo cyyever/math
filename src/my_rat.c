@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "my_rat.h"
 #include "my_arithmetic.h"
@@ -18,7 +19,7 @@
 static unsigned int power10[]={1,10,100,1000};
 
 /*
- *	功能：增加有理数的节点
+ *	功能：增加有理数的节点。并且节点初始化为0
  *	参数：
  *		n：要处理的有理数
  *		num：增加的节点数
@@ -30,6 +31,18 @@ int my_rat_add_node(my_rat *n,size_t num)
 {
 	my_node *p,*q;
 	
+	if(!n)
+	{
+		my_log("n is NULL");
+		return MY_ERROR;	
+	}
+
+	if(n->total_node_num+num <n->total_node_num)
+	{
+		my_log("node number will overflow");
+		return MY_ERROR;	
+	}
+
 	//开始增加节点
 	while(num)
 	{
@@ -61,79 +74,6 @@ int my_rat_add_node(my_rat *n,size_t num)
 	return MY_SUCC;
 }
 
-
-/*
- *	功能：检查传入的字符串是否是合法有理数，即是否匹配 ^[-]?\d+(.\d+)?$
- * 	参数：
- *		str：要检查的字符串
- *		point：
- *			非NULL：如果存在小数点，指向小数点，否则设置为NULL
- * 	返回值：
- *		1：合法
- *		0：非法
- */
-static int my_rat_str_is_valid(const char *str,const char **point)
-{
-	int needdigit;	//0-不需要数字 1-需要数字
-	const char *point2; 
-	const char *p;
-
-	if(!str || !*str)
-	{
-		my_log("str is NULL or empty");
-		return 0;
-	}
-
-	point2=NULL;
-	needdigit=1;
-	p=str;
-	while(*p)
-	{
-		if(*p=='-')
-		{
-		       	if(p!=str)
-			{
-				my_log("invalid char - at index %zd of str %s",p-str,str);
-				return 0;
-			}
-		}
-		else if(*p=='.')
-		{
-			if(p==str)
-			{
-				my_log("invalid char . at index 0 of str %s",str);
-				return 0;
-			}
-			else if(!point2)
-			{
-				point2=p;
-				needdigit=1;
-			}
-			else //已经有了
-			{
-				my_log("invalid char . at %zd of str %s",p-str,str);
-				return 0;
-			}
-		}
-		else if(!isdigit(*p))
-		{
-			my_log("invalid char %c at %zd of str %s",*p,p-str,str);
-			return 0;
-		}
-		else
-			needdigit=0;
-		p++;
-	}
-
-	if(needdigit)
-	{
-		my_log("lack of [0-9] of str %s",str);
-		return 0;
-	}
-	if(point)
-		*point=point2;
-	return 1;
-}
 
 /*
  *	功能：去除有理数的两端的0数据节点
@@ -201,6 +141,74 @@ void my_rat_free(my_rat *n)
 }
 
 /*
+ *	功能：检查传入的字符串是否是合法有理数，即是否匹配 ^[-]?\d+(.\d+)?$
+ * 	参数：
+ *		str：要检查的字符串
+ *		point：
+ *			非NULL：如果存在小数点，指向小数点，否则设置为NULL
+ * 	返回值：
+ *		1：合法
+ *		0：非法
+ */
+static int my_rat_str_is_valid(const char *str,const char **point)
+{
+	int needdigit;	//0-不需要数字 1-需要数字
+	const char *_point; 
+	const char *p;
+
+	if(!str || !*str)
+	{
+		my_log("str is NULL or empty");
+		return 0;
+	}
+
+	_point=NULL;
+	needdigit=1;
+	p=str;
+	if(*p=='-')
+		p++;
+	while(*p)
+	{
+		if(*p=='.')
+		{
+			if(p==str)
+			{
+				my_log("invalid char . at index 0 of str %s",str);
+				return 0;
+			}
+			else if(!_point)
+			{
+				_point=p;
+				needdigit=1;
+			}
+			else //已经有了
+			{
+				my_log("invalid char . at %zd of str %s",p-str,str);
+				return 0;
+			}
+		}
+		else if(!isdigit(*p))
+		{
+			my_log("invalid char %c at %zd of str %s",*p,p-str,str);
+			return 0;
+		}
+		else
+			needdigit=0;
+		p++;
+	}
+
+	if(needdigit)
+	{
+		my_log("lack of [0-9] of str %s",str);
+		return 0;
+	}
+	if(point)
+		*point=_point;
+	return 1;
+}
+
+
+/*
  * 	功能：把字符串转换为my_rat
  * 	参数：
  *		n：	
@@ -215,7 +223,6 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 {
 	const char *lastdigit,*point;
 	size_t len;
-	int bases[]={1,10,100,1000};
 	int i;
 	my_rat *m;
 	my_node *p;
@@ -259,7 +266,7 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	while(*str=='0'&& (!point || str<point-1) && str < lastdigit)
 		str++;
 	
-	//清除小数点后终结的0
+	//清除小数点后结尾的0
 	if(point)
 	{
 		while(*lastdigit=='0')
@@ -270,7 +277,7 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 			point=NULL;
 		}
 	}
-	else //后置0并入指数
+	else //整数结尾的0并入指数
 	{
 		while(*lastdigit=='0' && lastdigit > str)
 		{
@@ -279,13 +286,12 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 		}
 	}
 
-
 	//处理-0
 	if(m->sign==-1 && lastdigit==str && *str=='0')
 		m->sign=1;
 	//增加节点
 	size_t node_num=((lastdigit-str+1)>>2)+1;
-	if(MY_RAT_FREE_NODE_NUM(m) < node_num)
+	if(MY_RAT_FREE_NODE_NUM(m)<node_num)
 	{
 		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
 		{
@@ -306,14 +312,14 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	m->used_node_num=1;
 	while(lastdigit>=str) //从最低位向上构造digit部分
 	{
-		if(lastdigit!=point)
+		if(lastdigit!=point)	//跳过小数点
 		{
-			p->data+=(*lastdigit-'0')*bases[i];
+			p->data+=(*lastdigit-'0')*power10[i];
 			i++;
 			if(i==4)
 			{
 				i=0;
-				if(lastdigit > str)
+				if(lastdigit>str)
 				{
 					p=p->next;
 					p->data=0;
@@ -324,7 +330,6 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 		lastdigit--;
 	}
 	m->msn=p;
-
 	return m;
 }
 
@@ -341,74 +346,13 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
  */
 my_rat *my_rat_from_int64(my_rat *n,int64_t num)
 {
-	my_rat *m;
-	my_node *p;
-		
-	if(n)
-	{
-		MY_RAT_INIT(n);
-		m=n;
-	}
-	else
-	{
-		//分配空间
-		m=(my_rat *)calloc(1,sizeof(*m));
-		if(!m)
-		{
-			my_log("calloc failed:%s",strerror(errno));
-			return NULL;			
-		}
-	}
+	char str[MY_INT64_MIN_STR_LEN+1];
 
-	size_t node_num=MY_INT64_MIN_STR_LEN>>2;
-	if(MY_RAT_FREE_NODE_NUM(m) < node_num)
-	{
-		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(!n)
-				my_rat_free(m);
-			return NULL;
-		}
-	}
-	
-	p=m->lsn;
-	m->used_node_num=1;
-
-	if(num>=0)
-	{
-		m->sign=1;
-		p->data=0;
-	}
-	else
-	{
-		m->sign=-1;
-		if(num==INT64_MIN)
-		{
-			p->data=1;
-			num=INT64_MAX;
-		}
-		else
-		{
-			p->data=0;
-			num=-num;
-		}
-			
-	}
-
-	while(num)
-	{
-		p->data+=num%10000;
-		num/=10000;
-		if(num)
-		{
-			p=p->next;
-			p->data=0;
-			m->used_node_num++;
-		}
-	}
-	m->msn=p;
-	return m;
+	sprintf(str,"%"PRId64,num);
+	n=my_rat_from_str(n,str);
+	if(!n)
+		my_log("my_rat_from_str failed");
+	return n;
 }
 
 
@@ -422,13 +366,12 @@ my_rat *my_rat_from_int64(my_rat *n,int64_t num)
  */
 char *my_rat_to_str(my_rat *n)
 {
-	int bases[]={1000,100,10,1};
 	int i;
 	size_t j;
 	char *p,*str;
-	size_t len,node_num;
+	size_t len;
 	my_node *node;
-		
+
 	//检查参数
 	if(!n)
 	{
@@ -444,10 +387,9 @@ char *my_rat_to_str(my_rat *n)
 	//剔除0
 	my_rat_strip_zero_end_nodes(n);
 
-	node_num=MY_RAT_USED_NODE_NUM(n);
 	if(n->power>=0) //整数的显示
 	{
-		len=(node_num<<2)+n->power+2;
+		len=(n->used_node_num<<2)+n->power+2;
 		//分配空间
 		str=(char*)malloc(len);
 		if(str==NULL)
@@ -462,29 +404,25 @@ char *my_rat_to_str(my_rat *n)
 			*p++='-';
 
 		//打印有效数字
-		for(node=n->msn,j=0;j<node_num;j++)
+		for(node=n->msn,j=0;j<n->used_node_num;j++)
 		{
-			i=0;
-			if(j==0)
+			
+			i=3;
+			if(j==0) //如果是第一个节点，就去掉前置0
 			{
-				while(node->data<bases[i] && i<3)
-					i++;
+				while(node->data<power10[i])
+					i--;
 			}
-			while(i<4)
+			while(i>=0)
 			{
-				*p++=(node->data/bases[i])%10+'0';
-				i++;
+				*p++=(node->data/power10[i])%10+'0';
+				i--;
 			}
 			node=node->prev;
 		}
 
-		if(n->power>0)
-		{
-			memset(p,'0',n->power);
-			p[n->power]='\0';
-		}
-		else
-			*p='\0';
+		memset(p,'0',n->power);
+		p[n->power]='\0';
 	}
 	else //小数的显示
 	{
@@ -494,7 +432,7 @@ char *my_rat_to_str(my_rat *n)
 		power=-n->power;
 
 		//先计算需要的空间
-		len=MY_MAX(power,MY_RAT_USED_NODE_NUM(n)<<2)+5;
+		len=MY_MAX(power,(n->used_node_num)<<2)+4;
 
 		//分配空间
 		str=(char*)malloc(len);
@@ -507,15 +445,15 @@ char *my_rat_to_str(my_rat *n)
 		p=str+len-2;  //p指向字符串尾部
 		lastdigit=p;
 		//打印有效数字
-		for(node=n->lsn,j=0;j<node_num;j++)
+		for(node=n->lsn,j=0;j<n->used_node_num;j++)
 		{
-			i=3;
-			while(i>=0)
+			i=0;
+			while(i<4)
 			{
-				if(j==node_num-1 && bases[i]>node->data)
+				if(j==n->used_node_num-1 && power10[i]>node->data)
 					break;
-				*p--=(node->data/bases[i])%10+'0';
-				i--;
+				*p--=(node->data/power10[i])%10+'0';
+				i++;
 				power--;
 				if(power==0)
 					*p--='.';
@@ -602,9 +540,10 @@ my_rat *my_rat_copy(my_rat *dest,my_rat *src)
 		}
 	}
 
-	if(MY_RAT_FREE_NODE_NUM(tmp) < MY_RAT_USED_NODE_NUM(src))
+	//节点不够
+	if(MY_RAT_FREE_NODE_NUM(tmp)<src->used_node_num)
 	{
-		if(my_rat_add_node(tmp,MY_RAT_USED_NODE_NUM(src)-MY_RAT_FREE_NODE_NUM(tmp))!=MY_SUCC)
+		if(my_rat_add_node(tmp,src->used_node_num-MY_RAT_FREE_NODE_NUM(tmp))!=MY_SUCC)
 		{
 			my_log("my_rat_add_node failed");
 			if(!dest)
@@ -617,83 +556,17 @@ my_rat *my_rat_copy(my_rat *dest,my_rat *src)
 	tmp->power=src->power;
 	p=tmp->lsn;
 	q=src->lsn;
-	for(i=0;i<MY_RAT_USED_NODE_NUM(src);i++)
+	for(i=0;i<src->used_node_num;i++)
 	{
 		p->data=q->data;
 		p=p->next;
 		q=q->next;
 	}
 	tmp->msn=p->prev;
-	tmp->used_node_num=MY_RAT_USED_NODE_NUM(src);
+	tmp->used_node_num=src->used_node_num;
 	return tmp;
 }
 
-/*
- *	功能：减少有理数指数部分，作为0增加到整数部分
- *	参数：
- *		n：要处理的有理数
- *		delta:指数减少量
- *	返回值：
- *		MY_SUCC：成功
- *		MY_ERROR：出错
- */
-int my_rat_reduce_power(my_rat *n,size_t delta)
-{
-	//检查参数
-	if(!n)
-	{
-		my_log("n is NULL");
-		return MY_ERROR;
-	}
-
-	if(!MY_RAT_HAS_INITED(n))
-	{
-		my_log("n is uninitialized");
-		return MY_ERROR;
-	}
-
-	if(delta==0) //指数不变
-		return MY_SUCC;
-	//溢出
-	if(n->power-delta > n->power);  
-	{
-		my_log("power will overflow");
-		return MY_ERROR;
-	}
-
-
-	//设置新的指数
-	n->power-=delta;  
-
-	//先乘上剩余部分的0
-	if(my_rat_multiply_small_int(n,power10[delta%4],MY_ARG_RES)==NULL)
-	{
-		my_log("my_rat_multiply_small_int failed");
-		return MY_ERROR;
-	}
-
-	while(delta>=4)
-	{
-		if(n->used_node_num!=n->total_node_num) //还有多余的节点，利用它
-		{
-			n->lsn=n->lsn->prev;
-			n->lsn->data=0;
-			n->used_node_num++;
-			delta-=4;
-		}
-		else //一次性分配剩下的节点
-		{
-			if(my_rat_add_node(n,delta/4)!=MY_SUCC)
-			{
-				my_log("my_rat_add_node failed");
-				return MY_ERROR;
-			}
-			n->lsn=n->msn->next;
-			break;
-		}
-	}
-	return MY_SUCC;
-}
 
 /*
  *	功能：舍入有理数到指定小数位数
@@ -744,7 +617,7 @@ int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode round_mode)
 
 	cur_fraction=-(n->power);
 	p=n->lsn;
-	for(i=0;i<MY_RAT_USED_NODE_NUM(n);i++)
+	for(i=0;i<n->used_node_num;i++)
 	{
 		if(cur_fraction-3<=fraction)
 			break;
