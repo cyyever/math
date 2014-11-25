@@ -31,14 +31,14 @@ typedef struct
 
 //舍入模式
 typedef enum{
-	MY_TRUNC,	//截断
+	MY_TRUNC=0,	//截断
 }my_round_mode;
 
 #define MY_RAT_TOTAL_NODE_NUM(rat) ((rat)?((rat)->total_node_num):0)
 #define MY_RAT_USED_NODE_NUM(rat) ((rat)?((rat)->used_node_num):0)
 #define MY_RAT_FREE_NODE_NUM(rat) ((rat)?((rat)->total_node_num-(rat)->used_node_num):0)
 #define MY_RAT_INIT(rat) do {(rat)->msn=(rat)->lsn;(rat)->used_node_num=0;(rat)->sign=0;(rat)->power=0;} while(0)
-#define MY_RAT_HAS_INITED(rat) ((rat)->sign !=0)
+#define MY_RAT_HAS_INITED(rat) ((rat)->sign!=0)
 #define MY_RAT_DIGIT_NUM(node) ((node)->data>=1000? 4 : ((node)->data>=100 ? 3: ((node)->data>=10?2:1)))
 
 /*

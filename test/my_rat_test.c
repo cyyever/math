@@ -55,27 +55,30 @@ int main(int argc, char **argv)
 	puts("结束测试my_rat_from_str与my_rat_to_str");
 
 	puts("开始测试my_rat_round");
-	a=my_rat_from_str(NULL,"-0.34");
+	a=my_rat_from_str(NULL,"-0.123456789");
 	if(!a)
 	{
 		printf("++测试失败：%d\n",__LINE__);
 		return -1;
 	}
 
-	if(my_rat_round(a,0,MY_TRUNC)!=MY_SUCC)
+	for(i=9;i>=0;i--)
 	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
+		if(my_rat_round(a,i,MY_TRUNC)!=MY_SUCC)
+		{
+			printf("++测试失败：%d\n",__LINE__);
+			return -1;
+		}
+		str=my_rat_to_str(a);
+		if(!str)
+		{
+			printf("++测试失败：%d\n",__LINE__);
+			my_rat_free(a);
+			return -1;
+		}
+		puts(str);
+		free(str);
 	}
-	str=my_rat_to_str(a);
-	if(!str)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		my_rat_free(a);
-		return -1;
-	}
-	puts(str);
 	my_rat_free(a);
-	free(str);
 	return 0;
 }

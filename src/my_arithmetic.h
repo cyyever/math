@@ -42,28 +42,28 @@ int my_rats_cmp_abs(my_rat* a,my_rat* b,int* cmp_res);
  *	功能：有理数加法
  *	参数：
  *		a,b：要相加的有理数
- *		type：结果存放方式，取值以下：
+ *		saving_type：结果存放方式，取值以下：
  *			MY_NEW_RES：和作为新的有理数返回
  *			MY_ARG_RES：和放在a
  *	返回值：
  *		非NULL：和
  *		NULL：出错
  */
-my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type);
+my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type);
 
 /*
  *	功能：有理数乘以小整数
  *	参数:
  *		a：有理数
  *		b：乘数，必须在[-9999,9999]区间
- *		type：结果存放方式，取值以下：
+ *		saving_type：结果存放方式，取值以下：
  *			MY_NEW_RES：积作为新的有理数返回
  *			MY_ARG_RES：积放在a
  *	返回值：
  *		非NULL：积
  *		NULL：出错
  */
-my_rat* my_rat_multiply_small_int(my_rat* a,int32_t b,my_result_saving_type type);
+my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type saving_type);
 
 /*
  *	功能：计算传入整数的阶乘

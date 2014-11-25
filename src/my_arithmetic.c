@@ -179,14 +179,14 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
  *	功能：有理数加法
  *	参数：
  *		a,b：要相加的有理数
- *		type：结果存放方式，取值以下：
+ *		saving_type：结果存放方式，取值以下：
  *			MY_NEW_RES：和作为新的有理数返回
  *			MY_ARG_RES：和放在a
  *	返回值：
  *		非NULL：和
  *		NULL：出错
  */
-my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
+my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 {
 	my_rat *c;
 	int carry;
@@ -220,13 +220,13 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
 	my_rat_strip_zero_end_nodes(b);
 
 	//把指数调整为一致
-	if(a->power > b->power)
+	if(a->power>b->power)
 		my_rat_reduce_power(a,a->power-b->power);
-	if(b->power > a->power)
+	if(b->power>a->power)
 		my_rat_reduce_power(b,b->power-a->power);
 
 	//根据存放方式设置c
-	if(type==MY_ARG_RES) 
+	if(saving_type==MY_ARG_RES) 
 		c=a;
 	else
 	{
@@ -361,14 +361,14 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type type)
  *	参数:
  *		a：有理数
  *		b：乘数，必须在[-9999,9999]区间
- *		type：结果存放方式，取值以下：
+ *		saving_type：结果存放方式，取值以下：
  *			MY_NEW_RES：积作为新的有理数返回
  *			MY_ARG_RES：积放在a
  *	返回值：
  *		非NULL：积
  *		NULL：出错
  */
-my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type)
+my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type saving_type)
 {
 	my_rat *c;
 	my_node *p,*q;
@@ -376,34 +376,38 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
 	int32_t tmp,carry;
 
 	//验证参数
-	if(b>9999 || b < -9999)
+	if(!a)
+	{
+		my_log("a is NULL");
+		return NULL;	
+	}
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return NULL;	
+	}
+
+	if(b>9999 || b<-9999)
 	{
 		my_log("b is out of [-9999,9999]");
 		return NULL;	
 	}
 
-	if(a)
-	{
-		if(!MY_RAT_HAS_INITED(a))
-		{
-			my_log("a is uninitialized");
-			return NULL;	
-		}
+	//整理
+	my_rat_strip_zero_end_nodes(a);
+
+	if(saving_type==MY_ARG_RES)
 		c=a;
-	}
 	else
 	{
 		//分配空间
-		c=(my_rat *)calloc(1,sizeof(*c));
+		c=my_rat_copy(a,NULL);
 		if(!c)
 		{
-			my_log("calloc failed:%s",strerror(errno));
+			my_log("my_rat_copy failed");
 			return NULL;			
 		}
 	}
-
-	//去除0
-	my_rat_strip_zero_end_nodes(a);
 
 	//乘法可能导致溢出
 	if(MY_RAT_FREE_NODE_NUM(c)==0)
@@ -411,7 +415,7 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
 		if(my_rat_add_node(c,1)!=MY_SUCC)
 		{
 			my_log("my_rat_add_node failed");
-			if(!a)
+			if(c!=a)
 				my_rat_free(c);
 			return NULL;
 		}
@@ -427,7 +431,6 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
 	p=a->lsn;
 	q=c->lsn;
 	node_num=MY_RAT_USED_NODE_NUM(a);
-	c->used_node_num=node_num;
 	while(node_num)
 	{
 		tmp=p->data*b;
@@ -439,7 +442,7 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
 	}
 	if(carry)
 	{
-		c->msn=p;
+		c->msn=q;
 		q->data=carry;
 		c->used_node_num++;
 	}
@@ -454,39 +457,43 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type type
  *	参数:
  *		a:有理数
  *		b:除数
- *	precision:所需精度(保留的小数位数)
- *	mode:指定截断或者四舍五入
- *	restype:结果存放方式
+ *		fraction：保留的小数位数
+ *		round_mode：舍入模式
+ *		restype:结果存放方式
  *	返回值:
  *		成功:商
  *		失败:NULL
  */
-ln ln_divide_int(ln a,int b,int precision,divide_mode mode,res_type restype)
+my_rat *my_divide_small_int(my_rat *a,int b,ssize_t fraction,my_round_mode round_mode,my_result_saving_type saving_type)
 {
-	//TODO:如果a或者b=MIN_INT 这边会溢出要转换成ln除法
 	int res=0;
 	int carry=0;
 	int inc_prec=0; //累积精度
 	ln c,d;
 	cell x,z;
 
-	//验证参数
-	if(ln_checknull(a)!=0)
+	//检查参数
+	if(!a)
 	{
-		fprintf(stderr,"[%s %d] %s error,reason: ln_checknull fail\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
+		my_log("a is NULL");
+		return NULL;	
+	}
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return NULL;	
 	}
 
-	//精度参数有误
-	if(precision<0)
+	if(fraction<0)
 	{
-		fprintf(stderr,"[%s %d] %s error,reason: precision error\n",__FILE__,__LINE__,__FUNCTION__);
-		return NULL;
+		my_log("invalid fraction:%zd",fraction);
+		return NULL;	
 	}
+
 	//除数不能为0
 	if(b==0)
 	{
-		fprintf(stderr,"[%s %d] %s error,reason: b=0\n",__FILE__,__LINE__,__FUNCTION__);
+		my_log("b is 0:%zd",fraction);
 		return NULL;
 	}
 

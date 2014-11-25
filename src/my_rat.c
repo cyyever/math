@@ -729,6 +729,13 @@ int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode round_mode)
 		my_log("invalid fraction:%zd",fraction);
 		return MY_ERROR;
 	}
+
+	if(round_mode!=MY_TRUNC)	//目前仅支持截断
+	{
+		my_log("invalid round mode:%d",(int)round_mode);
+		return MY_ERROR;
+	}
+
 	//整理
 	my_rat_strip_zero_end_nodes(n);
 
@@ -744,6 +751,7 @@ int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode round_mode)
 		cur_fraction-=4;
 		p=p->next;
 	}
+
 	if(cur_fraction-3>fraction)	//这意味着当前的第一个有效数字的小数位数大于要舍入的小数位数，那只能设置为0
 	{
 		if(my_rat_from_int64(n,0)==NULL)
@@ -754,15 +762,22 @@ int my_rat_round(my_rat *n,ssize_t fraction,my_round_mode round_mode)
 		return MY_SUCC;
 	}
 
-	if(cur_fraction<=fraction)	//当前已经比要舍入的小数位数小，直接返回成功
-		return MY_SUCC;
-
-	if(round_mode==MY_TRUNC)
+	if(cur_fraction>fraction)	
 		p->data-=(p->data%power10[cur_fraction-fraction]);
+
+	if(p!=n->lsn)
+	{
+		do
+		{
+			p=p->prev;
+			p->data=0;
+		}
+		while(p!=n->lsn);
+	}
+	//整理
+	my_rat_strip_zero_end_nodes(n);
 	return MY_SUCC;
 }
-
-
 
 #ifdef cyy
 
