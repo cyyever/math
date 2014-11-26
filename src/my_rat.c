@@ -108,6 +108,7 @@ void my_rat_strip_zero_end_nodes(my_rat *n)
 	while(p->data==0 && p!=n->msn)
 	{
 		p=p->next;
+		//FIXME:可能溢出
 		n->power+=4;
 		n->used_node_num--;
 	}
@@ -290,7 +291,7 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	if(m->sign==-1 && lastdigit==str && *str=='0')
 		m->sign=1;
 	//增加节点
-	size_t node_num=((lastdigit-str+1)>>2)+1;
+	size_t node_num=((lastdigit-str+1)/4)+1;
 	if(MY_RAT_FREE_NODE_NUM(m)<node_num)
 	{
 		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
@@ -346,13 +347,67 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
  */
 my_rat *my_rat_from_int64(my_rat *n,int64_t num)
 {
-	char str[MY_INT64_MIN_STR_LEN+1];
+	my_rat *m;
+	my_node *p;
 
-	sprintf(str,"%"PRId64,num);
-	n=my_rat_from_str(n,str);
-	if(!n)
-		my_log("my_rat_from_str failed");
-	return n;
+	if(n)
+	{
+		MY_RAT_INIT(n);
+		m=n;
+	}
+	else
+	{
+		//分配空间
+		m=(my_rat *)calloc(1,sizeof(*m));
+		if(!m)
+		{
+			my_log("calloc failed:%s",strerror(errno));
+			return NULL;			
+		}
+	}
+
+	if(MY_RAT_FREE_NODE_NUM(m) < MY_INT64_MIN_STR_LEN/4+1)
+	{
+		if(my_rat_add_node(m,MY_INT64_MIN_STR_LEN/4+1-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
+		{
+			my_log("my_rat_add_node failed");
+			if(!n)
+				my_rat_free(m);
+			return NULL;
+		}
+	}
+	
+	p=m->lsn;
+	p->data=0;
+
+	if(num>=0)
+		m->sign=1;
+	else
+	{
+		m->sign=-1;
+		if(num==INT64_MIN)	//这个要特殊对待
+		{
+			p->data=1;
+			num=INT64_MAX;
+		}
+		else
+			num=-num;
+	}
+
+	//处理lsn，由于对INT64_MIN进行特殊处理，这边要+=
+	p->data+=num%10000;
+	num/=10000;
+	m->used_node_num++;
+
+	while(num)
+	{
+		p=p->next;
+		p->data=num%10000;
+		num/=10000;
+		m->used_node_num++;
+	}
+	m->msn=p;
+	return m;
 }
 
 
