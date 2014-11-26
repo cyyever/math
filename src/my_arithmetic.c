@@ -259,9 +259,9 @@ static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 {
 	my_rat *c;
-	uint8_t carry;
-	my_node *x,*y,*z;
-	size_t i,used_node_num,max_used_node_num;
+	int8_t carry;
+	my_node *y,*z;
+	size_t i;
 
 	//验证参数
 	if(!a)
@@ -308,10 +308,8 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		}
 	}
 
-
 	//预先增加需要的节点，同时考虑加法进位时需要多一个节点
-	max_used_node_num=MY_MAX(c->used_node_num,b->used_node_num);
-	if(my_rat_add_node(c,max_used_node_num+1-c->used_node_num)!=MY_SUCC)
+	if(my_rat_add_node(c,MY_MAX(c->used_node_num,b->used_node_num)+1-c->used_node_num)!=MY_SUCC)
 	{
 		my_log("my_rat_add_node failed");
 		if(c!=a)
@@ -319,7 +317,6 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		return NULL;	
 	}
 
-	used_node_num=0;
 	z=c->lsn;
 	y=b->lsn;
 	//c,b符号相同,加法
@@ -345,120 +342,199 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 	}
 	if(c->used_node_num<b->used_node_num)
 	{
-		c->msn=z;
+		c->msn=z->prev;
 		c->used_node_num=b->used_node_num;
 	}
 
 	//接下来我们要处理加法进位和减法借位
-	//首先根据msn决定结果是正数还是负数
-	while(c->msc->data==0 && c->msn!=c->lsn)
+	//根据最高节点决定结果是正数还是负数
+	z=c->msn;
+	while(z->data==0 && z!=c->lsn)
 	{
-		c->msn=c->msc->prev;
+		z=z->prev;
 		c->used_node_num--;
 	}
-	if(c->msc->data==0)
+
+	c->msn=z;
+	if(c->msn->data==0)
 	{
 		c->sign=0;
 		c->power=0;
 		return c;
 	}
-		n
-
-
+	else if(c->msn->data>0)	//按照正数来处理
+	{
+		z=c->lsn;
 		carry=0;
-		/*
-			if(z->data>10000)
+		for(i=0;i<c->used_node_num;i++,z=z->next)
+		{
+			z->data+=carry;
+			if(z->data>=10000)	//加法导致
 			{
 				z->data-=10000;
 				carry=1;
 			}
+			else if(z->data<0)	//减法导致
+			{
+				z->data+=10000;
+				carry=-1;
+			}
 			else
 				carry=0;
-
-			if(y==b->msn)
-			{
-				//由于c是复制a的，只要b遍历完，就可以提前退出
-				if(!y&&carry==0)
-				{
-					if(!x)	//a也遍历完，有可能进位
-					{
-						c->msn=z;
-						c->used_node_num=used_node_num;
-					}
-					break;
-				}
-			}
-			y=y->next;
-			z=z->next;
 		}
-		*/
+		if(carry==1)
+		{
+			c->msn=z;
+			c->used_node_num++;
+		}
 	}
-	else //减法
+	else	//按照负数来处理
 	{
-		int cmp_res;
-		if(my_rats_cmp_abs(a,b,&cmp_res) !=MY_SUCC)
-		{
-			my_log("my_rats_cmp_abs failed");
-			if(c!=a)
-				my_rat_free(c);
-			return NULL;	
-		}
-
-		if(cmp_res==0) //绝对值相等 为0
-		{
-			MY_RAT_INIT(c);
-			c->lsn->data=0;
-			return c;
-		}
-
-		//确定符号
-		if(cmp_res>0)
-		{
-			x=a->lsn;
-			y=b->lsn;
-			c->sign=a->sign;
-		}
-		else	
-		{
-			x=b->lsn;
-			y=a->lsn;
-			c->sign=b->sign;
-		}
-
+		c->sign=-1;
 		z=c->lsn;
 		carry=0;
-		while(1)
+		for(i=0;i<c->used_node_num;i++,z=z->next)
 		{
-			if(y)
-				z->data=x->data-carry-y->data;
-			else
-				z->data=x->data-carry;
-			if(z->data <0)
+			z->data+=carry;
+			if(z->data>0)
 			{
+				z->data=10000-z->data;
 				carry=1;
-				z->data+=10000;	
 			}
 			else
-				carry=0;
-			used_node_num++;
-			if(y==a->msn || y==b->msn)
-				y=NULL;
-			if(x==a->msn || x==b->msn)
 			{
-				c->msn=z;
-				c->used_node_num=used_node_num;
-				break;
+				z->data=-z->data;
+				carry=0;
 			}
-			x=x->next;
-			if(y)
-				y=y->next;
-			z=z->next;
-		}	
-	}	
+		}
+	}
+
 	//整理
 	my_rat_strip_zero_end_nodes(c);
 	return c;
 }
+
+/*
+ *	功能：有理数乘法
+ *	参数：
+ *		a,b：要相乘的有理数
+ *		saving_type：结果存放方式，取值以下：
+ *			MY_NEW_RES：积作为新的有理数返回
+ *			MY_ARG_RES：积放在a
+ *	返回值：
+ *		非NULL：和
+ *		NULL：出错
+ */
+my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
+{
+	my_rat *c;
+	my_node *x,*y,*z,*x1,*y1,*z1;
+	int32_t carry;
+
+	//验证参数
+	if(!a)
+	{
+		my_log("a is NULL");
+		return NULL;	
+	}
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return NULL;	
+	}
+	if(!b)
+	{
+		my_log("b is NULL");
+		return NULL;	
+	}
+	if(!MY_RAT_HAS_INITED(b))
+	{
+		my_log("b is uninitialized");
+		return NULL;	
+	}
+
+	//整理
+	my_rat_strip_zero_end_nodes(a);
+	my_rat_strip_zero_end_nodes(b);
+
+	//预先增加需要的节点
+	c=(my_rat *)calloc(1,sizeof(*tmp));
+	if(!c)
+	{
+		my_log("calloc failed:%s",strerror(errno));
+		return NULL;			
+	}
+
+	if(my_rat_add_node(c,a->used_node_num+b->used_node_num)!=MY_SUCC)
+	{
+		my_log("my_rat_add_node failed");
+		my_rat_free(c);
+		return NULL;	
+	}
+
+	//确定正负号
+	if(a->sign==b->sign)
+		c->sign=1;
+	else
+		c->sign=-1;
+
+	//确定指数
+	c->power=a->power+b->power;
+
+	y=b->lsn;
+	z=c->lsn;
+	for(i=0;i<b->used_node_num;i++)
+	{
+		z1=z;
+		x=a->lsn;
+		carry=0;
+		for(j=0;j<a->used_node_num;j++)
+		{
+			z1->data+=x->data+y->data+carry;
+			if(z1->data>=10000)
+			{
+				carry=z1->data/10000;
+				z1->data%=10000;
+			}
+			else
+				carry=0;
+			x=x->next;
+			z1=z1->next;
+		}
+		if(carry)
+			z1->data+=carry;
+
+		if(i==b-used_node_num-1)
+		{
+			if(carry)
+				c->msn=z1;
+			else
+				c->msn=z1->prev;
+		}
+		z=z->next;
+		y=y->next;
+	}
+
+	//计算已用节点数
+	z=c->lsn;
+	c->used_node_num=1;
+	while(z!=c->msn)
+	{
+		z=z->next;
+		c->used_node_num++;
+	}
+
+	//整理
+	my_rat_strip_zero_end_nodes(c);
+	return c;
+}
+
+
+
+
+
+
+
 
 /*
  *	功能：有理数乘以小整数
