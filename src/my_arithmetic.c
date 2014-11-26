@@ -64,15 +64,9 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	if(b->msn->data==0) //0
 		b->sign=1;
 	//符号不等
-	if(a->sign > b->sign)
+	if(a->sign!=b->sign)
 	{
-		*cmp_res=1;
-		return MY_SUCC;
-	}
-
-	if(a->sign < b->sign)
-	{
-		*cmp_res=-1;
+		*cmp_res=a->sign-b->sign;
 		return MY_SUCC;
 	}
 
@@ -82,20 +76,17 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	a_digit_num=MY_RAT_DIGIT_NUM(p)+((a->used_node_num-1)<<2)+a->power;
 	b_digit_num=MY_RAT_DIGIT_NUM(q)+((b->used_node_num-1)<<2)+b->power;
 
-	if(a_digit_num != b_digit_num)
-	{
-		if(a_digit_num>b_digit_num)
-			*cmp_res=1;
-		else
-			*cmp_res=-1;
-	}
+	if(a_digit_num>b_digit_num)
+		*cmp_res=1;
+	else if(a_digit_num<b_digit_num)
+		*cmp_res=-1;
 	else
 	{
 		*cmp_res=0;
 		size_t min_node_num=MY_MIX(a->used_node_num,b->used_node_num);
 		while(min_node_num)
 		{
-			if(p->data != q->data)
+			if(p->data!= q->data)
 			{
 				*cmp_res=p->data-q->data;
 				break;
@@ -185,9 +176,13 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_rat_reduce_power(my_rat *n,size_t delta)
+static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 {
-	unsigned int rest_power;
+	my_node *p;
+	unsigned int rest_power,carry;
+	int32_t tmp;
+	size_t i;
+
 	//检查参数
 	if(!n)
 	{
@@ -222,39 +217,33 @@ int my_rat_reduce_power(my_rat *n,size_t delta)
 
 	//设置新的指数
 	n->power-=delta;  
-
 	rest_power=power10[delta%4];
 	delta=delta-(delta%4);
 
 	//先乘上剩余的指数
 	if(rest_power!=1)
 	{
-	if(my_rat_multiply_small_int(n,power10[delta%4],MY_ARG_RES)==NULL)
-	{
-		my_log("my_rat_multiply_small_int failed");
-		return MY_ERROR;
-	}
-	}
-
-	while(delta>=4)
-	{
-		if(MY_RAT_FREE_NODE_NUM(n)>0) //还有多余的节点，利用它
+		for(i=0,p=n->lsn,carry=0;i<n->used_node_num;i++,p=p->next)
 		{
-			n->lsn=n->lsn->prev;
-			n->lsn->data=0;
+			tmp=p->data*rest_power;
+			p->data=tmp%10000+carry;
+			carry=tmp/10000;
+		}
+		if(carry)
+		{
+			n->msn=p;
+			p->data=carry;
 			n->used_node_num++;
-			delta-=4;
 		}
-		else //一次性分配剩下的节点
-		{
-			if(my_rat_add_node(n,delta/4)!=MY_SUCC)
-			{
-				my_log("my_rat_add_node failed");
-				return MY_ERROR;
-			}
-			n->lsn=n->msn->next;
-			break;
-		}
+		else
+			n->msn=p->prev;
+	}
+	while(delta>0)
+	{
+		n->lsn=n->lsn->prev;
+		n->lsn->data=0;
+		n->used_node_num++;
+		delta-=4;
 	}
 	return MY_SUCC;
 }
@@ -322,22 +311,23 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		}
 	}
 
+
+	//预先增加需要的节点，同时考虑加法进位时需要多一个节点
+	if(MY_RAT_FREE_NODE_NUM(c)<MY_MAX(a->used_node_num,b->used_node_num)+1-c->used_node_num)
+	{
+		if(my_rat_add_node(c,MY_MAX(a->used_node_num,b->used_node_num)+1-c->used_node_num-MY_RAT_FREE_NODE_NUM(c))!=MY_SUCC)
+		{
+			my_log("my_rat_add_node failed");
+			if(c!=a)
+				my_rat_free(c);
+			return NULL;	
+		}
+	}
+
 	used_node_num=0;
 	//a,b符号相同,加法
 	if(a->sign==b->sign)	
 	{
-		//有可能会进位，c多增加一个节点
-		if(c->msn->next==c->lsn)
-		{
-			if(my_rat_add_node(c,1)!=MY_SUCC)
-			{
-				my_log("my_rat_add_node failed");
-				if(c!=a)
-					my_rat_free(c);
-				return NULL;	
-			}
-		}
-		//调整指数部分一致
 		x=a->lsn;
 		y=b->lsn;
 		z=c->lsn;
@@ -355,10 +345,15 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 			z->data=carry%10000;
 			carry=carry/10000;
 			used_node_num++;
-			if(x==NULL&&y==NULL&&carry==0)
+
+			//由于c是复制a的，只要b遍历完，就可以提前退出
+			if(!y&&carry==0)
 			{
-				c->msn=z;
-				c->used_node_num=used_node_num;
+				if(!x)	//a也遍历完，有可能进位
+				{
+					c->msn=z;
+					c->used_node_num=used_node_num;
+				}
 				break;
 			}
 			if(x)
@@ -381,18 +376,13 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 
 		if(cmp_res==0) //绝对值相等 为0
 		{
-			if(my_rat_from_int64(c,0) !=MY_SUCC)
-			{
-				my_log("my_rat_from_int64 failed");
-				if(c!=a)
-					my_rat_free(c);
-				return NULL;	
-			}
+			MY_RAT_INIT(c);
+			c->lsn->data=0;
 			return c;
 		}
 
 		//确定符号
-		if(cmp_res==1)
+		if(cmp_res>0)
 		{
 			x=a->lsn;
 			y=b->lsn;

@@ -35,9 +35,9 @@ int main(int argc, char** argv)
 				return -1;
 			}
 
-			if((num[i]>num[j] && cmp_res !=1)
+			if((num[i]>num[j] && cmp_res <=0)
 			 || (num[i]==num[j] && cmp_res !=0)
-			 || (num[i]<num[j] && cmp_res !=-1))
+			 || (num[i]<num[j] && cmp_res >=0))
 			{
 				printf("++测试失败：%d\n",__LINE__);
 				return -1;
@@ -106,14 +106,14 @@ int main(int argc, char** argv)
 
 	puts("开始测试my_rats_add");
 	my_rat *b;
-	a=my_rat_from_int64(NULL,INT64_MAX);
+	a=my_rat_from_int64(NULL,1);
 	if(!a)
 	{
 		printf("++测试失败：%d\n",__LINE__);
 		return -1;
 	}
 	
-	b=my_rat_from_int64(NULL,INT64_MIN);
+	b=my_rat_from_int64(NULL,INT64_MAX);
 	if(!b)
 	{
 		printf("++测试失败：%d\n",__LINE__);
@@ -135,6 +135,38 @@ int main(int argc, char** argv)
 	puts(str);
 	free(str);
 
+	b=my_rat_from_int64(NULL,1);
+	if(!b)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	
+	a=my_rat_from_int64(NULL,INT64_MAX);
+	if(!a)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+
+	if(my_rats_add(a,b,MY_ARG_RES)==NULL)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+
+	str=my_rat_to_str(a);
+	if(!str)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+
+	puts(str);
+	free(str);
+
+
+	return -1;
 	if(my_rats_add(a,b,MY_ARG_RES)==NULL)
 	{
 		printf("++测试失败：%d\n",__LINE__);
