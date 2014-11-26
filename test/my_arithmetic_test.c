@@ -5,14 +5,18 @@
  *	功能：包含my_arithmetic相关测试函数
  */
 #include <assert.h>
+#include <stdlib.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <my_arithmetic.h>
 int main(int argc, char** argv)
 {
 	my_rat *rat[3];
+	my_rat *a;
+	my_rat *b;
 	int i,j,cmp_res;
 	int64_t num[3]={INT64_MIN+1,0,INT64_MAX};
+	char *str;
 	for(i=0;i<3;i++)
 	{
 		rat[i]=my_rat_from_int64(NULL,num[i]);
@@ -46,7 +50,6 @@ int main(int argc, char** argv)
 	}
 	puts("结束测试my_rats_cmp");
 
-
 	puts("开始测试my_rats_cmp_abs");
 	for(i=0;i<3;i++)
 	{
@@ -73,144 +76,117 @@ int main(int argc, char** argv)
 	for(i=0;i<3;i++)
 		my_rat_free(rat[i]);
 	
-	puts("开始测试my_rat_multiply_small_int");
-	my_rat *a;
-	char* str;
-	a=my_rat_from_int64(NULL,1);
-	if(!a)
+	puts("开始测试my_rats_add");
+	int64_t a_nums[]={88888,8};
+	int64_t b_nums[]={-99999,-9};
+	for(i=0;i<2;i++)
 	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
+		for(j=0;j<2;j++)
+		{
+			a=my_rat_from_int64(NULL,a_nums[i]);
+			if(!a)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			b=my_rat_from_int64(NULL,b_nums[j]);
+			if(!b)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			if(my_rats_add(a,b,MY_ARG_RES)==NULL)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			str=my_rat_to_str(a);
+			if(!str)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+			printf("(%"PRId64")+(%"PRId64")=%s\n",a_nums[i],b_nums[j],str);
+			free(str);
+			my_rat_free(a);
+			my_rat_free(b);
+		}
 	}
-	
-	for(i=0;i<10;i++)
+	puts("测试my_rats_add");
+
+	puts("开始测试my_rats_multliply");
+	for(i=0;i<2;i++)
 	{
-		if(my_rat_multiply_small_int(a,999,MY_ARG_RES)==NULL)
+		for(j=0;j<2;j++)
+		{
+			a=my_rat_from_int64(NULL,a_nums[i]);
+			if(!a)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			b=my_rat_from_int64(NULL,b_nums[j]);
+			if(!b)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			if(my_rats_multiply(a,b,MY_ARG_RES)==NULL)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+
+			str=my_rat_to_str(a);
+			if(!str)
+			{
+				printf("++测试失败：%d\n",__LINE__);
+				return -1;
+			}
+			printf("(%"PRId64")*(%"PRId64")=%s\n",a_nums[i],b_nums[j],str);
+			free(str);
+			my_rat_free(a);
+			my_rat_free(b);
+		}
+	}
+	puts("结束测试my_rats_multliply");
+
+	puts("开始测试my_factorial");
+	for(i=0;i<=10;i++)
+	{
+		a=my_factorial(i);
+		if(!a)
 		{
 			printf("++测试失败：%d\n",__LINE__);
 			return -1;
 		}
+
 		str=my_rat_to_str(a);
 		if(!str)
 		{
 			printf("++测试失败：%d\n",__LINE__);
-			my_rat_free(a);
 			return -1;
 		}
-		puts(str);
+		printf("%d!=%s\n",i,str);
 		free(str);
+		my_rat_free(a);
 	}
+	puts("结束测试my_factorial");
 
-	my_rat_free(a);
-
-
-	puts("开始测试my_rats_add");
-	my_rat *b;
-	a=my_rat_from_int64(NULL,1);
+	puts("开始测试my_rat_sum_digits和my_rat_digit_num");
+	uint64_t digit_sum,digit_num;
+	a=my_rat_from_str(NULL,"12341");
 	if(!a)
 	{
 		printf("++测试失败：%d\n",__LINE__);
 		return -1;
 	}
-	
-	b=my_rat_from_int64(NULL,INT64_MAX);
-	if(!b)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	if(my_rats_add(a,b,MY_ARG_RES)==NULL)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	str=my_rat_to_str(a);
-	if(!str)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	puts(str);
-	free(str);
-
-	b=my_rat_from_int64(NULL,1);
-	if(!b)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	
-	a=my_rat_from_int64(NULL,INT64_MAX);
-	if(!a)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	if(my_rats_add(a,b,MY_ARG_RES)==NULL)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	str=my_rat_to_str(a);
-	if(!str)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	puts(str);
-	free(str);
-
-
-	return -1;
-	if(my_rats_add(a,b,MY_ARG_RES)==NULL)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-
-	str=my_rat_to_str(a);
-	if(!str)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	puts(str);
-	free(str);
-
-	my_rat_free(a);
-	my_rat_free(b);
-
-	puts("开始测试my_factorial");
-	a=my_factorial(10);
-	if(!a)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	
-	str=my_rat_to_str(a);
-	if(!str)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	puts(str);
-	free(str);
-	my_rat_free(a);
-
-	uint64_t digit_sum;
-	puts("开始测试my_rat_sum_digits");
-	a=my_rat_from_str(NULL,"123450");
-	if(!a)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
+	a->lsn->data=2340;
 	a->power=-1;
 	if(my_rat_sum_digits(a,&digit_sum)!=MY_SUCC)
 	{
@@ -218,7 +194,14 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	printf("digit_sum=%"PRIu64"\n",digit_sum);
+	if(my_rat_digit_num(a,&digit_num)!=MY_SUCC)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	printf("digit_num=%"PRIu64"\n",digit_num);
 	my_rat_free(a);
+	puts("结束测试my_rat_sum_digits和my_rat_digit_num");
 
 	return 0;
 }

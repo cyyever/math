@@ -384,6 +384,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		}
 		if(carry==1)
 		{
+			z->data=1;
 			c->msn=z;
 			c->used_node_num++;
 		}
@@ -428,7 +429,8 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 {
 	my_rat *c;
-	my_node *x,*y,*z,*x1,*y1,*z1;
+	my_node *x,*y,*z,*z1;
+	size_t i,j;
 	int32_t carry;
 
 	//验证参数
@@ -458,7 +460,7 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 	my_rat_strip_zero_end_nodes(b);
 
 	//预先增加需要的节点
-	c=(my_rat *)calloc(1,sizeof(*tmp));
+	c=(my_rat *)calloc(1,sizeof(*c));
 	if(!c)
 	{
 		my_log("calloc failed:%s",strerror(errno));
@@ -490,7 +492,7 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		carry=0;
 		for(j=0;j<a->used_node_num;j++)
 		{
-			z1->data+=x->data+y->data+carry;
+			z1->data+=x->data*y->data+carry;
 			if(z1->data>=10000)
 			{
 				carry=z1->data/10000;
@@ -504,7 +506,7 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		if(carry)
 			z1->data+=carry;
 
-		if(i==b-used_node_num-1)
+		if(i==b->used_node_num-1)
 		{
 			if(carry)
 				c->msn=z1;
@@ -526,21 +528,27 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 
 	//整理
 	my_rat_strip_zero_end_nodes(c);
-	return c;
+
+	if(saving_type!=MY_ARG_RES) 
+		return c;
+
+	//释放a的节点
+	z=a->lsn->next;
+	while(z!=a->lsn)
+	{
+		z=z->next;
+		free(z->prev);
+	}
+	*a=*c;
+	free(c);
+	return a;
 }
 
-
-
-
-
-
-
-
 /*
- *	功能：有理数乘以小整数
+ *	功能：有理数乘以int64
  *	参数:
  *		a：有理数
- *		b：乘数，必须在[-9999,9999]区间
+ *		b：乘数
  *		saving_type：结果存放方式，取值以下：
  *			MY_NEW_RES：积作为新的有理数返回
  *			MY_ARG_RES：积放在a
@@ -548,12 +556,9 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
  *		非NULL：积
  *		NULL：出错
  */
-my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type saving_type)
+my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_type)
 {
-	my_rat *c;
-	my_node *p,*q;
-	size_t node_num;
-	int32_t tmp,carry;
+	my_rat *c,*_b;
 
 	//验证参数
 	if(!a)
@@ -567,67 +572,15 @@ my_rat *my_rat_multiply_small_int(my_rat *a,int32_t b,my_result_saving_type savi
 		return NULL;	
 	}
 
-	if(b>9999 || b<-9999)
+	_b=my_rat_from_int64(NULL,b);
+	if(!_b)
 	{
-		my_log("b is out of [-9999,9999]");
+		my_log("my_rat_from_int64");
 		return NULL;	
 	}
 
-	//整理
-	my_rat_strip_zero_end_nodes(a);
-
-	if(saving_type==MY_ARG_RES)
-		c=a;
-	else
-	{
-		//分配空间
-		c=my_rat_copy(a,NULL);
-		if(!c)
-		{
-			my_log("my_rat_copy failed");
-			return NULL;			
-		}
-	}
-
-	//乘法可能导致溢出
-	if(MY_RAT_FREE_NODE_NUM(c)==0)
-	{
-		if(my_rat_add_node(c,1)!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(c!=a)
-				my_rat_free(c);
-			return NULL;
-		}
-	}
-
-	if(b<0)
-	{
-		b=-b;
-		c->sign=-(c->sign);
-	}
-
-	carry=0;
-	p=a->lsn;
-	q=c->lsn;
-	node_num=a->used_node_num;
-	while(node_num)
-	{
-		tmp=p->data*b;
-		q->data=tmp%10000+carry;
-		carry=tmp/10000;
-		p=p->next;
-		q=q->next;
-		node_num--;
-	}
-	if(carry)
-	{
-		c->msn=q;
-		q->data=carry;
-		c->used_node_num++;
-	}
-	else
-		c->msn=q->prev;
+	c=my_rats_multiply(a,_b,saving_type);
+	my_rat_free(_b);
 	return c;
 }
 
@@ -775,12 +728,6 @@ my_rat *my_divide_small_int(my_rat *a,int b,ssize_t fraction,my_round_mode round
 				fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
 				return NULL;
 			}
-			c->lsd=c->msd->hcell;
-		}
-		z=z->lcell;
-	}
-
-	//获取精度
 	ln_fix(c,precision,mode);
 	return c;
 }
@@ -794,9 +741,9 @@ my_rat *my_divide_small_int(my_rat *a,int b,ssize_t fraction,my_round_mode round
  *		非NULL：对应的阶乘
  *		NULL：出错
  */
-my_rat *my_factorial(uint64_t n)
+my_rat *my_factorial(int64_t n)
 {
-	uint64_t i;
+	int64_t i;
 	my_rat *f;
 
 	f=my_rat_from_int64(NULL,1);
@@ -812,9 +759,9 @@ my_rat *my_factorial(uint64_t n)
 
 	for(i=2;i<=n;i++)
 	{
-		if(my_rat_multiply_small_int(f,i,MY_ARG_RES)==NULL)
+		if(my_rat_multiply_int64(f,i,MY_ARG_RES)==NULL)
 		{
-			my_log("my_rat_multiply_small_int failed");
+			my_log("my_rat_multiply_int64 failed");
 			my_rat_free(f);
 			return NULL;
 		}
@@ -864,10 +811,13 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 	//剔除0
 	my_rat_strip_zero_end_nodes(n);
 
-	if(n->power<0)	//非整数
+	if(n->power<0)
 	{
-		my_log("n is not interger");
-		return MY_ERROR;	
+		if(n->power<=-4 || n->lsn->data%power10[-n->power]!=0)
+		{
+			my_log("n is not interger");
+			return MY_ERROR;	
+		}
 	}
 
 	*digit_sum=0;
@@ -925,10 +875,13 @@ int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
 	//剔除0
 	my_rat_strip_zero_end_nodes(n);
 
-	if(n->power<0)	//非整数
+	if(n->power<0)
 	{
-		my_log("n is not interger");
-		return MY_ERROR;	
+		if(n->power<=-4 || n->lsn->data%power10[-n->power]!=0)
+		{
+			my_log("n is not interger");
+			return MY_ERROR;	
+		}
 	}
 
 	*digit_num=(n->used_node_num-1)*4+n->power+MY_RAT_DIGIT_NUM(n->msn);
