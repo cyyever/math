@@ -27,7 +27,7 @@ typedef enum{
 }my_round_mode;
 
 #define MY_MAX(a,b) ((a)>(b)?(a):(b))
-#define MY_MIX(a,b) ((a)<(b)?(a):(b))
+#define MY_MIN(a,b) ((a)<(b)?(a):(b))
 #define MY_INT64_MIN_STR_LEN 20
 #define MY_UNSIGNED_MOD_4(a) ((a)&3)
 #endif

@@ -21,8 +21,8 @@ typedef struct my_node_s
 //有理数表示成 (sign) (lsn ... msn)*(10^5)^power，10^5进制
 typedef struct
 {
-	my_node *lsn;		//最低node
-	my_node *msn;		//最高node
+	my_node *lsn;		//最低节点
+	my_node *msn;		//最高节点
 	ssize_t power; 		//指数
 	int8_t sign; 		//1-正数 0-未初始化 -1-负数
 	size_t used_node_num;	//已使用节点数量
@@ -38,13 +38,15 @@ typedef struct
 #define MY_RAT_DIGIT_NUM(node) ((node)->data>=1000? 4 : ((node)->data>=100 ? 3: ((node)->data>=10?2:1)))
 
 /*
- *	功能：增加有理数的节点。并且节点初始化为0
+ *	功能：增加指定数量的未使用节点到有理数的最高节点，并且节点初始化为0
  *	参数：
  *		n：要处理的有理数
  *		num：增加的节点数
  *	返回值：
  *		MY_SUCC：成功
  *		MY_ERROR：出错
+ *	注意：
+ *		如果有理数已经存在一些未使用节点，优先初始化它们
  */
 int my_rat_add_node(my_rat *n,size_t num);
 

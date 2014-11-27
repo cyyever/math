@@ -82,8 +82,6 @@ int main(int argc, char **argv)
 
 	puts("结束测试my_rat_from_int64");
 
-
-
 	puts("开始测试my_rat_round");
 
 	a=my_rat_from_str(NULL,"-0.123456789");

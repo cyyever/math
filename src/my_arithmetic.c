@@ -83,7 +83,7 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	else
 	{
 		*cmp_res=0;
-		size_t min_node_num=MY_MIX(a->used_node_num,b->used_node_num);
+		size_t min_node_num=MY_MIN(a->used_node_num,b->used_node_num);
 		while(min_node_num)
 		{
 			if(p->data!= q->data)
@@ -104,7 +104,7 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 				*cmp_res=-1;
 		}
 	}
-	if(a->sign==-1) //复数
+	if(a->sign==-1) //负数
 		*cmp_res=-(*cmp_res);
 	return MY_SUCC;
 }
@@ -206,13 +206,10 @@ static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 	}
 
 	//预先分配多余的节点来容纳
-	if(MY_RAT_FREE_NODE_NUM(n)<delta/4+1)
+	if(my_rat_add_node(n,delta/4+1)!=MY_SUCC)
 	{
-		if(my_rat_add_node(n,delta/4+1-MY_RAT_FREE_NODE_NUM(n))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			return MY_ERROR;
-		}
+		my_log("my_rat_add_node failed");
+		return MY_ERROR;
 	}
 
 	//设置新的指数
@@ -238,11 +235,11 @@ static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 		else
 			n->msn=p->prev;
 	}
-	while(delta>0)
+	n->used_node_num+=delta/4;
+	while(delta)
 	{
 		n->lsn=n->lsn->prev;
-		n->lsn->data=0;
-		n->used_node_num++;
+		n->lsn->data=0;		//由于新节点是在最高节点后初始化的，从最低节点下去可能没初始化到
 		delta-=4;
 	}
 	return MY_SUCC;
@@ -262,9 +259,9 @@ static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 {
 	my_rat *c;
-	int carry;
+	uint8_t carry;
 	my_node *x,*y,*z;
-	size_t used_node_num;
+	size_t i,used_node_num,max_used_node_num;
 
 	//验证参数
 	if(!a)
@@ -313,55 +310,88 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 
 
 	//预先增加需要的节点，同时考虑加法进位时需要多一个节点
-	if(MY_RAT_FREE_NODE_NUM(c)<MY_MAX(a->used_node_num,b->used_node_num)+1-c->used_node_num)
+	max_used_node_num=MY_MAX(c->used_node_num,b->used_node_num);
+	if(my_rat_add_node(c,max_used_node_num+1-c->used_node_num)!=MY_SUCC)
 	{
-		if(my_rat_add_node(c,MY_MAX(a->used_node_num,b->used_node_num)+1-c->used_node_num-MY_RAT_FREE_NODE_NUM(c))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(c!=a)
-				my_rat_free(c);
-			return NULL;	
-		}
+		my_log("my_rat_add_node failed");
+		if(c!=a)
+			my_rat_free(c);
+		return NULL;	
 	}
 
 	used_node_num=0;
-	//a,b符号相同,加法
-	if(a->sign==b->sign)	
+	z=c->lsn;
+	y=b->lsn;
+	//c,b符号相同,加法
+	if(c->sign==b->sign)	
 	{
-		x=a->lsn;
-		y=b->lsn;
-		z=c->lsn;
-		carry=0;
-		while(1)
+		for(i=0;i<b->used_node_num;i++,y=y->next,z=z->next)
+			z->data+=y->data;
+	}
+	else	//c,b符号不同，减法
+	{
+		if(c->sign==1)	//c正b负
 		{
-			if(x)
-				carry+=x->data;
-			if(y)
-				carry+=y->data;
-			if(x==a->msn)
-				x=NULL;
-			if(y==b->msn)
-				y=NULL;
-			z->data=carry%10000;
-			carry=carry/10000;
-			used_node_num++;
+			for(i=0;i<b->used_node_num;i++,y=y->next,z=z->next)
+				z->data-=y->data;
+		}
+		else	//c负b正
+		{
+			for(i=0;i<b->used_node_num;i++,y=y->next,z=z->next)
+				z->data=y->data-z->data;
+		}
+		//如果c是负数，它的负号已经融合进节点了，所以我们先设置为正号
+		c->sign=1;
+	}
+	if(c->used_node_num<b->used_node_num)
+	{
+		c->msn=z;
+		c->used_node_num=b->used_node_num;
+	}
 
-			//由于c是复制a的，只要b遍历完，就可以提前退出
-			if(!y&&carry==0)
+	//接下来我们要处理加法进位和减法借位
+	//首先根据msn决定结果是正数还是负数
+	while(c->msc->data==0 && c->msn!=c->lsn)
+	{
+		c->msn=c->msc->prev;
+		c->used_node_num--;
+	}
+	if(c->msc->data==0)
+	{
+		c->sign=0;
+		c->power=0;
+		return c;
+	}
+		n
+
+
+		carry=0;
+		/*
+			if(z->data>10000)
 			{
-				if(!x)	//a也遍历完，有可能进位
-				{
-					c->msn=z;
-					c->used_node_num=used_node_num;
-				}
-				break;
+				z->data-=10000;
+				carry=1;
 			}
-			if(x)
-				x=x->next;
-			if(y)
-				y=y->next;
+			else
+				carry=0;
+
+			if(y==b->msn)
+			{
+				//由于c是复制a的，只要b遍历完，就可以提前退出
+				if(!y&&carry==0)
+				{
+					if(!x)	//a也遍历完，有可能进位
+					{
+						c->msn=z;
+						c->used_node_num=used_node_num;
+					}
+					break;
+				}
+			}
+			y=y->next;
 			z=z->next;
 		}
+		*/
 	}
 	else //减法
 	{

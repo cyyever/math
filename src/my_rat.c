@@ -19,16 +19,19 @@
 static unsigned int power10[]={1,10,100,1000};
 
 /*
- *	功能：增加有理数的节点。并且节点初始化为0
+ *	功能：增加指定数量的未使用节点到有理数的最高节点，并且节点初始化为0
  *	参数：
  *		n：要处理的有理数
  *		num：增加的节点数
  *	返回值：
  *		MY_SUCC：成功
  *		MY_ERROR：出错
+ *	注意：
+ *		如果有理数已经存在一些未使用节点，优先初始化它们
  */
 int my_rat_add_node(my_rat *n,size_t num)
 {
+	size_t i;
 	my_node *p,*q;
 	
 	if(!n)
@@ -37,9 +40,23 @@ int my_rat_add_node(my_rat *n,size_t num)
 		return MY_ERROR;	
 	}
 
-	if(n->total_node_num+num <n->total_node_num)
+	if(n->used_node_num==0)
+		p=n->msn;
+	else
+		p=n->msn->next;;
+	for(i=0;i<MY_MIN(num,MY_RAT_FREE_NODE_NUM(n));i++)
 	{
-		my_log("node number will overflow");
+		p->data=0;
+		p=p->next;
+	}
+	num-=MY_MIN(num,MY_RAT_FREE_NODE_NUM(n));
+	if(num==0)
+		return MY_SUCC;
+
+	//那么我们还必须要新增节点
+	if(n->total_node_num+num<n->total_node_num)
+	{
+		my_log("total node number will overflow");
 		return MY_ERROR;	
 	}
 
@@ -62,18 +79,17 @@ int my_rat_add_node(my_rat *n,size_t num)
 		}
 		else
 		{
-			q=n->lsn->prev;
-			p->next=n->lsn;
-			n->lsn->prev=p;
-			p->prev=q;
-			q->next=p;
+			q=n->msn->next;
+			p->prev=n->msn;
+			n->msn->next=p;
+			p->next=q;
+			q->prev=p;
 		}
 		n->total_node_num++;
 		num--;
 	}
 	return MY_SUCC;
 }
-
 
 /*
  *	功能：去除有理数的两端的0数据节点
@@ -227,7 +243,7 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	int i;
 	my_rat *m;
 	my_node *p;
-		
+
 	//str格式验证
 	if(!my_rat_str_is_valid(str,&point))
 	{
@@ -266,7 +282,7 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	//清除起始的0
 	while(*str=='0'&& (!point || str<point-1) && str < lastdigit)
 		str++;
-	
+
 	//清除小数点后结尾的0
 	if(point)
 	{
@@ -291,16 +307,12 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 	if(m->sign==-1 && lastdigit==str && *str=='0')
 		m->sign=1;
 	//增加节点
-	size_t node_num=((lastdigit-str+1)/4)+1;
-	if(MY_RAT_FREE_NODE_NUM(m)<node_num)
+	if(my_rat_add_node(m,((lastdigit-str+1)/4)+1)!=MY_SUCC)
 	{
-		if(my_rat_add_node(m,node_num-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(!n)
-				my_rat_free(m);
-			return NULL;
-		}
+		my_log("my_rat_add_node failed");
+		if(!n)
+			my_rat_free(m);
+		return NULL;
 	}
 
 	//nnnn.mmmm
@@ -308,7 +320,6 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 		m->power=point-lastdigit;
 
 	p=m->lsn;
-	p->data=0;
 	i=0;
 	m->used_node_num=1;
 	while(lastdigit>=str) //从最低位向上构造digit部分
@@ -323,7 +334,6 @@ my_rat *my_rat_from_str(my_rat *n,const char *str)
 				if(lastdigit>str)
 				{
 					p=p->next;
-					p->data=0;
 					m->used_node_num++;
 				}
 			}
@@ -366,19 +376,15 @@ my_rat *my_rat_from_int64(my_rat *n,int64_t num)
 		}
 	}
 
-	if(MY_RAT_FREE_NODE_NUM(m) < MY_INT64_MIN_STR_LEN/4+1)
+	if(my_rat_add_node(m,MY_INT64_MIN_STR_LEN/4+1)!=MY_SUCC)
 	{
-		if(my_rat_add_node(m,MY_INT64_MIN_STR_LEN/4+1-MY_RAT_FREE_NODE_NUM(m))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(!n)
-				my_rat_free(m);
-			return NULL;
-		}
+		my_log("my_rat_add_node failed");
+		if(!n)
+			my_rat_free(m);
+		return NULL;
 	}
-	
+
 	p=m->lsn;
-	p->data=0;
 
 	if(num>=0)
 		m->sign=1;
@@ -461,7 +467,7 @@ char *my_rat_to_str(my_rat *n)
 		//打印有效数字
 		for(node=n->msn,j=0;j<n->used_node_num;j++)
 		{
-			
+
 			i=3;
 			if(j==0) //如果是第一个节点，就去掉前置0
 			{
@@ -595,16 +601,16 @@ my_rat *my_rat_copy(my_rat *dest,my_rat *src)
 		}
 	}
 
-	//节点不够
-	if(MY_RAT_FREE_NODE_NUM(tmp)<src->used_node_num)
+	//整理
+	my_rat_strip_zero_end_nodes(src);
+
+	//预先增加足够节点
+	if(my_rat_add_node(tmp,src->used_node_num)!=MY_SUCC)
 	{
-		if(my_rat_add_node(tmp,src->used_node_num-MY_RAT_FREE_NODE_NUM(tmp))!=MY_SUCC)
-		{
-			my_log("my_rat_add_node failed");
-			if(!dest)
-				my_rat_free(tmp);
-			return NULL;
-		}
+		my_log("my_rat_add_node failed");
+		if(!dest)
+			my_rat_free(tmp);
+		return NULL;
 	}
 
 	tmp->sign=src->sign;
