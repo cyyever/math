@@ -467,7 +467,6 @@ char *my_rat_to_str(my_rat *n)
 		//打印有效数字
 		for(node=n->msn,j=0;j<n->used_node_num;j++)
 		{
-
 			i=3;
 			if(j==0) //如果是第一个节点，就去掉前置0
 			{

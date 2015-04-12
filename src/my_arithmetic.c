@@ -6,7 +6,9 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <errno.h>
+
 #include "my_arithmetic.h"
 #include "my_log.h"
 
@@ -33,28 +35,28 @@ int my_rats_cmp(my_rat *a,my_rat *b,int32_t *cmp_res)
 	if(!a)
 	{
 		my_log("a is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!b)
 	{
 		my_log("b is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!MY_RAT_HAS_INITED(b))
 	{
 		my_log("b is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!cmp_res)
 	{
 		my_log("cmp_res is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	my_rat_strip_zero_end_nodes(a);
 	my_rat_strip_zero_end_nodes(b);
@@ -130,30 +132,30 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
 	if(!a)
 	{
 		my_log("a is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!b)
 	{
 		my_log("b is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 	if(!MY_RAT_HAS_INITED(b))
 	{
 		my_log("b is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!cmp_res)
 	{
 		my_log("cmp_res is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
-		
+
 	//保存正负号
 	sign_a=a->sign;
 	sign_b=b->sign;
@@ -176,7 +178,7 @@ int my_rats_cmp_abs(my_rat *a,my_rat *b,int32_t *cmp_res)
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-static int my_rat_reduce_power(my_rat *n,ssize_t delta)
+static int my_rat_reduce_power(my_rat *n,size_t delta)
 {
 	my_node *p;
 	unsigned int rest_power,carry;
@@ -199,7 +201,7 @@ static int my_rat_reduce_power(my_rat *n,ssize_t delta)
 	if(delta==0) //指数不变
 		return MY_SUCC;
 	//溢出
-	if(n->power-delta > n->power);  
+	if(n->power-delta > n->power)
 	{
 		my_log("power will overflow");
 		return MY_ERROR;
@@ -267,22 +269,22 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 	if(!a)
 	{
 		my_log("a is NULL");
-		return NULL;	
+		return NULL;
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return NULL;	
+		return NULL;
 	}
 	if(!b)
 	{
 		my_log("b is NULL");
-		return NULL;	
+		return NULL;
 	}
 	if(!MY_RAT_HAS_INITED(b))
 	{
 		my_log("b is uninitialized");
-		return NULL;	
+		return NULL;
 	}
 
 	//整理
@@ -291,9 +293,21 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 
 	//把指数调整为一致
 	if(a->power>b->power)
-		my_rat_reduce_power(a,a->power-b->power);
+	{
+		if(my_rat_reduce_power(a,a->power-b->power)!=MY_SUCC)
+		{
+			my_log("my_rat_reduce_power failed");
+			return NULL;
+		}
+	}
 	if(b->power>a->power)
-		my_rat_reduce_power(b,b->power-a->power);
+	{
+		if(my_rat_reduce_power(b,b->power-a->power)!=MY_SUCC)
+		{
+			my_log("my_rat_reduce_power failed");
+			return NULL;
+		}
+	}
 
 	//根据存放方式设置c
 	if(saving_type==MY_ARG_RES) 
@@ -304,7 +318,7 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		if(!c)
 		{
 			my_log("my_rat_copy failed");
-			return NULL;	
+			return NULL;
 		}
 	}
 
@@ -314,13 +328,13 @@ my_rat *my_rats_add(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		my_log("my_rat_add_node failed");
 		if(c!=a)
 			my_rat_free(c);
-		return NULL;	
+		return NULL;
 	}
 
 	z=c->lsn;
 	y=b->lsn;
 	//c,b符号相同,加法
-	if(c->sign==b->sign)	
+	if(c->sign==b->sign)
 	{
 		for(i=0;i<b->used_node_num;i++,y=y->next,z=z->next)
 			z->data+=y->data;
@@ -437,22 +451,22 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 	if(!a)
 	{
 		my_log("a is NULL");
-		return NULL;	
+		return NULL;
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return NULL;	
+		return NULL;
 	}
 	if(!b)
 	{
 		my_log("b is NULL");
-		return NULL;	
+		return NULL;
 	}
 	if(!MY_RAT_HAS_INITED(b))
 	{
 		my_log("b is uninitialized");
-		return NULL;	
+		return NULL;
 	}
 
 	//整理
@@ -464,14 +478,14 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 	if(!c)
 	{
 		my_log("calloc failed:%s",strerror(errno));
-		return NULL;			
+		return NULL;
 	}
 
 	if(my_rat_add_node(c,a->used_node_num+b->used_node_num)!=MY_SUCC)
 	{
 		my_log("my_rat_add_node failed");
 		my_rat_free(c);
-		return NULL;	
+		return NULL;
 	}
 
 	//确定正负号
@@ -533,11 +547,13 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type)
 		return c;
 
 	//释放a的节点
-	z=a->lsn->next;
-	while(z!=a->lsn)
+	x=a->lsn;
+	while(a->total_node_num)
 	{
-		z=z->next;
-		free(z->prev);
+		y=x->next;
+		free(x);
+		x=y;
+		a->total_node_num--;
 	}
 	*a=*c;
 	free(c);
@@ -564,19 +580,19 @@ my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_t
 	if(!a)
 	{
 		my_log("a is NULL");
-		return NULL;	
+		return NULL;
 	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return NULL;	
+		return NULL;
 	}
 
 	_b=my_rat_from_int64(NULL,b);
 	if(!_b)
 	{
 		my_log("my_rat_from_int64");
-		return NULL;	
+		return NULL;
 	}
 
 	c=my_rats_multiply(a,_b,saving_type);
@@ -584,9 +600,8 @@ my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_t
 	return c;
 }
 
-#ifdef cyy
 /*
- *	功能：有理数除以小整数
+ *	功能：有理数除以uint32
  *	参数:
  *		a:有理数
  *		b:除数
@@ -597,30 +612,24 @@ my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_t
  *		成功:商
  *		失败:NULL
  */
-my_rat *my_divide_small_int(my_rat *a,int b,ssize_t fraction,my_round_mode round_mode,my_result_saving_type saving_type)
+my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode round_mode,my_result_saving_type saving_type)
 {
-	int res=0;
-	int carry=0;
-	int inc_prec=0; //累积精度
-	ln c,d;
-	cell x,z;
+	uint64_t carry,res;
+	size_t extra_divide_num,i;
+	my_rat *c;
+	my_node *x,*y;
 
 	//检查参数
 	if(!a)
 	{
 		my_log("a is NULL");
-		return NULL;	
+		return NULL;
 	}
+
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
-		return NULL;	
-	}
-
-	if(fraction<0)
-	{
-		my_log("invalid fraction:%zd",fraction);
-		return NULL;	
+		return NULL;
 	}
 
 	//除数不能为0
@@ -630,108 +639,92 @@ my_rat *my_divide_small_int(my_rat *a,int b,ssize_t fraction,my_round_mode round
 		return NULL;
 	}
 
-	//除数必须在-200000-200000之间否则下面计算有可能溢出,因此必须把b转化成ln再操作
-	//这个范围是根据INT_MAX/UNIT即2147483647/10000得出
-	if(b>200000 || b<-200000)
+	if(fraction<0)
 	{
-		d=ln_init(b);
-		if(d==NULL)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_init fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-		c=ln_divide(a,d,precision,mode,restype);
-		if(c==NULL)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_divide fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-		return c;
-	}
-	
-
-	//去除前置0
-	ln_stripleadingzero(a);
-
-	//没指定商的精度 那就使用默认精度
-	if(precision<0)
-		precision=DIV_PREC;
-
-	if(restype==newln)
-	{
-		c=ln_creat(ln_cellnum(a));
-		if(c==NULL)
-		{
-			fprintf(stderr,"[%s %d] %s error,reason: ln_creat fail\n",__FILE__,__LINE__,__FUNCTION__);
-			return NULL;
-		}
-		c->msd=c->lsd->lcell;
-	}
-	else
-		c=a;
-
-	//确定符号
-	if(b>0)
-		c->sign=a->sign;
-	else
-	{
-		c->sign=-a->sign;
-		b=-b;
+		my_log("invalid fraction:%zd",fraction);
+		return NULL;
 	}
 
-	//算出初始精度
-	inc_prec=ln_pointnum(a,a->msd)-DIGIT_NUM;
+	//复制
+	c=my_rat_copy(NULL,a);
+	if(!c)
+	{
+		my_log("my_rat_copy failed");
+		return NULL;
+	}
+
+	//调整指数
+	if(c->power>0)
+	{
+		if(my_rat_reduce_power(c,c->power)!=MY_SUCC)
+		{
+			my_log("my_rat_reduce_power failed");
+			my_rat_free(c);
+			return NULL;
+		}
+	}
+
+
+	//超出lsn后要除的次数
+	if(c->power==0)
+		extra_divide_num=fraction/4+fraction%4;
+	else	//c是小数
+	{
+		if(fraction>-c->power)
+			extra_divide_num=(fraction+c->power)/4+(fraction+c->power)%4;
+		else
+			extra_divide_num=0;
+	}
+
+	//预先增加节点
+	if(my_rat_add_node(c,extra_divide_num)!=MY_SUCC)
+	{
+		my_log("my_rat_add_node failed");
+		my_rat_free(c);
+		return NULL;
+	}
 
 	//开始计算
 	carry=0;
-	x=a->msd;
-	z=c->msd;
-	res=x->num;
-	while(1)
+	x=c->msn;
+	for(i=0;i<c->used_node_num;i++,x=x->prev)
 	{
-		res+=carry*UNIT;
-		z->num=res/b;
+		res=x->data+carry*10000;
+		x->data=res/b;
 		carry=res%b;
-		//开始计算当前精度
-		inc_prec+=DIGIT_NUM;
-		if(inc_prec>precision) //已经达到需要的精度
-		{
-			c->lsd=z;
-			//确定指数
-			c->power=-inc_prec;
-			break;
-		}
-		//必须这样标识，否则如果a和c一样，则下面会修改lsd
-		if(x==a->lsd)
-			x=NULL;
-		if(x==NULL)
-		{
-			if(carry==0) //除得尽
-			{
-				c->lsd=z;
-				//确定指数
-				c->power=-inc_prec;
-				break;
-			}
-			res=0;
-		}
-		else
-		{
-			x=x->lcell;
-			res=x->num;
-		}
+	}
 
-		if(z==c->lsd) //增加节点
-		{
-			if(ln_addcell(c,INIT_SIZE) ==NULL)
-			{
-				fprintf(stderr,"[%s %d] %s error,reason: ln_addcell fail\n",__FILE__,__LINE__,__FUNCTION__);
-				return NULL;
-			}
-	ln_fix(c,precision,mode);
-	return c;
+	for(i=0;i<extra_divide_num;i++,x=x->prev)
+	{
+		res=x->data+carry*10000;
+		x->data=res/b;
+		carry=res%b;
+		c->power-=4;
+		c->used_node_num++;
+	}
+	c->lsn=x->next;
+	if(my_rat_round(c,fraction,round_mode)!=MY_SUCC)
+	{
+		my_log("my_rat_round failed");
+		my_rat_free(c);
+		return NULL;
+	}
+	if(saving_type!=MY_ARG_RES) 
+		return c;
+
+	//释放a的节点
+	x=a->lsn;
+	while(a->total_node_num)
+	{
+		y=x->next;
+		free(x);
+		x=y;
+		a->total_node_num--;
+	}
+	*a=*c;
+	free(c);
+	return a;
 }
-#endif
 
 /*
  *	功能：计算传入整数的阶乘
@@ -787,25 +780,25 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 	if(!n)
 	{
 		my_log("n is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!MY_RAT_HAS_INITED(n))
 	{
 		my_log("n is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!digit_sum)
 	{
 		my_log("digit_sum is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(n->sign!=1)
 	{
 		my_log("n isn't postive");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	//剔除0
@@ -816,7 +809,7 @@ int my_rat_sum_digits(my_rat *n,uint64_t *digit_sum)
 		if(n->power<=-4 || n->lsn->data%power10[-n->power]!=0)
 		{
 			my_log("n is not interger");
-			return MY_ERROR;	
+			return MY_ERROR;
 		}
 	}
 
@@ -851,25 +844,25 @@ int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
 	if(!n)
 	{
 		my_log("n is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!MY_RAT_HAS_INITED(n))
 	{
 		my_log("n is uninitialized");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	if(!digit_num)
 	{
 		my_log("digit_num is NULL");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
-	
+
 	if(n->sign!=1)
 	{
 		my_log("n isn't postive");
-		return MY_ERROR;	
+		return MY_ERROR;
 	}
 
 	//剔除0
@@ -880,7 +873,7 @@ int my_rat_digit_num(my_rat *n,uint64_t *digit_num)
 		if(n->power<=-4 || n->lsn->data%power10[-n->power]!=0)
 		{
 			my_log("n is not interger");
-			return MY_ERROR;	
+			return MY_ERROR;
 		}
 	}
 

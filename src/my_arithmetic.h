@@ -79,6 +79,20 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type);
 my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_type);
 
 /*
+ *	功能：有理数除以uint32
+ *	参数:
+ *		a:有理数
+ *		b:除数
+ *		fraction：保留的小数位数
+ *		round_mode：舍入模式
+ *		restype:结果存放方式
+ *	返回值:
+ *		成功:商
+ *		失败:NULL
+ */
+my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode round_mode,my_result_saving_type saving_type);
+
+/*
  *	功能：计算传入整数的阶乘
  *	参数：
  *		n：计算n!
