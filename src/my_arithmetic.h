@@ -79,6 +79,33 @@ my_rat *my_rats_multiply(my_rat *a,my_rat *b,my_result_saving_type saving_type);
 my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_type);
 
 /*
+ *	功能：有理数的平方
+ *	参数:
+ *		a：有理数
+ *		saving_type：结果存放方式，取值以下：
+ *			MY_NEW_RES：指数作为新的有理数返回
+ *			MY_ARG_RES：指数放在a
+ *	返回值：
+ *		非NULL：平方
+ *		NULL：出错
+ */
+my_rat *my_rat_square(my_rat *a,my_result_saving_type saving_type);
+
+/*
+ *	功能：有理数对uint64的指数
+ *	参数:
+ *		a：有理数
+ *		power：指数
+ *		saving_type：结果存放方式，取值以下：
+ *			MY_NEW_RES：指数作为新的有理数返回
+ *			MY_ARG_RES：指数放在a
+ *	返回值：
+ *		非NULL：指数
+ *		NULL：出错
+ */
+my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_type);
+
+/*
  *	功能：有理数除以uint32
  *	参数:
  *		a:有理数

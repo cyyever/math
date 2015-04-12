@@ -601,6 +601,155 @@ my_rat *my_rat_multiply_int64(my_rat *a,int64_t b,my_result_saving_type saving_t
 }
 
 /*
+ *	功能：有理数的平方
+ *	参数:
+ *		a：有理数
+ *		saving_type：结果存放方式，取值以下：
+ *			MY_NEW_RES：指数作为新的有理数返回
+ *			MY_ARG_RES：指数放在a
+ *	返回值：
+ *		非NULL：平方
+ *		NULL：出错
+ */
+my_rat *my_rat_square(my_rat *a,my_result_saving_type saving_type)
+{
+	my_rat *b;
+	my_node *x,*y;
+
+	//验证参数
+	if(!a)
+	{
+		my_log("a is NULL");
+		return NULL;
+	}
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return NULL;
+	}
+
+	b=my_rat_copy(NULL,a);
+	if(!b)
+	{
+		my_log("my_rat_copy failed");
+		return NULL;
+	}
+
+	if(my_rats_multiply(b,a,MY_ARG_RES)==NULL)
+	{
+		my_log("my_rats_multiply failed");
+		my_rat_free(b);
+		return NULL;
+	}
+
+	if(saving_type!=MY_ARG_RES) 
+		return b;
+
+	//释放a的节点
+	x=a->lsn;
+	while(a->total_node_num)
+	{
+		y=x->next;
+		free(x);
+		x=y;
+		a->total_node_num--;
+	}
+	*a=*b;
+	free(b);
+	return a;
+}
+
+/*
+ *	功能：有理数对uint64的指数
+ *	参数:
+ *		a：有理数
+ *		power：指数
+ *		saving_type：结果存放方式，取值以下：
+ *			MY_NEW_RES：指数作为新的有理数返回
+ *			MY_ARG_RES：指数放在a
+ *	返回值：
+ *		非NULL：指数
+ *		NULL：出错
+ */
+my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_type)
+{
+	my_rat *b,*c;
+	my_node *x,*y;
+
+	//验证参数
+	if(!a)
+	{
+		my_log("a is NULL");
+		return NULL;
+	}
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return NULL;
+	}
+
+	//只支持整数
+	if(a->power<0)
+	{
+		my_log("unsupported rat");
+		return NULL;
+	}
+
+	b=my_rat_copy(NULL,a);
+	if(!b)
+	{
+		my_log("my_rat_copy failed");
+		return NULL;
+	}
+
+	c=my_rat_from_int64(NULL,1);
+	if(!c)
+	{
+		my_log("my_rat_from_int64 failed");
+		my_rat_free(b);
+		return NULL;
+	}
+
+	while(power)
+	{
+		if(power&1)
+		{
+			if(my_rats_multiply(c,b,MY_ARG_RES)==NULL)
+			{
+				my_log("my_rats_multiply failed");
+				my_rat_free(b);
+				my_rat_free(c);
+				return NULL;
+			}
+		}
+		power>>=1;
+		if(my_rat_square(b,MY_ARG_RES)==NULL)
+		{
+			my_log("my_rat_square failed");
+			my_rat_free(b);
+			my_rat_free(c);
+			return NULL;
+		}
+	}
+	my_rat_free(b);
+	if(saving_type!=MY_ARG_RES) 
+		return c;
+
+	//释放a的节点
+	x=a->lsn;
+	while(a->total_node_num)
+	{
+		y=x->next;
+		free(x);
+		x=y;
+		a->total_node_num--;
+	}
+	*a=*c;
+	free(c);
+	return a;
+}
+
+/*
  *	功能：有理数除以uint32
  *	参数:
  *		a:有理数
