@@ -16,7 +16,7 @@
 #include "my_arithmetic.h"
 #include "my_log.h"
 
-static unsigned int power10[]={1,10,100,1000};
+static int32_t power10[]={1,10,100,1000};
 
 /*
  *	功能：增加指定数量的未使用节点到有理数的最高节点，并且节点初始化为0
@@ -492,7 +492,7 @@ char *my_rat_to_str(my_rat *n)
 		power=-n->power;
 
 		//先计算需要的空间
-		len=MY_MAX(power,(n->used_node_num)<<2)+4;
+		len=MY_MAX((size_t)power,(n->used_node_num)<<2)+4;
 
 		//分配空间
 		str=(char*)malloc(len);

@@ -15,7 +15,8 @@ int main(int argc, char **argv)
 	char *err_str[]={NULL,"","-",".","-0.","-0.0.0"};
 	char *num_str[]={"00","-0","-0.0","-000000","12300000","123","12345","-123.4","-0.0001234","-0.00001234","-1000.00001234"};
 	int64_t int64_arr[]={INT64_MIN,INT64_MAX};
-	int i;
+	size_t i;
+	int j;
 
 	puts("开始测试my_rat_from_str与my_rat_to_str");
 
@@ -91,9 +92,9 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	for(i=9;i>=0;i--)
+	for(j=9;j>=0;j--)
 	{
-		if(my_rat_round(a,i,MY_TRUNC)!=MY_SUCC)
+		if(my_rat_round(a,j,MY_TRUNC)!=MY_SUCC)
 		{
 			printf("++测试失败：%d\n",__LINE__);
 			return -1;

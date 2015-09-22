@@ -8,6 +8,7 @@
 #define MY_RAT_H
 
 #include <stdlib.h>
+#include <ctype.h>
 #include "my_math.h"
 
 //有理数数据节点

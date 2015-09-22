@@ -5,7 +5,7 @@ DEPS=$(patsubst %.c,%.d,$(SRCS))
 OBJS=$(patsubst %.c,%.o,$(SRCS))
 HEADERS=$(wildcard *.h)
 CC=gcc 
-CFLAGS=-O2 -Wall -fPIC -g
+CFLAGS=-O2 -Wall -Wextra -fPIC -g
 LDFLAGS=-shared 
 .PHONY:all clean install
 all:

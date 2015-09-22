@@ -201,7 +201,7 @@ static int my_rat_reduce_power(my_rat *n,size_t delta)
 	if(delta==0) //指数不变
 		return MY_SUCC;
 	//溢出
-	if(n->power-delta > n->power)
+	if((ssize_t)(n->power-delta)>n->power)
 	{
 		my_log("power will overflow");
 		return MY_ERROR;
@@ -784,7 +784,7 @@ my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode rou
 	//除数不能为0
 	if(b==0)
 	{
-		my_log("b is 0:%zd",fraction);
+		my_log("b is 0");
 		return NULL;
 	}
 
@@ -873,6 +873,83 @@ my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode rou
 	*a=*c;
 	free(c);
 	return a;
+}
+
+/*
+ *	功能：非负整数模uint32
+ *	参数:
+ *		a:非负整数
+ *		b:除数
+ *		remainder：保留余数
+ *	返回值:
+ *		MY_SUCC：成功
+ *		MY_ERROR：出错
+ */
+int my_mod_uint32(my_rat *a,uint32_t b,uint32_t *remainder)
+{
+	uint32_t carry;
+	size_t i;
+	my_node *x;
+
+	//检查参数
+	if(!a)
+	{
+		my_log("a is NULL");
+		return MY_ERROR;
+	}
+
+	if(!MY_RAT_HAS_INITED(a))
+	{
+		my_log("a is uninitialized");
+		return MY_ERROR;
+	}
+
+	//除数不能为0
+	if(b==0)
+	{
+		my_log("b is 0");
+		return MY_ERROR;
+	}
+
+	//a是负数
+	if(a->sign==-1)
+	{
+		my_log("a is negative");
+		return MY_ERROR;
+	}
+
+	//调整指数
+	if(a->power<0)
+	{
+		my_rat_strip_zero_end_nodes(a);
+		if(a->power<0)	//当作小数
+		{
+			my_log("may be a is not interger");
+			return MY_ERROR;
+		}
+	}
+	if(a->power>0)
+	{
+		if(my_rat_reduce_power(a,a->power)!=MY_SUCC)
+		{
+			my_log("my_rat_reduce_power failed");
+			return MY_ERROR;
+		}
+	}
+
+	//开始计算
+	carry=0;
+	x=a->msn;
+	for(i=0;i<a->used_node_num;i++,x=x->prev)
+	{
+		if(carry==0)
+			carry=x->data%b;
+		else
+			carry=(x->data+carry*10000)%b;
+	}
+
+	*remainder=carry;
+	return MY_SUCC;
 }
 
 /*
