@@ -1,5 +1,5 @@
 /*
- *	程序名：ln_helper_test.c
+ *	程序名：my_arithmetic_test.c
  *	作者：陈源源
  *	日期：2013-02-06
  *	功能：包含my_arithmetic相关测试函数

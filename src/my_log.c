@@ -6,6 +6,7 @@
  */
 #include <stdarg.h>
 #include <syslog.h>
+#include <errno.h>
 
 /*
  * 	功能：写入日志到syslog
@@ -17,12 +18,15 @@
  */
 void _my_log(const char* fmt,...)
 {
+	int my_errno;
 	va_list ap;
 	if(!fmt)
 		return;
+	my_errno=errno;
 	va_start(ap,fmt);
-	openlog("ln",LOG_PID,LOG_LOCAL0);
+	openlog("my_math",LOG_PID,LOG_LOCAL0);
 	va_start(ap, fmt);
+	errno=my_errno;
 	vsyslog(LOG_ERR,fmt,ap);
 	closelog();
 }

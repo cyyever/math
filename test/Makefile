@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-O2 -Wall -Wextra -g  -fPIC -I/usr/local/include/my_math
+CFLAGS=-O2 -Wall -g  -fPIC -I/usr/local/include/my_math
 LDFLAGS=-L/usr/local/lib/my_math -lmy_math
-PROGS=my_rat_test my_arithmetic_test
+PROGS=my_rat_test my_arithmetic_test my_number_theory_test
 .PHONY:all clean
 
 all:$(PROGS)

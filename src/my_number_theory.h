@@ -19,4 +19,14 @@
  *		非NULL：质数数组，以零结尾
  */
 uint64_t *my_primes(uint64_t upper_limit);
+
+/*
+ *	功能：生成伯努利系数C(n,k)
+ *	参数：
+ *		n,k：参数
+ *	返回值：
+ *		非NULL：C(n,k)
+ *		NULL：失败
+ */
+my_rat *my_binomial(int64_t n,uint32_t k);
 #endif
