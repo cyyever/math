@@ -100,7 +100,7 @@ int my_rat_add_node(my_rat *n,size_t num)
  */
 void my_rat_strip_zero_end_nodes(my_rat *n)
 {
-	my_node *p;
+	my_node *p,*tmp_node;
 	if(!n)
 	{
 		my_log("n is NULL");
@@ -123,12 +123,18 @@ void my_rat_strip_zero_end_nodes(my_rat *n)
 	p=n->lsn;
 	while(p->data==0 && p!=n->msn)
 	{
+		tmp_node=p;
 		p=p->next;
+		tmp_node->prev->next=p;
+		p->prev=tmp_node->prev;
+		free(tmp_node);
 		//FIXME:可能溢出
 		n->power+=4;
 		n->used_node_num--;
+		n->total_node_num--;
 	}
 	n->lsn=p;
+
 	return;
 }
 
