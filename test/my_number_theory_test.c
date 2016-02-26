@@ -27,6 +27,14 @@ int main(int argc, char** argv)
 	puts("结束测试my_primes");
 	free(primes);
 
+	puts("开始测试my_is_prime");
+	if(!my_is_prime(252097800623))
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	puts("结束测试my_is_prime");
+
 	puts("开始测试my_binomial");
 	num=my_binomial(100,50);
 	if(!num)

@@ -11,6 +11,16 @@
 #include "my_rat.h"
 
 /*
+ *	功能：判定质数
+ *	参数：
+ *		num：要判定的数
+ *	返回值：
+ *		1：是质数
+ *		0：不是质数
+ */
+int my_is_prime(uint64_t num);
+
+/*
  *	功能：生成质数
  *	参数：
  *		upper_limit：质数上限

@@ -12,6 +12,138 @@
 #include "my_arithmetic.h"
 #include "my_log.h"
 
+static uint64_t *primes;
+static size_t prime_num;
+
+/*
+ *	功能：缓存质数
+ *	参数：
+ *		无
+ *	返回值：
+ *		无
+ */
+static void my_cache_primes(void)
+{
+	uint64_t *tmp;
+	size_t i,j;
+
+	if(!primes)
+	{
+		primes=malloc(sizeof(*primes)*(100000+1));
+		if(!primes)
+		{
+			my_log("malloc failed:%m");
+			exit(EXIT_FAILURE);
+		}
+
+		//标识质数
+		for(i=2;i<=100000;i++)
+			primes[i]=1;
+		for(i=2;i<=100000;i++)
+		{
+			if(primes[i])
+				for(j=i*2;j<=100000;j+=i)
+					primes[j]=0;
+		}
+		//重新定位
+		for(i=2,j=0;i<=100000;i++)
+		{
+			if(primes[i])
+				primes[j++]=i;
+		}
+		prime_num=j;
+		tmp=realloc(primes,j*sizeof(*tmp));
+		if(!tmp)
+		{
+			my_log("realloc failed:%m");
+			free(primes);
+			primes=NULL;
+			exit(EXIT_FAILURE);
+		}
+		primes=tmp;
+	}
+	return;
+}
+
+/*
+ *	功能：判定质数
+ *	参数：
+ *		num：要判定的数
+ *	返回值：
+ *		1：是质数
+ *		0：不是质数
+ */
+int my_is_prime(uint64_t num)
+{
+	uint64_t square;
+	size_t i,j,k,prime;
+
+	my_cache_primes();
+
+	if(num==UINT64_MAX)
+		return 0;
+	if(num<=1)
+		return 0;
+	if((num&1)==0)
+		return 0;
+	if(num<=primes[prime_num-1])
+	{
+		i=0;
+		j=prime_num-1;
+
+		while(i<=j)
+		{
+			k=(i+j)/2;
+
+			if(num==primes[k])
+				return 1;
+			else if(num<primes[k])
+				j=k-1;
+			else
+				i=k+1;
+		}
+		return 0;
+	}
+
+
+	i=1;
+	if(num>UINT32_MAX)
+		j=UINT32_MAX+1;
+	else
+		j=num;
+	while(i<=j)
+	{
+		k=(i+j)/2;
+		square=k*k;
+
+		if(num==square)
+			return 0;
+		else if(num<square)
+			j=k-1;
+		else
+			i=k+1;
+	}
+	j++;
+
+	for(i=1;i<prime_num;i++)
+	{
+		if(primes[i]>j)
+			return 1;
+		if((num%primes[i])==0)
+			return 0;
+	}
+
+	for(prime=100001;prime<=j;prime+=2)
+	{
+		if(my_is_prime(prime))
+		{
+			if((num%prime)==0)
+				return 0;
+		}
+	}
+	return 1;
+}
+
 /*
  *	功能：生成质数
  *	参数：
@@ -22,41 +154,42 @@
  */
 uint64_t *my_primes(uint64_t upper_limit)
 {
-	uint64_t *primes,*tmp;
-	size_t i,j;
+	uint64_t *local_primes;
+	uint64_t prime;
+	size_t i;
 
-	primes=malloc(8*(upper_limit+1));
-	if(!primes)
+	my_cache_primes();
+	
+	local_primes=malloc(sizeof(*local_primes)*(upper_limit/2+1));
+	if(!local_primes)
 	{
 		my_log("malloc failed:%m");
 		return NULL;
 	}
 
-	//标识质数
-	for(i=2;i<=upper_limit;i++)
-		primes[i]=1;
-	for(i=2;i<=upper_limit;i++)
+	for(i=0;i<prime_num;i++)
 	{
-		if(primes[i])
-			for(j=i*2;j<=upper_limit;j+=i)
-				primes[j]=0;
+		if(primes[i]>upper_limit)
+		{
+			local_primes[i]=0;
+			break;
+		}
+		local_primes[i]=primes[i];
 	}
-	//重新定位
-	for(i=2,j=0;i<=upper_limit;i++)
+
+	if(i<prime_num)
+		return local_primes;
+	
+	for(prime=100001;prime<=upper_limit;prime+=2)
 	{
-		if(primes[i])
-			primes[j++]=i;
+		if(my_is_prime(prime))
+		{
+			local_primes[i]=prime;
+			i++;
+		}
 	}
-	primes[j]=0;
-	tmp=realloc(primes,(j+1)*8);
-	if(!tmp)
-	{
-		my_log("realloc failed:%m");
-		free(primes);
-		return NULL;
-	}
-	primes=tmp;
-	return primes;
+	local_primes[i]=0;
+	return local_primes;
 }
 
 /*
@@ -100,7 +233,6 @@ my_rat *my_binomial(int64_t n,uint32_t k)
 			return NULL;
 		}
 		tmp=(uint64_t)denominator*i;
-		my_log("denominator=%llu",(unsigned long long)denominator);
 		if(tmp<UINT32_MAX)
 			denominator=tmp;
 		else
