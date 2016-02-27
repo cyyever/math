@@ -159,7 +159,7 @@ uint64_t *my_primes(uint64_t upper_limit)
 	size_t i;
 
 	my_cache_primes();
-	
+
 	local_primes=malloc(sizeof(*local_primes)*(upper_limit/2+1));
 	if(!local_primes)
 	{
@@ -179,7 +179,7 @@ uint64_t *my_primes(uint64_t upper_limit)
 
 	if(i<prime_num)
 		return local_primes;
-	
+
 	for(prime=100001;prime<=upper_limit;prime+=2)
 	{
 		if(my_is_prime(prime))
@@ -208,7 +208,7 @@ my_rat *my_binomial(int64_t n,uint32_t k)
 
 	if(k>n)
 	{
-		my_log("k is out of range:%m");
+		my_log("k is out of range");
 		return NULL;
 	}
 	if(n-k<k)
@@ -257,4 +257,66 @@ my_rat *my_binomial(int64_t n,uint32_t k)
 		}
 	}
 	return numerator;
+}
+
+/*
+ *	功能：生成组合
+ *	参数：
+ *		n,k：在n个数中选k个数的组合
+ *		prev_combination：如果*prev_combination非NULL，把第一个组合写入此，否则包括上一次调用此函数生成的组合，此函数把下一个组合写入此
+ *	返回值：
+ *		非NULL：返回*prev_combination
+ *		NULL：组合已经全部生成完毕
+ */
+uint8_t *my_next_combination(uint64_t n,uint64_t k,uint8_t **prev_combination)
+{
+	uint64_t i,cnt;
+	uint8_t find_zero;
+
+	if(k>n)
+	{
+		my_log("k is out of range");
+		exit(EXIT_FAILURE);
+	}
+	if(!prev_combination)
+	{
+		my_log("prev_combination is NULL");
+		exit(EXIT_FAILURE);
+	}
+
+	if(!*prev_combination)
+	{
+		*prev_combination=calloc(n,1);
+		if(!*prev_combination)
+		{
+			my_log("calloc failed:%m");
+			exit(EXIT_FAILURE);
+		}
+		memset(*prev_combination,1,k);
+		return *prev_combination;
+	}
+
+	cnt=0;
+	find_zero=0;
+	i=n-1;
+	while(1)
+	{
+		if((*prev_combination)[i]==1)
+		{
+			cnt++;
+			(*prev_combination)[i]=0;
+			if(find_zero)
+			{
+				i++;
+				memset((*prev_combination)+i,1,cnt);
+				return *prev_combination;
+			}
+		}
+		else
+			find_zero=1;
+		if(i==0)
+			break;
+		i--;
+	}
+	return NULL;
 }

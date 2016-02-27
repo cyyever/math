@@ -53,5 +53,23 @@ int main(int argc, char** argv)
 	my_rat_free(num);
 	puts("结束测试my_binomial");
 
+	puts("开始测试my_binomial");
+	num=my_binomial(100,50);
+	if(!num)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	str=my_rat_to_str(num);
+	if(!str)
+	{
+		printf("++测试失败：%d\n",__LINE__);
+		return -1;
+	}
+	printf("C(100,50)=%s\n",str);
+	free(str);
+	my_rat_free(num);
+	puts("结束测试my_binomial");
+
 	return 0;
 }
