@@ -14,11 +14,6 @@ int main(int argc, char** argv)
 	uint8_t *combination;
 
 	combination=NULL;
-	combination=my_next_combination(5,2,&combination);
-	for(i=0;i<5;i++)
-		putchar('0'+combination[i]);
-	putchar('\n');
-
 	while(my_next_combination(5,2,&combination))
 	{
 		for(i=0;i<5;i++)
