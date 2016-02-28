@@ -5,9 +5,7 @@ CFLAGS=-O2 -Wall -g  -fPIC -I/usr/local/include/my_math
 LDFLAGS=-L/usr/local/lib/my_math -lmy_math
 .PHONY:all clean
 
-all:
-	-make $(BINS)
-	-$(RM) $(BINS)
+all:$(BINS)
 %:%.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 clean:

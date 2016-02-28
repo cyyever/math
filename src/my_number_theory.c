@@ -108,14 +108,13 @@ int my_is_prime(uint64_t num)
 
 	i=1;
 	if(num>UINT32_MAX)
-		j=UINT32_MAX+1;
+		j=(uint64_t)(UINT32_MAX)+1;
 	else
 		j=num;
 	while(i<=j)
 	{
 		k=(i+j)/2;
 		square=k*k;
-
 		if(num==square)
 			return 0;
 		else if(num<square)
@@ -123,8 +122,6 @@ int my_is_prime(uint64_t num)
 		else
 			i=k+1;
 	}
-	j++;
-
 	for(i=1;i<prime_num;i++)
 	{
 		if(primes[i]>j)
