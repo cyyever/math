@@ -12,7 +12,7 @@
 #include "my_arithmetic.h"
 #include "my_log.h"
 
-static unsigned int power10[]={1,10,100,1000};
+static uint32_t power10[]={1,10,100,1000};
 
 /*
  *	功能：比较有理数的大小
@@ -876,7 +876,7 @@ my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode rou
 }
 
 /*
- *	功能：非负整数模uint32
+ *	功能：非负整数模uint64
  *	参数:
  *		a:非负整数
  *		b:除数
@@ -885,10 +885,12 @@ my_rat *my_divide_uint32(my_rat *a,uint32_t b,ssize_t fraction,my_round_mode rou
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_mod_uint32(my_rat *a,uint32_t b,uint32_t *remainder)
+int my_mod_uint64(my_rat *a,uint64_t b,uint64_t *remainder)
 {
-	uint32_t carry;
+	unsigned __int128 res;
+	uint64_t modulo_of_base;
 	size_t i;
+	ssize_t power;
 	my_node *x;
 
 	//检查参数
@@ -898,6 +900,11 @@ int my_mod_uint32(my_rat *a,uint32_t b,uint32_t *remainder)
 		return MY_ERROR;
 	}
 
+	if(!remainder)
+	{
+		my_log("remainder is NULL");
+		return MY_ERROR;
+	}
 	if(!MY_RAT_HAS_INITED(a))
 	{
 		my_log("a is uninitialized");
@@ -928,27 +935,53 @@ int my_mod_uint32(my_rat *a,uint32_t b,uint32_t *remainder)
 			return MY_ERROR;
 		}
 	}
-	if(a->power>0)
+
+	if(b==1)
 	{
-		if(my_rat_reduce_power(a,a->power)!=MY_SUCC)
-		{
-			my_log("my_rat_reduce_power failed");
-			return MY_ERROR;
-		}
+		*remainder=0;
+		return MY_SUCC;
 	}
+	else if(b==2)
+	{
+		if(a->power>0)
+			*remainder=0;
+		else
+			*remainder=a->lsn->data&1;
+		return MY_SUCC;
+	}
+
+	if(b==3)
+		modulo_of_base=1;
+	else
+		modulo_of_base=10000%b;	
 
 	//开始计算
-	carry=0;
 	x=a->msn;
-	for(i=0;i<a->used_node_num;i++,x=x->prev)
+	res=x->data;
+	x=x->prev;
+	for(i=1;i<a->used_node_num;i++,x=x->prev)
 	{
-		if(carry==0)
-			carry=x->data%b;
+		if(modulo_of_base==1)
+			res+=x->data;
 		else
-			carry=(x->data+carry*10000)%b;
+			res=res*modulo_of_base+x->data;
+		if(res>UINT64_MAX)
+			res%=b;
 	}
-
-	*remainder=carry;
+	power=a->power;
+	while(power>=4)
+	{
+		res*=modulo_of_base;
+		if(res>UINT64_MAX)
+			res%=b;
+		power-=4;
+	}
+	if(power>0)
+		res*=power10[power];
+	
+	if(res>=b)
+		res%=b;
+	*remainder=res;
 	return MY_SUCC;
 }
 

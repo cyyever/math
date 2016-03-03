@@ -19,7 +19,7 @@ typedef struct my_node_s
 	struct my_node_s *next; //下一个
 }my_node;
 
-//有理数表示成 (sign) (lsn ... msn)*(10^5)^power，10^5进制
+//有理数表示成 (sign) (lsn ... msn)*(10^4)^power，10^4进制
 typedef struct
 {
 	my_node *lsn;		//最低节点

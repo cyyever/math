@@ -29,7 +29,7 @@ static void my_cache_primes(void)
 
 	if(!primes)
 	{
-		primes=malloc(sizeof(*primes)*(100000+1));
+		primes=malloc(sizeof(*primes)*(10000000+1));
 		if(!primes)
 		{
 			my_log("malloc failed:%m");
@@ -37,16 +37,16 @@ static void my_cache_primes(void)
 		}
 
 		//标识质数
-		for(i=2;i<=100000;i++)
+		for(i=2;i<=10000000;i++)
 			primes[i]=1;
-		for(i=2;i<=100000;i++)
+		for(i=2;i<=10000000;i++)
 		{
 			if(primes[i])
-				for(j=i*2;j<=100000;j+=i)
+				for(j=i*2;j<=10000000;j+=i)
 					primes[j]=0;
 		}
 		//重新定位
-		for(i=2,j=0;i<=100000;i++)
+		for(i=2,j=0;i<=10000000;i++)
 		{
 			if(primes[i])
 				primes[j++]=i;
@@ -105,6 +105,11 @@ int my_is_prime(uint64_t num)
 		return 0;
 	}
 
+	for(i=1;i<100;i++)
+	{
+		if((num%primes[i])==0)
+			return 0;
+	}
 
 	i=1;
 	if(num>UINT32_MAX)
@@ -122,7 +127,7 @@ int my_is_prime(uint64_t num)
 		else
 			i=k+1;
 	}
-	for(i=1;i<prime_num;i++)
+	for(i=100;i<prime_num;i++)
 	{
 		if(primes[i]>j)
 			return 1;
@@ -130,13 +135,10 @@ int my_is_prime(uint64_t num)
 			return 0;
 	}
 
-	for(prime=100001;prime<=j;prime+=2)
+	for(prime=10000001;prime<=j;prime+=2)
 	{
-		if(my_is_prime(prime))
-		{
-			if((num%prime)==0)
-				return 0;
-		}
+		if((num%prime)==0)
+			return 0;
 	}
 	return 1;
 }
@@ -177,7 +179,7 @@ uint64_t *my_primes(uint64_t upper_limit)
 	if(i<prime_num)
 		return local_primes;
 
-	for(prime=100001;prime<=upper_limit;prime+=2)
+	for(prime=10000001;prime<=upper_limit;prime+=2)
 	{
 		if(my_is_prime(prime))
 		{

@@ -106,7 +106,7 @@ my_rat *my_rat_square(my_rat *a,my_result_saving_type saving_type);
 my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_type);
 
 /*
- *	功能：非负整数模uint32
+ *	功能：非负整数模uint64
  *	参数:
  *		a:非负整数
  *		b:除数
@@ -115,7 +115,7 @@ my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_
  *		MY_SUCC：成功
  *		MY_ERROR：出错
  */
-int my_mod_uint32(my_rat *a,uint32_t b,uint32_t *remainder);
+int my_mod_uint64(my_rat *a,uint64_t b,uint64_t *remainder);
 	
 /*
  *	功能：有理数除以uint32
