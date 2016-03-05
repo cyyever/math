@@ -1,4 +1,4 @@
 pull:
-	git pull git@gitcafe.com:cyy_ever/my_math.git master
+	git pull git@github.com:cyyever/my_math.git master
 push:
-	git push git@gitcafe.com:cyy_ever/my_math.git master
+	git push git@github.com:cyyever/my_math.git master
