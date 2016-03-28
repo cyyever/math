@@ -1,8 +1,8 @@
 /*
- *	ç¨‹åºåï¼šmy_int.cpp
- *	ä½œè€…ï¼šé™ˆæºæº
- *	æ—¥æœŸï¼š2016-03-28
- *	åŠŸèƒ½ï¼šæ•´æ•°ç›¸å…³ç±»å’Œå‡½æ•°
+ *	³ÌĞòÃû£ºmy_int.cpp
+ *	×÷Õß£º³ÂÔ´Ô´
+ *	ÈÕÆÚ£º2016-03-28
+ *	¹¦ÄÜ£ºÕûÊıÏà¹ØÀàºÍº¯Êı
  */
 
 #include <cstdlib>
@@ -93,15 +93,57 @@ my_int::operator string() const
 	return int_str;
 }
 
+/*
+ *	¹¦ÄÜ£º±È½ÏºÍÁíÒ»¸öÕûÊıµÄ´óĞ¡
+ * 	²ÎÊı£º
+ *		rhs£ºÁíÒ»¸öÕûÊı
+ * 	·µ»ØÖµ£º
+ * 		>0£º´óÓÚÁíÒ»¸öÕûÊı
+ * 		0£ºÁ½¸öÕûÊıÏàµÈ
+ * 		<0£ºĞ¡ÓÚÁíÒ»¸öÕûÊı
+ */
+int my_int::cmp(const my_int &rhs) const
+{
+	int res;
+	if(sign<rhs.sign)
+		return -1;
+	else if(sign>rhs.sign)
+		return 1;
+		
+	if(my_digit_list.size()<rhs.my_digit_list.size())
+		res=-1;
+	else if(my_digit_list.size()>rhs.my_digit_list.size())
+		res=1;
+	else
+	{
+		res=0;
+		auto it=--my_digit_list.end();
+		auto it2=--rhs.my_digit_list.cend();
+		for(;;it++,it2++)
+		{
+			if(*it<*it2)
+			{
+				res=-1;
+				break;
+			}
+			else if(*it>*it2)
+			{
+				res=1;
+				break;
+			}
+			if(it==my_digit_list.begin())
+				break;
+		}
+	}
+	if(sign==0)	//¸ºÊı
+		res=-res;
+	return res;
+}
 bool operator ==(const my_int &a,const my_int &b)
 {
-	if(a.sign!=b.sign)
-		return false;
-	if(a.my_digit_list.size()!=b.my_digit_list.size())
-		return false;
-	if(!std::equal(a.my_digit_list.begin(),a.my_digit_list.end(),b.my_digit_list.begin()))
-		return false;
-	return true;
+	if(a.cmp(b)==0)
+		return true;
+	return false;
 }
 
 bool operator !=(const my_int &a,const my_int &b)
@@ -111,38 +153,16 @@ bool operator !=(const my_int &a,const my_int &b)
 
 bool operator <(const my_int &a,const my_int &b)
 {
-	bool res;
-	if(a.sign<b.sign)
+	if(a.cmp(b)<0)
 		return true;
-	else if(a.sign>b.sign)
-		return false;
-		
-	if(a.my_digit_list.size()<b.my_digit_list.size())
-		res=true;
-	else if(a.my_digit_list.size()>b.my_digit_list.size())
-		res=false;
-	else
-	{
-		res=false;
-		for(auto it=--a.my_digit_list.end(),it2=--b.my_digit_list.end();;it++,it2++)
-		{
-			if(*it<*it2)
-			{
-				res=true;
-				break;
-			}
-			if(it==a.my_digit_list.begin())
-				break;
-		}
-	}
-	if(a.sign==0)	//è´Ÿæ•°
-		res=!res;
-	return res;
+	return false;
 }
 
 bool operator <=(const my_int &a,const my_int &b)
 {
-	return (a<b)||(a==b);
+	if(a.cmp(b)<=0)
+		return true;
+	return false;
 }
 
 bool operator >(const my_int &a,const my_int &b)
@@ -217,51 +237,7 @@ my_int& my_int::operator +=(const my_int &rhs)
 	else 
 		throw std::invalid_argument("no the same sign");
 
-
-
-
-	/*
-
-	//	if(my_digit_list.size()<digit_list.size())
-	//		my_digit_list.push_front(0);
-	auto it=--my_digit_list.end();
-	if(
-			auto it2=--digit_list.end();
-
-
-
-
-			while(1)
-			{
-			(*it)+=(*it2);
-			if(it2==digit_list.begin())
-			break;
-			it--;
-			it2--;
-			}
-
-			carry=0;
-			it=--my_digit_list.end();
-
-			for(;;it--)	
-			{
-			*it+=carry;
-			if(*it>my_base)
-			{
-				*it-=my_base;
-				carry=1;
-			}
-			else
-				break;
-
-			if(it==my_digit_list.begin())
-			{
-				my_digit_list.push_front(1);
-				break;
-			}
-			}
-	*/
-		return *this;
+	return *this;
 }
 
 ostream &operator <<(ostream &os,const my_int &a)
@@ -271,12 +247,12 @@ ostream &operator <<(ostream &os,const my_int &a)
 }
 
 /*
- *	åŠŸèƒ½ï¼šæ£€æŸ¥ä¼ å…¥çš„å­—ç¬¦ä¸²æ˜¯å¦æ•´æ•°ï¼Œå³æ˜¯å¦åŒ¹é… ^[+-]?[1-9][0-9]*$
- * 	å‚æ•°ï¼š
- *		strï¼šè¦æ£€æŸ¥çš„å­—ç¬¦ä¸²
- * 	è¿”å›å€¼ï¼š
- *		trueï¼šæ˜¯
- *		falseï¼šä¸æ˜¯
+ *	¹¦ÄÜ£º¼ì²é´«ÈëµÄ×Ö·û´®ÊÇ·ñÕûÊı£¬¼´ÊÇ·ñÆ¥Åä ^[+-]?[1-9][0-9]*$
+ * 	²ÎÊı£º
+ *		str£ºÒª¼ì²éµÄ×Ö·û´®
+ * 	·µ»ØÖµ£º
+ *		true£ºÊÇ
+ *		false£º²»ÊÇ
  */
 bool my_int::is_valid_int_str(const string &str)
 {

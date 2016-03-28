@@ -27,15 +27,15 @@ class my_int
 		my_int& operator +=(const my_int &rhs);
 	private:
 
-	//	static const size_t my_digit_num=18;			//单个my_digit所包含的位数
-	//	static const size_t my_base=1000000000000000000LL;	//单个my_digit的base
+		//	static const size_t my_digit_num=18;			//单个my_digit所包含的位数
+		//	static const size_t my_base=1000000000000000000LL;	//单个my_digit的base
 		static const size_t my_digit_num=1;			//单个my_digit所包含的位数
 		static const int64_t my_base=10;	//单个my_digit的base
 		list<int64_t> my_digit_list;
 		ssize_t power;
 		uint8_t sign;	//1-正数 0-负数
 		bool is_valid_int_str(const string &str);
-
+		int cmp(const my_int &rhs) const;
 	friend bool operator ==(const my_int &a,const my_int &b);
 	friend bool operator !=(const my_int &a,const my_int &b);
 	friend bool operator <(const my_int &a,const my_int &b);
@@ -44,6 +44,7 @@ class my_int
 	friend bool operator >=(const my_int &a,const my_int &b);
 };
 
+bool my_int_cmp(const my_int &a,const my_int &b);
 bool operator ==(const my_int &a,const my_int &b);
 bool operator !=(const my_int &a,const my_int &b);
 bool operator <(const my_int &a,const my_int &b);

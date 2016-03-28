@@ -9,7 +9,7 @@ CXX=clang++
 .PHONY:all clean install
 all:$(TARGET_LIB)
 $(TARGET_LIB):$(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 clean:
 	-$(RM) $(TARGET_LIB) $(DEPS) $(OBJS) *~
 install:all
