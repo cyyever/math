@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <regex>
+#include <iostream>
 
 #include "my_int.h"
 #include "my_log.h"
@@ -19,28 +20,42 @@ my_int::my_int():power(0),sign(1)
 
 my_int::my_int(const string &int_str):power(0),sign(1)
 {
-	string tmp_str;
 	if(!is_valid_int_str(int_str))
 	{
 		my_log("invalid interger");
 		throw std::invalid_argument(int_str);
 	}
 
+	auto i=int_str.size()%my_digit_num;
 	if(int_str[0]=='-')
 	{
 		sign=0;
-		tmp_str=int_str.substr(1);
+		if(i==0)
+			i=my_digit_num-1;
+		else
+			i--;
 	}
-	else
-		tmp_str=int_str;
-	auto i=tmp_str.size();
-	while(i>=4)
+	if(i!=0)
 	{
-		my_digit_list.push_back(stoi(tmp_str.substr(i-4,4)));
-		i-=4;
+		if(int_str[0]=='-')
+			my_digit_list.push_back(stoull(int_str.substr(1,i)));
+		else
+			my_digit_list.push_back(stoull(int_str.substr(0,i)));
 	}
-	if(i>0)
-		my_digit_list.push_back(stoi(tmp_str.substr(0,i)));
+	if(int_str[0]=='-')
+		i++;
+
+	while(i<int_str.size())
+	{
+		my_digit_list.push_back(stoull(int_str.substr(i,my_digit_num)));
+		i+=my_digit_num;
+	}
+	return;
+}
+
+my_int::my_int(uint64_t num):power(0),sign(1)
+{
+	my_digit_list=get_my_digit_list(num);
 	return;
 }
 
@@ -55,14 +70,51 @@ my_int::operator string() const
 	return int_str;
 }
 
-/*
- *	功能：重载ostream的<<给my_int
- * 	参数：
- *		os：输出流
- *		a：整数
- * 	返回值：
- * 		输出流
- */
+my_int& my_int::operator +=(uint64_t num)
+{
+	list<uint64_t> digit_list=get_my_digit_list(num);
+	uint64_t carry;
+
+	if(num==0)
+		return *this;
+
+	if(my_digit_list.size()<digit_list.size())
+		my_digit_list.push_front(0);
+	auto it=--my_digit_list.end();
+	auto it2=--digit_list.end();
+			
+	while(1)
+	{
+		(*it)+=(*it2);
+		if(it2==digit_list.begin())
+			break;
+		it--;
+		it2--;
+	}
+		
+	carry=0;
+	it=--my_digit_list.end();
+
+	for(;;it--)	
+	{
+		*it+=carry;
+		if(*it>my_base)
+		{
+			*it-=my_base;
+			carry=1;
+		}
+		else
+			break;
+
+		if(it==my_digit_list.begin())
+		{
+			my_digit_list.push_front(1);
+			break;
+		}
+	}
+	return *this;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;
@@ -85,4 +137,19 @@ bool my_int::is_valid_int_str(const string &str)
 		return true;
 	else
 		return false;
+}
+
+/*
+ *	功能：把传入的uint64_t数字转成我们需要的digit链表
+ * 	参数：
+ *		num：要处理的数字
+ * 	返回值：
+ * 		digit链表
+ */
+list<uint64_t> inline my_int::get_my_digit_list(uint64_t num)
+{
+	if(num<my_base)
+		return {num%my_base};
+	else
+		return {num/my_base,num%my_base};
 }

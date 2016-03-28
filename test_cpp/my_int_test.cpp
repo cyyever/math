@@ -14,7 +14,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	vector<string> invalid_interger_str={"aaa","0123"};
-	vector<string> valid_interger_str={"1","-1","0","-0"};
+	vector<string> valid_interger_str={"1","-1","0","-0","123456789012345678901","-12345678901234567890"};
 
 	for(auto it=invalid_interger_str.begin();it!=invalid_interger_str.end();it++)
 	{
@@ -33,5 +33,9 @@ int main(int argc, char** argv)
 		my_int a(*it);
 		cout<<a<<endl;
 	}
+	 
+	my_int a=10;
+	a+=10;
+	cout<<a<<endl;
 	return 0;
 }
