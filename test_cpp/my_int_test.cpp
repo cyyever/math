@@ -33,9 +33,23 @@ int main(int argc, char** argv)
 		my_int a(*it);
 		cout<<a<<endl;
 	}
-	 
-	my_int a=10;
-	a+=10;
+	
+	my_int a=10,b=10;
+
+	if(a!=b)
+		throw std::logic_error("10!=10");
+	b=20;
+	if(a==b)
+		throw std::logic_error("10==20");
+	b=-10;
+	if(a<b)
+		throw std::logic_error("10<-20");
+	a=-11;
+	if(a>=b)
+		throw std::logic_error("-11>=-10");
+	a=111;
+	b=99;
+	a+=b;
 	cout<<a<<endl;
 	return 0;
 }

@@ -5,6 +5,7 @@ SRCS=$(wildcard *.cpp)
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 CPPFLAGS=-O2 -Wall -Wextra -fPIC -g -std=c++11
 LDFLAGS=-shared 
+CXX=clang++
 .PHONY:all clean install
 all:$(TARGET_LIB)
 $(TARGET_LIB):$(OBJS)
