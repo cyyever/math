@@ -13,6 +13,9 @@
 #include "my_int.h"
 #include "my_log.h"
 
+using std::cout;
+using std::endl;
+
 my_int::my_int():power(0),sign(1)
 {
 	my_digit_list.push_back(0);
@@ -28,7 +31,6 @@ my_int::my_int(const string &int_str):power(0),sign(1)
 		throw std::invalid_argument(int_str);
 	}
 
-	i=int_str.size();
 	if(int_str[0]=='-')
 	{
 		sign=0;
@@ -177,131 +179,146 @@ bool operator >=(const my_int &a,const my_int &b)
 
 my_int& my_int::operator +=(const my_int &rhs)
 {
-	if(sign==rhs.sign)
+	if(sign!=rhs.sign)	//符号不同，转换成减法
 	{
-		uint8_t carry=0;
+		sign=1-sign;
+		operator-=(rhs);
+		sign=1-sign;
+		return *this;
+	}
+	uint8_t carry=0;
 
-		auto it=my_digit_list.begin();
-		auto it2=rhs.my_digit_list.cbegin();
-		for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	auto it=my_digit_list.begin();
+	auto it2=rhs.my_digit_list.cbegin();
+	for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	{
+		*it+=*it2+carry;
+		if((*it)>=my_base)
 		{
-			*it+=*it2+carry;
-			if((*it)>=my_base)
-			{
-				carry=1;
-				*it-=my_base;
-			}
-			else
-				carry=0;
+			carry=1;
+			*it-=my_base;
 		}
-		if(it!=my_digit_list.end() && carry==1)
+		else
+			carry=0;
+	}
+	while(it2!=rhs.my_digit_list.cend())
+	{
+		int64_t my_digit=*it2+carry;
+
+		if(my_digit>=my_base)
+		{
+			carry=1;
+			my_digit-=my_base;
+		}
+		else
+			carry=0;
+		my_digit_list.push_back(my_digit);
+		it2++;
+	}
+	if(carry==1)
+	{
+		if(it!=my_digit_list.end())
 		{
 			do
 			{
-				*it+=carry;
+				*it+=1;
 				if((*it)>=my_base)
-				{
-					carry=1;
 					*it-=my_base;
-				}
 				else
-				{
-					carry=0;
 					break;
-				}
 				it++;
 			}
 			while(it!=my_digit_list.end());
 		}
-		else if(it2!=rhs.my_digit_list.cend())
-		{
-			do
-			{
-				int64_t my_digit=*it2+carry;
-
-				if(my_digit>=my_base)
-				{
-					carry=1;
-					my_digit-=my_base;
-				}
-				else
-					carry=0;
-				my_digit_list.push_back(my_digit);
-				it2++;
-			}
-			while(it2!=rhs.my_digit_list.cend());
-		}
-		if(carry==1)
+		else
 			my_digit_list.push_back(1);
 	}
-	else 
-		throw std::invalid_argument("no the same sign");
-
 	return *this;
 }
 
 my_int& my_int::operator -=(const my_int &rhs)
 {
-	if(sign==rhs.sign)
+	if(sign!=rhs.sign)	//符号不同，转换成加法
 	{
-		uint8_t carry=0;
+		sign=1-sign;
+		operator+=(rhs);
+		sign=1-sign;
+		return *this;
+	}
 
-		auto it=my_digit_list.begin();
-		auto it2=rhs.my_digit_list.cbegin();
-		for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	uint8_t carry=0;
+
+	auto it=my_digit_list.begin();
+	auto it2=rhs.my_digit_list.cbegin();
+	for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	{
+		*it-=(*it2+carry);
+		if((*it)<0)
 		{
-			*it+=*it2+carry;
-			if((*it)>=my_base)
+			*it+=my_base;
+			carry=1;
+		}
+		else
+			carry=0;
+	}
+	if(it2!=rhs.my_digit_list.cend())
+	{
+		do{
+			int64_t my_digit=-(*it2+carry);
+
+			if(my_digit<0)
 			{
+				my_digit+=my_base;
 				carry=1;
-				*it-=my_base;
+			}
+			else
+				carry=0;
+			my_digit_list.push_back(my_digit);
+			it2++;
+		}
+		while(it2!=rhs.my_digit_list.cend());
+	}
+	else if(carry==1)
+	{
+		for(;it!=my_digit_list.end();it++)
+		{
+			*it-=1;
+			if((*it)<0)
+				*it+=my_base;
+			else
+			{
+				carry=0;
+				break;
+			}
+		}
+	}
+
+	if(carry==1)
+	{
+		my_digit_list.push_back(-1);
+		//这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
+		carry=0;
+		for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
+		{
+			*it=-(*it+carry);
+			if(*it<0)
+			{
+				*it+=my_base;
+				carry=1;
 			}
 			else
 				carry=0;
 		}
-		if(it!=my_digit_list.end() && carry==1)
-		{
-			do
-			{
-				*it+=carry;
-				if((*it)>=my_base)
-				{
-					carry=1;
-					*it-=my_base;
-				}
-				else
-				{
-					carry=0;
-					break;
-				}
-				it++;
-			}
-			while(it!=my_digit_list.end());
-		}
-		else if(it2!=rhs.my_digit_list.cend())
-		{
-			do
-			{
-				int64_t my_digit=*it2+carry;
-
-				if(my_digit>=my_base)
-				{
-					carry=1;
-					my_digit-=my_base;
-				}
-				else
-					carry=0;
-				my_digit_list.push_back(my_digit);
-				it2++;
-			}
-			while(it2!=rhs.my_digit_list.cend());
-		}
-		if(carry==1)
-			my_digit_list.push_back(1);
+		sign=1-sign;
 	}
-	else 
-		throw std::invalid_argument("no the same sign");
 
+	//去除前面的0
+	while(my_digit_list.back()==0 && my_digit_list.size()>1)
+		my_digit_list.pop_back();
+
+	//如果两个相等的负数相减，这边我们要调整符号为正
+	if(my_digit_list.back()==0)
+		sign=1;
 	return *this;
 }
 

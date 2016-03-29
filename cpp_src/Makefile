@@ -11,7 +11,7 @@ all:$(TARGET_LIB)
 $(TARGET_LIB):$(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 clean:
-	-$(RM) $(TARGET_LIB) $(DEPS) $(OBJS) *~
+	-$(RM) $(TARGET_LIB) $(OBJS) *~
 install:all
 	install -D $(TARGET_LIB) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB)
 	install -d $(DESTDIR)/usr/local/include/$(PKG_NAME)

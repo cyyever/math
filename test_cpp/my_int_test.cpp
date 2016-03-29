@@ -49,18 +49,54 @@ int main(int argc, char** argv)
 		throw std::logic_error("-11>=-10");
 	a=111;
 	b=99;
-	cout<<a<<"+"<<b<<"=";
 	a+=b;
-	cout<<a<<endl;
+	if(a!=210)
+		throw std::logic_error("111+99!=210");
 	b=-99;
 	a=-111;
-	cout<<a<<"+"<<b<<"=";
 	a+=b;
-	cout<<a<<endl;
+	if(a!=-210)
+		throw std::logic_error("-111+(-99)!=-210");
+
 	a=99;
 	b=99;
-	cout<<a<<"+"<<b<<"=";
 	a+=b;
-	cout<<a<<endl;
+	if(a!=198)
+		throw std::logic_error("99+99!=198");
+
+	a=11;
+	b=10000;
+	a-=b;
+	if(a!=-9989)
+		throw std::logic_error("11-10000!=-9989");
+
+	a=111111;
+	b=1;
+	a-=b;
+	if(a!=111110)
+		throw std::logic_error("111111-1!=111110");
+
+	a=111111;
+	b=999999;
+	a-=b;
+	if(a!=-888888)
+		throw std::logic_error("111111-999999!=-888888");
+	a=-111;
+	b=-111;
+	a-=b;
+	if(a!=0)
+		throw std::logic_error("-111-(-111)!=0");
+
+	a=-111;
+	b=111;
+	a-=b;
+	if(a!=-222)
+		throw std::logic_error("-111-111!=-222");
+
+	a=1;
+	b=-2;
+	a+=b;
+	if(a!=-1)
+		throw std::logic_error("1+(-2)!=-1");
 	return 0;
 }
