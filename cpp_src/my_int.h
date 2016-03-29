@@ -26,6 +26,10 @@ class my_int
 		operator string() const;
 		my_int& operator +=(const my_int &rhs);
 		my_int& operator -=(const my_int &rhs);
+		my_int& operator ++();	//前缀
+		my_int& operator --();
+		my_int operator ++(int);	//后缀
+		my_int operator --(int);
 	private:
 
 		//	static const size_t my_digit_num=18;			//单个my_digit所包含的位数

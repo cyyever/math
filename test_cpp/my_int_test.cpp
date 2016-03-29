@@ -111,5 +111,18 @@ int main(int argc, char** argv)
 	b=1;
 	if(a+b!=2)
 		throw std::logic_error("1+1 != 2");
+
+	a=0;
+	if(++a!=1)
+		throw std::logic_error("prefix ++ failed");
+
+	if(--a!=0)
+		throw std::logic_error("prefix -- failed");
+
+	if(a++!=0 || a!=1)
+		throw std::logic_error("postfix ++ failed");
+
+	if(a--!=1 || a!=0)
+		throw std::logic_error("postfix -- failed");
 	return 0;
 }

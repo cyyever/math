@@ -322,6 +322,32 @@ my_int& my_int::operator -=(const my_int &rhs)
 	return *this;
 }
 
+my_int& my_int::operator ++()
+{
+	operator+=(1);
+	return *this;
+}
+
+my_int& my_int::operator --()
+{
+	operator-=(1);
+	return *this;
+}
+
+my_int my_int::operator ++(int)
+{
+	my_int tmp=*this;
+	operator+=(1);
+	return tmp;
+}
+
+my_int my_int::operator --(int)
+{
+	my_int tmp=*this;
+	operator-=(1);
+	return tmp;
+}
+
 my_int operator -(const my_int &a)
 {
 	my_int b=a;
