@@ -1,5 +1,6 @@
 SRCS=$(wildcard *.cpp)
 BINS=$(patsubst %.cpp,%,$(SRCS))
+CXX=clang++
 CPPFLAGS=-O2 -Wall -g -fPIC -I/usr/local/include/my_math -std=c++11
 LDFLAGS=-L/usr/local/lib/my_math -lmy_math
 .PHONY:all clean

@@ -322,6 +322,27 @@ my_int& my_int::operator -=(const my_int &rhs)
 	return *this;
 }
 
+my_int operator -(const my_int &a)
+{
+	my_int b=a;
+	b.sign=1-b.sign;
+	return b;
+}
+
+my_int operator -(const my_int &a,const my_int &b)
+{
+	my_int c=a;
+	c-=b;
+	return c;
+}
+
+my_int operator +(const my_int &a,const my_int &b)
+{
+	my_int c=a;
+	c+=b;
+	return c;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;

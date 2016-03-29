@@ -43,6 +43,9 @@ class my_int
 	friend bool operator <=(const my_int &a,const my_int &b);
 	friend bool operator >(const my_int &a,const my_int &b);
 	friend bool operator >=(const my_int &a,const my_int &b);
+	friend my_int operator -(const my_int &a);
+	friend my_int operator -(const my_int &a,const my_int &b);
+	friend my_int operator +(const my_int &a,const my_int &b);
 };
 
 bool my_int_cmp(const my_int &a,const my_int &b);
@@ -52,5 +55,8 @@ bool operator <(const my_int &a,const my_int &b);
 bool operator <=(const my_int &a,const my_int &b);
 bool operator >(const my_int &a,const my_int &b);
 bool operator >=(const my_int &a,const my_int &b);
+my_int operator -(const my_int &a);
+my_int operator -(const my_int &a,const my_int &b);
+my_int operator +(const my_int &a,const my_int &b);
 ostream &operator <<(ostream &os,const my_int &a);
 #endif
