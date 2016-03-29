@@ -49,6 +49,17 @@ int main(int argc, char** argv)
 		throw std::logic_error("-11>=-10");
 	a=111;
 	b=99;
+	cout<<a<<"+"<<b<<"=";
+	a+=b;
+	cout<<a<<endl;
+	b=-99;
+	a=-111;
+	cout<<a<<"+"<<b<<"=";
+	a+=b;
+	cout<<a<<endl;
+	a=99;
+	b=99;
+	cout<<a<<"+"<<b<<"=";
 	a+=b;
 	cout<<a<<endl;
 	return 0;

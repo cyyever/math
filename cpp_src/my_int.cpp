@@ -240,6 +240,71 @@ my_int& my_int::operator +=(const my_int &rhs)
 	return *this;
 }
 
+my_int& my_int::operator -=(const my_int &rhs)
+{
+	if(sign==rhs.sign)
+	{
+		uint8_t carry=0;
+
+		auto it=my_digit_list.begin();
+		auto it2=rhs.my_digit_list.cbegin();
+		for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+		{
+			*it+=*it2+carry;
+			if((*it)>=my_base)
+			{
+				carry=1;
+				*it-=my_base;
+			}
+			else
+				carry=0;
+		}
+		if(it!=my_digit_list.end() && carry==1)
+		{
+			do
+			{
+				*it+=carry;
+				if((*it)>=my_base)
+				{
+					carry=1;
+					*it-=my_base;
+				}
+				else
+				{
+					carry=0;
+					break;
+				}
+				it++;
+			}
+			while(it!=my_digit_list.end());
+		}
+		else if(it2!=rhs.my_digit_list.cend())
+		{
+			do
+			{
+				int64_t my_digit=*it2+carry;
+
+				if(my_digit>=my_base)
+				{
+					carry=1;
+					my_digit-=my_base;
+				}
+				else
+					carry=0;
+				my_digit_list.push_back(my_digit);
+				it2++;
+			}
+			while(it2!=rhs.my_digit_list.cend());
+		}
+		if(carry==1)
+			my_digit_list.push_back(1);
+	}
+	else 
+		throw std::invalid_argument("no the same sign");
+
+	return *this;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;
