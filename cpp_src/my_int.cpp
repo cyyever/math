@@ -51,8 +51,8 @@ my_int::my_int(const string &int_str):sign(1)
 
 my_int::my_int(uint64_t num):sign(1)
 {
-	if(num==0)
-		my_digit_list.push_back(0);
+	if(num<my_base)
+		my_digit_list.push_back(num);
 	else
 	{
 		while(num)
@@ -403,11 +403,11 @@ my_int& my_int::operator *=(const my_int &rhs)
 		return operator*=(tmp_this);
 	}
 
-	if(*this==0)
+	if(this->is_zero())
 		return *this;
-	if(rhs==0)
+	if(rhs.is_zero() || rhs.is_one())
 	{
-		*this=0;
+		*this=rhs;
 		return *this;
 	}
 
@@ -433,7 +433,7 @@ my_int operator *(const my_int &a,int64_t b)
 {
 	my_int c=operator *(a,abs(b));
 
-	if(b<0)
+	if(b<0 && c!=0)
 		c.sign=0;
 	return c;
 }
@@ -491,10 +491,69 @@ my_int operator *(const my_int &a,const my_int &b)
 	return c;
 }
 
+
+my_int& my_int::operator /=(uint64_t num)
+{
+	unsigned __int128 tmp;
+	if(num==0)
+		throw std::invalid_argument("divided by zero");
+
+	if(this->is_zero() || num==1)
+		return *this;
+
+	int64_t carry=0;
+	for(auto it=--my_digit_list.end();;it--)
+	{
+		tmp=*it;
+		if(carry!=0)
+			tmp+=carry*my_int::my_base;
+		if(tmp>=num)
+		{
+			*it=tmp/num;
+			carry=tmp%num;
+		}
+		else
+		{
+			*it=0;
+			carry=tmp;
+		}
+		if(it==my_digit_list.begin())
+			break;
+	}
+
+	//去除前面的0
+	while(my_digit_list.back()==0 && my_digit_list.size()>1)
+		my_digit_list.pop_back();
+	return *this;
+}
+
+my_int& my_int::operator /=(int64_t num)
+{
+	operator/=(abs(num));
+	if(num<0 && !this->is_zero())
+		sign=1-sign;
+	return *this;
+}
+
+my_int& my_int::operator /=(int num)
+{
+	return operator/=((int64_t)num);
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;
 	return os;
+}
+
+inline bool my_int::is_zero() const
+{
+	return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
+}
+
+inline bool my_int::is_one() const
+{
+	return my_digit_list.back()==1 && sign==1 && my_digit_list.size()==1;
 }
 
 /*

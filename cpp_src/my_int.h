@@ -36,6 +36,9 @@ class my_int
 		my_int operator ++(int);	//后缀
 		my_int operator --(int);
 		my_int& operator *=(const my_int &rhs);
+		my_int& operator /=(uint64_t num);
+		my_int& operator /=(int64_t num);
+		my_int& operator /=(int num);
 	private:
 #ifdef NDEBUG
 		static const size_t my_digit_num=18;			//单个my_digit所包含的位数
@@ -44,11 +47,20 @@ class my_int
 		static const size_t my_digit_num=1;			//单个my_digit所包含的位数
 		static const int64_t my_base=10;			//单个my_digit的base
 #endif
+		static bool is_valid_int_str(const string &str);
+
+
 		list<int64_t> my_digit_list;
 		uint8_t sign;	//1-正数 0-负数
 
-		bool is_valid_int_str(const string &str);
+		//对常用的比较我们另外写函数，避免构造对象的开销
+		inline bool is_zero() const;				
+		inline bool is_one() const;
+
 		int compare(const my_int &rhs) const;
+
+
+
 	friend bool operator ==(const my_int &a,const my_int &b);
 	friend bool operator !=(const my_int &a,const my_int &b);
 	friend bool operator <(const my_int &a,const my_int &b);

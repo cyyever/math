@@ -128,5 +128,23 @@ int main(int argc, char** argv)
 	a=2;
 	assert(a*UINT64_MAX==string("36893488147419103230"));
 	assert(a*INT64_MIN==string("-18446744073709551616"));
+
+	a=99;
+	a/=9;
+	assert(a==11);
+	a=77;
+	a/=9;
+	assert(a==8);
+	a=0;
+	a/=-1;
+	assert(a==0);
+
+	a=-77;
+	a/=9;
+	assert(a==(-77)/9);
+
+	a=77;
+	a/=-9;
+	assert(a==77/(-9));
 	return 0;
 }
