@@ -104,7 +104,7 @@ my_int::operator string() const
  * 		0：两个整数相等
  * 		<0：小于另一个整数
  */
-int my_int::cmp(const my_int &rhs) const
+int my_int::compare(const my_int &rhs) const
 {
 	int res;
 	if(sign<rhs.sign)
@@ -141,9 +141,43 @@ int my_int::cmp(const my_int &rhs) const
 		res=-res;
 	return res;
 }
+
+my_int my_int::multiply_my_digit(int64_t my_digit) const
+{
+	my_int res;
+	int64_t carry;
+	__int128 tmp;
+	if(my_digit<0 || my_digit>=my_base)
+		throw std::range_error("my_digit is out of range");
+
+	if(my_digit==0)
+		return 0;
+
+	res=*this;
+
+	carry=0;
+	for(auto it=res.my_digit_list.begin();it!=res.my_digit_list.end();it++)
+	{
+		tmp=(*it)*my_digit+carry;
+		if(tmp>=my_base)
+		{
+			*it=tmp%my_base;
+			carry=tmp/my_base;
+		}
+		else
+		{
+			*it=tmp;
+			carry=0;
+		}
+	}
+	if(carry)
+		res.my_digit_list.push_back(carry);
+	return res;
+}
+
 bool operator ==(const my_int &a,const my_int &b)
 {
-	if(a.cmp(b)==0)
+	if(a.compare(b)==0)
 		return true;
 	return false;
 }
@@ -155,14 +189,14 @@ bool operator !=(const my_int &a,const my_int &b)
 
 bool operator <(const my_int &a,const my_int &b)
 {
-	if(a.cmp(b)<0)
+	if(a.compare(b)<0)
 		return true;
 	return false;
 }
 
 bool operator <=(const my_int &a,const my_int &b)
 {
-	if(a.cmp(b)<=0)
+	if(a.compare(b)<=0)
 		return true;
 	return false;
 }
@@ -179,6 +213,12 @@ bool operator >=(const my_int &a,const my_int &b)
 
 my_int& my_int::operator +=(const my_int &rhs)
 {
+	if(this==&rhs)
+	{
+		my_int tmp_this=*this;
+		return operator+=(tmp_this);
+	}
+
 	if(sign!=rhs.sign)	//符号不同，转换成减法
 	{
 		sign=1-sign;
@@ -238,6 +278,12 @@ my_int& my_int::operator +=(const my_int &rhs)
 
 my_int& my_int::operator -=(const my_int &rhs)
 {
+	if(this==&rhs)
+	{
+		my_int tmp_this=*this;
+		return operator-=(tmp_this);
+	}
+
 	if(sign!=rhs.sign)	//符号不同，转换成加法
 	{
 		sign=1-sign;
@@ -351,7 +397,8 @@ my_int my_int::operator --(int)
 my_int operator -(const my_int &a)
 {
 	my_int b=a;
-	b.sign=1-b.sign;
+	if(b.my_digit_list.back()!=0)
+		b.sign=1-b.sign;
 	return b;
 }
 
@@ -366,6 +413,45 @@ my_int operator +(const my_int &a,const my_int &b)
 {
 	my_int c=a;
 	c+=b;
+	return c;
+}
+
+my_int& my_int::operator *=(const my_int &rhs)
+{
+	if(this==&rhs)
+	{
+		my_int tmp_this=*this;
+		return operator*=(tmp_this);
+	}
+
+	if(rhs==0)
+	{
+		*this=0;
+		return *this;
+	}
+
+	decltype(rhs.my_digit_list.size()) cnt=0,i;
+	my_int tmp_this=std::move(*this);
+
+	my_digit_list={0};
+	if(sign!=rhs.sign)	
+		sign=0;
+	else
+		sign=1;
+	for(auto it=rhs.my_digit_list.cbegin();it!=rhs.my_digit_list.cend();it++,cnt++)
+	{
+		my_int tmp=tmp_this.multiply_my_digit(*it);
+		for(i=0;i<cnt;i++)
+			tmp.my_digit_list.push_front(0);
+		operator+=(tmp);
+	}
+	return *this;
+}
+
+my_int operator *(const my_int &a,const my_int &b)
+{
+	my_int c=a;
+	c*=b;
 	return c;
 }
 

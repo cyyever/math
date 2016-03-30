@@ -3,11 +3,17 @@ TARGET_LIB=lib$(PKG_NAME).so
 HEADERS=$(wildcard *.h)
 SRCS=$(wildcard *.cpp)
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
-CPPFLAGS=-O2 -Wall -Wextra -fPIC -g -std=c++11
+#CXX=clang++
+CPPFLAGS=-O2 -Wall -Wextra -fPIC -g -std=c++11 
+ifneq ($(NDEBUG),0)
+	CPPFLAGS+= -DNDEBUG
+endif
 LDFLAGS=-shared 
-CXX=clang++
 .PHONY:all clean install
-all:$(TARGET_LIB)
+all:
+	make clean
+	make $(TARGET_LIB)
+	make clean
 $(TARGET_LIB):$(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 clean:
@@ -18,3 +24,7 @@ install:all
 	install -t $(DESTDIR)/usr/local/include/$(PKG_NAME) $(HEADERS)
 	echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
 	ldconfig
+
+debug_install:
+	make clean
+	NDEBUG=0 make install 

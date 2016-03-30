@@ -30,17 +30,22 @@ class my_int
 		my_int& operator --();
 		my_int operator ++(int);	//后缀
 		my_int operator --(int);
+		my_int& operator *=(const my_int &rhs);
 	private:
-
-		//	static const size_t my_digit_num=18;			//单个my_digit所包含的位数
-		//	static const size_t my_base=1000000000000000000LL;	//单个my_digit的base
+#ifdef NDEBUG
+		static const size_t my_digit_num=18;			//单个my_digit所包含的位数
+		static const int64_t my_base=1000000000000000000LL;	//单个my_digit的base
+#else
 		static const size_t my_digit_num=1;			//单个my_digit所包含的位数
-		static const int64_t my_base=10;	//单个my_digit的base
+		static const int64_t my_base=10;			//单个my_digit的base
+#endif
 		list<int64_t> my_digit_list;
 		ssize_t power;
 		uint8_t sign;	//1-正数 0-负数
+
 		bool is_valid_int_str(const string &str);
-		int cmp(const my_int &rhs) const;
+		int compare(const my_int &rhs) const;
+		my_int multiply_my_digit(int64_t my_digit) const;
 	friend bool operator ==(const my_int &a,const my_int &b);
 	friend bool operator !=(const my_int &a,const my_int &b);
 	friend bool operator <(const my_int &a,const my_int &b);
@@ -50,6 +55,7 @@ class my_int
 	friend my_int operator -(const my_int &a);
 	friend my_int operator -(const my_int &a,const my_int &b);
 	friend my_int operator +(const my_int &a,const my_int &b);
+	friend my_int operator *(const my_int &a,const my_int &b);
 };
 
 bool my_int_cmp(const my_int &a,const my_int &b);
