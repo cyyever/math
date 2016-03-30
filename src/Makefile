@@ -19,7 +19,7 @@ install:all
 	install -D $(TARGET_LIB) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB)
 	install -d $(DESTDIR)/usr/local/include/$(PKG_NAME)
 	install -t $(DESTDIR)/usr/local/include/$(PKG_NAME) $(HEADERS)
-	echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
+	#echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
 	ldconfig
 %.d:%.c
 	@set -e; $(RM) $@; \

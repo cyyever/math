@@ -73,6 +73,9 @@ class my_int
 	friend my_int operator *(const my_int &a,int64_t b);
 	friend my_int operator *(const my_int &a,uint64_t b);
 	friend my_int operator *(const my_int &a,const my_int &b);
+	friend my_int operator /(const my_int &a,uint64_t b);
+	friend my_int operator /(const my_int &a,int64_t b);
+	friend my_int operator /(const my_int &a,int b);
 };
 
 uint64_t inline abs(int64_t num);
@@ -89,6 +92,9 @@ my_int operator +(const my_int &a,const my_int &b);
 my_int operator *(const my_int &a,int64_t b);
 my_int operator *(const my_int &a,uint64_t b);
 my_int operator *(const my_int &a,const my_int &b);
+my_int operator /(const my_int &a,uint64_t b);
+my_int operator /(const my_int &a,int64_t b);
+my_int operator /(const my_int &a,int b);
 
 ostream &operator <<(ostream &os,const my_int &a);
 }

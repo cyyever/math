@@ -383,16 +383,12 @@ my_int operator -(const my_int &a)
 
 my_int operator -(const my_int &a,const my_int &b)
 {
-	my_int c=a;
-	c-=b;
-	return c;
+	return my_int(a)-=b;
 }
 
 my_int operator +(const my_int &a,const my_int &b)
 {
-	my_int c=a;
-	c+=b;
-	return c;
+	return my_int(a)+=b;
 }
 
 my_int& my_int::operator *=(const my_int &rhs)
@@ -446,7 +442,6 @@ my_int operator *(const my_int &a,uint64_t b)
 
 	if(b==0 || a==0)
 		return 0;
-
 	c=a;
 	if(b==1)
 		return c;
@@ -538,6 +533,21 @@ my_int& my_int::operator /=(int64_t num)
 my_int& my_int::operator /=(int num)
 {
 	return operator/=((int64_t)num);
+}
+
+my_int operator /(const my_int &a,uint64_t b)
+{
+	return my_int(a)/=b;
+}
+
+my_int operator /(const my_int &a,int64_t b)
+{
+	return my_int(a)/=b;
+}
+
+my_int operator /(const my_int &a,int b)
+{
+	return my_int(a)/=b;
 }
 
 ostream &operator <<(ostream &os,const my_int &a)
