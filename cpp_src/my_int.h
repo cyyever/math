@@ -15,13 +15,18 @@ using std::string;
 using std::list;
 using std::ostream;
 
+namespace my_math
+{
+
 //整数表示成 (sign) (my_digit ... my_digit)*10^power，10^10进制
 class my_int
 {
 	public:
 		my_int();
 		my_int(const string &int_str);
+		my_int(uint64_t num);
 		my_int(int64_t num);
+		my_int(int num);
 		~my_int() =default;
 		operator string() const;
 		my_int& operator +=(const my_int &rhs);
@@ -40,12 +45,10 @@ class my_int
 		static const int64_t my_base=10;			//单个my_digit的base
 #endif
 		list<int64_t> my_digit_list;
-		ssize_t power;
 		uint8_t sign;	//1-正数 0-负数
 
 		bool is_valid_int_str(const string &str);
 		int compare(const my_int &rhs) const;
-		my_int multiply_my_digit(int64_t my_digit) const;
 	friend bool operator ==(const my_int &a,const my_int &b);
 	friend bool operator !=(const my_int &a,const my_int &b);
 	friend bool operator <(const my_int &a,const my_int &b);
@@ -55,10 +58,13 @@ class my_int
 	friend my_int operator -(const my_int &a);
 	friend my_int operator -(const my_int &a,const my_int &b);
 	friend my_int operator +(const my_int &a,const my_int &b);
+	friend my_int operator *(const my_int &a,int64_t b);
+	friend my_int operator *(const my_int &a,uint64_t b);
 	friend my_int operator *(const my_int &a,const my_int &b);
 };
 
-bool my_int_cmp(const my_int &a,const my_int &b);
+uint64_t inline abs(int64_t num);
+
 bool operator ==(const my_int &a,const my_int &b);
 bool operator !=(const my_int &a,const my_int &b);
 bool operator <(const my_int &a,const my_int &b);
@@ -68,5 +74,10 @@ bool operator >=(const my_int &a,const my_int &b);
 my_int operator -(const my_int &a);
 my_int operator -(const my_int &a,const my_int &b);
 my_int operator +(const my_int &a,const my_int &b);
+my_int operator *(const my_int &a,int64_t b);
+my_int operator *(const my_int &a,uint64_t b);
+my_int operator *(const my_int &a,const my_int &b);
+
 ostream &operator <<(ostream &os,const my_int &a);
+}
 #endif

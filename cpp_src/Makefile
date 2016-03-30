@@ -13,7 +13,6 @@ LDFLAGS=-shared
 all:
 	make clean
 	make $(TARGET_LIB)
-	make clean
 $(TARGET_LIB):$(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 clean:
@@ -24,7 +23,8 @@ install:all
 	install -t $(DESTDIR)/usr/local/include/$(PKG_NAME) $(HEADERS)
 	echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
 	ldconfig
+	make clean
 
-debug_install:
+debug-install:
 	make clean
 	NDEBUG=0 make install 

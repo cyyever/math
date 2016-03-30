@@ -11,25 +11,24 @@
 #include <algorithm>
 
 #include "my_int.h"
-#include "my_log.h"
 
 using std::cout;
 using std::endl;
 
-my_int::my_int():power(0),sign(1)
+namespace my_math
+{
+
+my_int::my_int():sign(1)
 {
 	my_digit_list.push_back(0);
 	return;
 }
 
-my_int::my_int(const string &int_str):power(0),sign(1)
+my_int::my_int(const string &int_str):sign(1)
 {
 	decltype(int_str.size()) i,first_digit_index;
 	if(!is_valid_int_str(int_str))
-	{
-		my_log("invalid interger");
 		throw std::invalid_argument(int_str);
-	}
 
 	if(int_str[0]=='-')
 	{
@@ -50,34 +49,31 @@ my_int::my_int(const string &int_str):power(0),sign(1)
 	return;
 }
 
-my_int::my_int(int64_t num):power(0),sign(num<0?0:1)
+my_int::my_int(uint64_t num):sign(1)
 {
-	uint64_t tmp;
-
-	if(num<0)
-	{
-		if(num==INT64_MIN)
-		{
-			tmp=INT64_MAX;
-			tmp++;
-		}
-		else
-			tmp=-num;
-	}
-	else
-		tmp=num;
-
-	if(tmp==0)
+	if(num==0)
 		my_digit_list.push_back(0);
 	else
 	{
-		while(tmp)
+		while(num)
 		{
-			my_digit_list.push_back(tmp%my_base);
-			tmp/=my_base;
+			my_digit_list.push_back(num%my_base);
+			num/=my_base;
 		}
 	}
 	return;
+}
+
+my_int::my_int(int64_t num)
+{
+	*this=my_int(abs(num));
+	if(num<0)
+		sign=0;
+	return;
+}
+
+my_int::my_int(int num):my_int((int64_t)num)
+{
 }
 
 my_int::operator string() const
@@ -142,37 +138,20 @@ int my_int::compare(const my_int &rhs) const
 	return res;
 }
 
-my_int my_int::multiply_my_digit(int64_t my_digit) const
+uint64_t inline abs(int64_t num)
 {
-	my_int res;
-	int64_t carry;
-	__int128 tmp;
-	if(my_digit<0 || my_digit>=my_base)
-		throw std::range_error("my_digit is out of range");
+	uint64_t tmp;
+	if(num>=0)
+		return (uint64_t)num;
 
-	if(my_digit==0)
-		return 0;
-
-	res=*this;
-
-	carry=0;
-	for(auto it=res.my_digit_list.begin();it!=res.my_digit_list.end();it++)
+	if(num==INT64_MIN)
 	{
-		tmp=(*it)*my_digit+carry;
-		if(tmp>=my_base)
-		{
-			*it=tmp%my_base;
-			carry=tmp/my_base;
-		}
-		else
-		{
-			*it=tmp;
-			carry=0;
-		}
+		tmp=INT64_MAX;
+		tmp++;
 	}
-	if(carry)
-		res.my_digit_list.push_back(carry);
-	return res;
+	else
+		tmp=-num;
+	return tmp;
 }
 
 bool operator ==(const my_int &a,const my_int &b)
@@ -424,6 +403,8 @@ my_int& my_int::operator *=(const my_int &rhs)
 		return operator*=(tmp_this);
 	}
 
+	if(*this==0)
+		return *this;
 	if(rhs==0)
 	{
 		*this=0;
@@ -440,12 +421,67 @@ my_int& my_int::operator *=(const my_int &rhs)
 		sign=1;
 	for(auto it=rhs.my_digit_list.cbegin();it!=rhs.my_digit_list.cend();it++,cnt++)
 	{
-		my_int tmp=tmp_this.multiply_my_digit(*it);
+		my_int tmp=tmp_this*(*it);
 		for(i=0;i<cnt;i++)
 			tmp.my_digit_list.push_front(0);
 		operator+=(tmp);
 	}
 	return *this;
+}
+
+my_int operator *(const my_int &a,int64_t b)
+{
+	my_int c=operator *(a,abs(b));
+
+	if(b<0)
+		c.sign=0;
+	return c;
+}
+
+my_int operator *(const my_int &a,uint64_t b)
+{
+	my_int c;
+	int64_t carry;
+	unsigned __int128 tmp_my_digit,tmp_b;
+
+	if(b==0 || a==0)
+		return 0;
+
+	c=a;
+	if(b==1)
+		return c;
+
+	tmp_b=b;
+	carry=0;
+	for(auto it=c.my_digit_list.begin();it!=c.my_digit_list.end();it++)
+	{
+		tmp_my_digit=(*it)*tmp_b+carry;
+		if(tmp_my_digit>=my_int::my_base)
+		{
+			*it=tmp_my_digit%my_int::my_base;
+			carry=tmp_my_digit/my_int::my_base;
+		}
+		else
+		{
+			*it=tmp_my_digit;
+			carry=0;
+		}
+	}
+
+	while(carry)
+	{
+		if(carry>=my_int::my_base)
+		{
+			c.my_digit_list.push_back(carry%my_int::my_base);
+			carry/=my_int::my_base;
+		}
+		else
+		{
+			c.my_digit_list.push_back(carry);
+			carry=0;
+		}
+	}
+	return c;
 }
 
 my_int operator *(const my_int &a,const my_int &b)
@@ -477,4 +513,6 @@ bool my_int::is_valid_int_str(const string &str)
 		return true;
 	else
 		return false;
+}
+
 }

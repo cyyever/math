@@ -4,7 +4,7 @@
  *	日期：2016-03-28
  *	功能：测试my_log函数
  */
-#include <my_log.h>
+#include <my_math.h>
 
 int main(int argc, char** argv)
 {

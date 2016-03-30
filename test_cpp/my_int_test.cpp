@@ -7,15 +7,17 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <assert.h>
-#include <my_int.h>
+#include <cstdint>
+#include <cassert>
+#include <my_math.h>
 
 using namespace std;
+using namespace my_math;
 
 int main(int argc, char** argv)
 {
 	vector<string> invalid_interger_str={"aaa","0123"};
-	vector<string> valid_interger_str={"1","-1","0","-0","123456789012345678901","-12345678901234567890"};
+	vector<string> valid_interger_str={"1","-1","0","-0","123456789012345678901","-12345678901234567890",to_string(UINT64_MAX),to_string(INT64_MIN)};
 
 	for(auto it=invalid_interger_str.begin();it!=invalid_interger_str.end();it++)
 	{
@@ -34,7 +36,7 @@ int main(int argc, char** argv)
 		my_int a(*it);
 		assert(a==*it);
 	}
-	
+
 	my_int a=10,b=10;
 
 	assert(a==b);
@@ -114,8 +116,17 @@ int main(int argc, char** argv)
 	a*=b;
 	assert(a==0);
 
+	a=0;
+	b=-1;
+	a*=b;
+	assert(a==0);
+
 	a=2;
 	b=3;
 	assert(a*b==6);
+	
+	a=2;
+	assert(a*UINT64_MAX==string("36893488147419103230"));
+	assert(a*INT64_MIN==string("-18446744073709551616"));
 	return 0;
 }
