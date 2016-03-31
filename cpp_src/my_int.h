@@ -29,7 +29,11 @@ class my_int
 		my_int(int num);
 		~my_int() =default;
 		operator string() const;
+		my_int& operator +=(uint64_t rhs);
+		my_int& operator +=(int64_t rhs);
+		my_int& operator +=(int rhs);
 		my_int& operator +=(const my_int &rhs);
+//		my_int& operator -=(uint64_t rhs);
 		my_int& operator -=(const my_int &rhs);
 		my_int& operator ++();	//前缀
 		my_int& operator --();
@@ -43,6 +47,10 @@ class my_int
 		my_int& operator /=(int64_t rhs);
 		my_int& operator /=(int rhs);
 		my_int& operator /=(const my_int &rhs);
+		my_int& operator %=(uint64_t rhs);
+		my_int& operator %=(int64_t rhs);
+		my_int& operator %=(int rhs);
+		my_int& operator %=(const my_int &rhs);
 	private:
 #ifdef NDEBUG
 		static const size_t my_digit_num=18;			//单个my_digit所包含的位数
@@ -59,6 +67,7 @@ class my_int
 
 		//对常用的比较我们另外写函数，避免构造对象的开销
 		inline bool is_zero() const;				
+		inline bool is_abs_zero() const;				
 		inline bool is_abs_one() const;
 
 		int compare(const my_int &rhs) const;
@@ -72,8 +81,11 @@ class my_int
 	friend bool operator >(const my_int &a,const my_int &b);
 	friend bool operator >=(const my_int &a,const my_int &b);
 	friend my_int operator -(const my_int &a);
-	friend my_int operator -(const my_int &a,const my_int &b);
+	friend my_int operator +(const my_int &a,uint64_t b);
+	friend my_int operator +(const my_int &a,int64_t b);
+	friend my_int operator +(const my_int &a,int b);
 	friend my_int operator +(const my_int &a,const my_int &b);
+	friend my_int operator -(const my_int &a,const my_int &b);
 	friend my_int operator *(const my_int &a,uint64_t b);
 	friend my_int operator *(const my_int &a,int64_t b);
 	friend my_int operator *(const my_int &a,int b);
@@ -82,6 +94,10 @@ class my_int
 	friend my_int operator /(const my_int &a,int64_t b);
 	friend my_int operator /(const my_int &a,int b);
 	friend my_int operator /(const my_int &a,const my_int &b);
+	friend my_int operator %(const my_int &a,uint64_t b);
+	friend my_int operator %(const my_int &a,int64_t b);
+	friend my_int operator %(const my_int &a,int b);
+	friend my_int operator %(const my_int &a,const my_int &b);
 };
 
 uint64_t inline abs(int64_t num);
@@ -103,6 +119,10 @@ my_int operator /(const my_int &a,uint64_t b);
 my_int operator /(const my_int &a,int64_t b);
 my_int operator /(const my_int &a,int b);
 my_int operator /(const my_int &a,const my_int &b);
+my_int operator %(const my_int &a,uint64_t b);
+my_int operator %(const my_int &a,int64_t b);
+my_int operator %(const my_int &a,int b);
+my_int operator %(const my_int &a,const my_int &b);
 
 ostream &operator <<(ostream &os,const my_int &a);
 }

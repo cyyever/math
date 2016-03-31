@@ -190,6 +190,91 @@ bool operator >=(const my_int &a,const my_int &b)
 	return !(a<b);
 }
 
+my_int& my_int::operator +=(int64_t rhs)
+{
+	if(rhs>=0)
+		return operator+=((uint64_t)rhs);
+	else
+		return operator-=(abs(rhs));
+}
+
+my_int& my_int::operator +=(int rhs)
+{
+	return operator+=((int64_t)rhs);
+}
+
+my_int& my_int::operator +=(uint64_t rhs)
+{
+	if(sign==0)	//符号不同，转换成减法
+	{
+		sign=1-sign;
+		operator-=(rhs);
+		if(!is_zero())
+			sign=1-sign;
+		return *this;
+	}
+	unsigned __int128 tmp,carry;
+	auto it=my_digit_list.begin();
+
+	tmp=(unsigned __int128)(*it)+rhs;
+
+	if(tmp>=my_base)
+	{
+		carry=1;
+		tmp-=my_base;
+		if(tmp>=my_base)
+		{
+			carry+=(tmp/my_base);
+			*it=tmp%my_base;
+		}
+		else
+			*it=tmp;
+
+		it++;
+
+		while(it!=my_digit_list.end())
+		{
+			tmp=*it+carry;
+			if(tmp>=my_base)
+			{
+				carry=1;
+				tmp-=my_base;
+				if(tmp>=my_base)
+				{
+					carry+=(tmp/my_base);
+					*it=tmp%my_base;
+				}
+				else
+					*it=tmp;
+			}
+			else
+			{
+				*it=tmp;
+				carry=0;
+				break;
+			}
+			it++;
+		}
+
+		if(carry>0)
+		{
+			if(carry<my_base)
+				my_digit_list.push_back(carry);
+			else
+			{
+				while(carry)
+				{
+					my_digit_list.push_back(carry%my_base);
+					carry/=my_base;
+				}
+			}
+		}
+	}
+	else
+		*it=tmp;
+	return *this;
+}
+
 my_int& my_int::operator +=(const my_int &rhs)
 {
 	if(this==&rhs)
@@ -260,6 +345,99 @@ my_int& my_int::operator +=(const my_int &rhs)
 		my_digit_list.push_back(1);
 	return *this;
 }
+
+
+/*
+my_int& my_int::operator -=(uint64_t rhs)
+{
+	if(sign==0)	//符号不同，转换成加法
+	{
+		sign=1-sign;
+		operator+=(rhs);
+		if(!is_zero())
+			sign=1-sign;
+		return *this;
+	}
+
+
+
+
+	uint64_t carry=0;
+
+	auto it=my_digit_list.begin();
+	auto it2=rhs.my_digit_list.cbegin();
+	for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	{
+		*it-=(*it2+carry);
+		if((*it)<0)
+		{
+			*it+=my_base;
+			carry=1;
+		}
+		else
+			carry=0;
+	}
+	if(it2!=rhs.my_digit_list.cend())
+	{
+		do{
+			int64_t my_digit=-(*it2+carry);
+
+			if(my_digit<0)
+			{
+				my_digit+=my_base;
+				carry=1;
+			}
+			else
+				carry=0;
+			my_digit_list.push_back(my_digit);
+			it2++;
+		}
+		while(it2!=rhs.my_digit_list.cend());
+	}
+	else if(carry==1)
+	{
+		for(;it!=my_digit_list.end();it++)
+		{
+			*it-=1;
+			if((*it)<0)
+				*it+=my_base;
+			else
+			{
+				carry=0;
+				break;
+			}
+		}
+	}
+
+	if(carry==1)
+	{
+		my_digit_list.push_back(-1);
+		//这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
+		carry=0;
+		for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
+		{
+			*it=-(*it+carry);
+			if(*it<0)
+			{
+				*it+=my_base;
+				carry=1;
+			}
+			else
+				carry=0;
+		}
+		sign=1-sign;
+	}
+
+	//去除前面的0
+	while(my_digit_list.back()==0 && my_digit_list.size()>1)
+		my_digit_list.pop_back();
+
+	//如果两个相等的负数相减，这边我们要调整符号为正
+	if(my_digit_list.back()==0)
+		sign=1;
+	return *this;
+}
+*/
 
 my_int& my_int::operator -=(const my_int &rhs)
 {
@@ -383,19 +561,34 @@ my_int my_int::operator --(int)
 my_int operator -(const my_int &a)
 {
 	my_int b=a;
-	if(b.my_digit_list.back()!=0)
+	if(!b.is_zero())
 		b.sign=1-b.sign;
 	return b;
 }
 
-my_int operator -(const my_int &a,const my_int &b)
+my_int operator +(const my_int &a,uint64_t b)
 {
-	return my_int(a)-=b;
+	return my_int(a)+=b;
+}
+
+my_int operator +(const my_int &a,int64_t b)
+{
+	return my_int(a)+=b;
+}
+
+my_int operator +(const my_int &a,int b)
+{
+	return my_int(a)+=b;
 }
 
 my_int operator +(const my_int &a,const my_int &b)
 {
 	return my_int(a)+=b;
+}
+
+my_int operator -(const my_int &a,const my_int &b)
+{
+	return my_int(a)-=b;
 }
 
 my_int& my_int::operator *=(uint64_t rhs)
@@ -548,6 +741,9 @@ my_int& my_int::operator /=(uint64_t rhs)
 	//去除前面的0
 	while(my_digit_list.back()==0 && my_digit_list.size()>1)
 		my_digit_list.pop_back();
+
+	if(is_abs_zero())
+		sign=1;
 	return *this;
 }
 
@@ -612,7 +808,7 @@ my_int& my_int::operator /=(const my_int &rhs)
 	
 	*this=std::move(quotient);
 	
-	if(is_zero())
+	if(is_abs_zero())
 		sign=1;
 	else
 		sign=!(org_sign^rhs.sign);
@@ -639,6 +835,49 @@ my_int operator /(const my_int &a,const my_int &b)
 	return my_int(a)/=b;
 }
 
+my_int& my_int::operator %=(uint64_t rhs)
+{
+	*this=(*this)-((*this)/rhs)*rhs;
+	return *this;
+}
+
+my_int& my_int::operator %=(int64_t rhs)
+{
+	*this=(*this)-((*this)/rhs)*rhs;
+	return *this;
+}
+
+my_int& my_int::operator %=(int rhs)
+{
+	return operator%=((int64_t)rhs);
+}
+
+my_int& my_int::operator %=(const my_int &rhs)
+{
+	*this=(*this)-((*this)/rhs)*rhs;
+	return *this;
+}
+
+my_int operator %(const my_int &a,uint64_t b)
+{
+	return my_int(a)%=b;
+}
+
+my_int operator %(const my_int &a,int64_t b)
+{
+	return my_int(a)%=b;
+}
+
+my_int operator %(const my_int &a,int b)
+{
+	return my_int(a)%=b;
+}
+
+my_int operator %(const my_int &a,const my_int &b)
+{
+	return my_int(a)%=b;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;
@@ -648,6 +887,11 @@ ostream &operator <<(ostream &os,const my_int &a)
 inline bool my_int::is_zero() const
 {
 	return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
+}
+
+inline bool my_int::is_abs_zero() const
+{
+	return my_digit_list.back()==0 && my_digit_list.size()==1;
 }
 
 inline bool my_int::is_abs_one() const
