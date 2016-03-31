@@ -35,10 +35,13 @@ class my_int
 		my_int& operator --();
 		my_int operator ++(int);	//后缀
 		my_int operator --(int);
+		my_int& operator *=(uint64_t rhs);
+		my_int& operator *=(int64_t rhs);
+		my_int& operator *=(int rhs);
 		my_int& operator *=(const my_int &rhs);
-		my_int& operator /=(uint64_t num);
-		my_int& operator /=(int64_t num);
-		my_int& operator /=(int num);
+		my_int& operator /=(uint64_t rhs);
+		my_int& operator /=(int64_t rhs);
+		my_int& operator /=(int rhs);
 	private:
 #ifdef NDEBUG
 		static const size_t my_digit_num=18;			//单个my_digit所包含的位数

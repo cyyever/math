@@ -391,6 +391,66 @@ my_int operator +(const my_int &a,const my_int &b)
 	return my_int(a)+=b;
 }
 
+my_int& my_int::operator *=(uint64_t rhs)
+{
+	int64_t carry;
+	unsigned __int128 tmp_my_digit;
+
+	if(this->is_zero() || rhs==1)
+	{
+		return *this;
+	}
+	if(rhs==0)
+	{
+		*this=0;
+		return *this;
+	}
+
+	carry=0;
+	for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
+	{
+		tmp_my_digit=(unsigned __int128)(*it)*rhs+carry;
+		if(tmp_my_digit>=my_int::my_base)
+		{
+			*it=tmp_my_digit%my_int::my_base;
+			carry=tmp_my_digit/my_int::my_base;
+		}
+		else
+		{
+			*it=tmp_my_digit;
+			carry=0;
+		}
+	}
+
+	while(carry)
+	{
+		if(carry>=my_int::my_base)
+		{
+			my_digit_list.push_back(carry%my_int::my_base);
+			carry/=my_int::my_base;
+		}
+		else
+		{
+			my_digit_list.push_back(carry);
+			carry=0;
+		}
+	}
+	return *this;
+}
+
+my_int& my_int::operator *=(int64_t rhs)
+{
+	operator*=(abs(rhs));
+	if(rhs<0 && !this->is_zero())
+		sign=1-sign;
+	return *this;
+}
+
+my_int& my_int::operator *=(int rhs)
+{
+	return operator*=((int64_t)rhs);
+}
+
 my_int& my_int::operator *=(const my_int &rhs)
 {
 	if(this==&rhs)
@@ -399,9 +459,9 @@ my_int& my_int::operator *=(const my_int &rhs)
 		return operator*=(tmp_this);
 	}
 
-	if(this->is_zero())
+	if(this->is_zero() || rhs.is_one())
 		return *this;
-	if(rhs.is_zero() || rhs.is_one())
+	if(rhs.is_zero())
 	{
 		*this=rhs;
 		return *this;
@@ -436,47 +496,7 @@ my_int operator *(const my_int &a,int64_t b)
 
 my_int operator *(const my_int &a,uint64_t b)
 {
-	my_int c;
-	int64_t carry;
-	unsigned __int128 tmp_my_digit,tmp_b;
-
-	if(b==0 || a==0)
-		return 0;
-	c=a;
-	if(b==1)
-		return c;
-
-	tmp_b=b;
-	carry=0;
-	for(auto it=c.my_digit_list.begin();it!=c.my_digit_list.end();it++)
-	{
-		tmp_my_digit=(*it)*tmp_b+carry;
-		if(tmp_my_digit>=my_int::my_base)
-		{
-			*it=tmp_my_digit%my_int::my_base;
-			carry=tmp_my_digit/my_int::my_base;
-		}
-		else
-		{
-			*it=tmp_my_digit;
-			carry=0;
-		}
-	}
-
-	while(carry)
-	{
-		if(carry>=my_int::my_base)
-		{
-			c.my_digit_list.push_back(carry%my_int::my_base);
-			carry/=my_int::my_base;
-		}
-		else
-		{
-			c.my_digit_list.push_back(carry);
-			carry=0;
-		}
-	}
-	return c;
+	return my_int(a)*=b;
 }
 
 my_int operator *(const my_int &a,const my_int &b)
@@ -485,13 +505,13 @@ my_int operator *(const my_int &a,const my_int &b)
 }
 
 
-my_int& my_int::operator /=(uint64_t num)
+my_int& my_int::operator /=(uint64_t rhs)
 {
 	unsigned __int128 tmp;
-	if(num==0)
+	if(rhs==0)
 		throw std::invalid_argument("divided by zero");
 
-	if(this->is_zero() || num==1)
+	if(this->is_zero() || rhs==1)
 		return *this;
 
 	int64_t carry=0;
@@ -500,10 +520,10 @@ my_int& my_int::operator /=(uint64_t num)
 		tmp=*it;
 		if(carry!=0)
 			tmp+=carry*my_int::my_base;
-		if(tmp>=num)
+		if(tmp>=rhs)
 		{
-			*it=tmp/num;
-			carry=tmp%num;
+			*it=tmp/rhs;
+			carry=tmp%rhs;
 		}
 		else
 		{
@@ -520,17 +540,17 @@ my_int& my_int::operator /=(uint64_t num)
 	return *this;
 }
 
-my_int& my_int::operator /=(int64_t num)
+my_int& my_int::operator /=(int64_t rhs)
 {
-	operator/=(abs(num));
-	if(num<0 && !this->is_zero())
+	operator/=(abs(rhs));
+	if(rhs<0 && !this->is_zero())
 		sign=1-sign;
 	return *this;
 }
 
-my_int& my_int::operator /=(int num)
+my_int& my_int::operator /=(int rhs)
 {
-	return operator/=((int64_t)num);
+	return operator/=((int64_t)rhs);
 }
 
 my_int operator /(const my_int &a,uint64_t b)
