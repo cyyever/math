@@ -37,114 +37,32 @@ int main(int argc, char** argv)
 		assert(a==*it);
 	}
 
-	my_int a=10,b=10;
+	for(auto i=-200;i<=200;i++)
+	{
+		for(auto j=-200;j<=200;j++)
+		{
+			assert((i<j)==(my_int(i)<my_int(j)));
+			assert((i==j)==(my_int(i)==my_int(j)));
+			assert((i>j)==(my_int(i)>my_int(j)));
+			assert(i+j==(my_int(i)+my_int(j)));
+			assert(i-j==(my_int(i)-my_int(j)));
+			assert(i*j==(my_int(i)*my_int(j)));
+			if(j==0)
+				continue;
+			assert(i/j==(my_int(i)/my_int(j)));
+		}
+	}
 
-	assert(a==b);
-	b=20;
-	assert(a!=b);
-	b=-10;
-	assert(a>=b);
-	a=-11;
-	assert(a<b);
-	a=111;
-	b=99;
-	a+=b;
-	assert(a==210);
-	b=-99;
-	a=-111;
-	a+=b;
-	assert(a==-210);
-	a=99;
-	b=99;
-	a+=b;
-	assert(a==198);
-	a+=a;
-	assert(a==396);
-	a=11;
-	b=10000;
-	a-=b;
-	assert(a==-9989);
-
-	a=111111;
-	b=1;
-	a-=b;
-	assert(a==111110);
-	a=111111;
-	b=999999;
-	a-=b;
-	assert(a==-888888);
-	a=-111;
-	b=-111;
-	a-=b;
-	assert(a==0);
-
-	a=-111;
-	b=111;
-	a-=b;
-	assert(a==-222);
-	a-=a;
-	assert(a==0);
-	a=1;
-	b=-2;
-	a+=b;
-	assert(a==-1);
-	a=100;
-	assert(-a==-100);
-	a=0;
-	assert(-a==0);
-
-	a=2;
-	b=1;
-	assert(a-b==1);
-
-	a=1;
-	b=1;
-	assert(a+b==2);
-
+	my_int a;
 	a=0;
 	assert(++a==1);
 	assert(--a==0);
 	assert((a++)==0 && a==1);
 	assert((a--)==1 && a==0);
 
-	a=99;
-	a*=a;
-	assert(a==9801);
-
-	a=-1;
-	b=0;
-	a*=b;
-	assert(a==0);
-
-	a=0;
-	b=-1;
-	a*=b;
-	assert(a==0);
-
-	a=2;
-	b=3;
-	assert(a*b==6);
-	
 	a=2;
 	assert(a*UINT64_MAX==string("36893488147419103230"));
 	assert(a*INT64_MIN==string("-18446744073709551616"));
 
-	a=99;
-	a/=9;
-	assert(a==11);
-	a=77;
-	a/=9;
-	assert(a==8);
-	a=0;
-	a/=-1;
-	assert(a==0);
-
-	a=-77;
-	a/=9;
-	assert(a==(-77)/9);
-
-	a=77;
-	a/=-9;
-	assert(a==77/(-9));
 	return 0;
 }

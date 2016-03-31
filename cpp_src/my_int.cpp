@@ -117,7 +117,7 @@ int my_int::compare(const my_int &rhs) const
 		res=0;
 		auto it=--my_digit_list.end();
 		auto it2=--rhs.my_digit_list.cend();
-		for(;;it++,it2++)
+		for(;;it--,it2--)
 		{
 			if(*it<*it2)
 			{
@@ -202,7 +202,8 @@ my_int& my_int::operator +=(const my_int &rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		sign=1-sign;
+		if(!is_zero())
+			sign=1-sign;
 		return *this;
 	}
 	uint8_t carry=0;
@@ -220,38 +221,43 @@ my_int& my_int::operator +=(const my_int &rhs)
 		else
 			carry=0;
 	}
-	while(it2!=rhs.my_digit_list.cend())
+	if(it2!=rhs.my_digit_list.cend())
 	{
-		int64_t my_digit=*it2+carry;
+		do
+		{
+			int64_t my_digit=*it2+carry;
 
-		if(my_digit>=my_base)
-		{
-			carry=1;
-			my_digit-=my_base;
-		}
-		else
-			carry=0;
-		my_digit_list.push_back(my_digit);
-		it2++;
-	}
-	if(carry==1)
-	{
-		if(it!=my_digit_list.end())
-		{
-			do
+			if(my_digit>=my_base)
 			{
-				*it+=1;
-				if((*it)>=my_base)
-					*it-=my_base;
-				else
-					break;
-				it++;
+				carry=1;
+				my_digit-=my_base;
 			}
-			while(it!=my_digit_list.end());
+			else
+				carry=0;
+			my_digit_list.push_back(my_digit);
+			it2++;
 		}
-		else
-			my_digit_list.push_back(1);
+		while(it2!=rhs.my_digit_list.cend());
 	}
+	else if(carry==1 && it!=my_digit_list.end())
+	{
+		do
+		{
+			*it+=1;
+			if((*it)>=my_base)
+				*it-=my_base;
+			else
+			{
+				carry=0;
+				break;
+			}
+			it++;
+		}
+		while(it!=my_digit_list.end());
+	}
+
+	if(carry==1)
+		my_digit_list.push_back(1);
 	return *this;
 }
 
@@ -267,7 +273,8 @@ my_int& my_int::operator -=(const my_int &rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		sign=1-sign;
+		if(!is_zero())
+			sign=1-sign;
 		return *this;
 	}
 
@@ -459,22 +466,24 @@ my_int& my_int::operator *=(const my_int &rhs)
 		return operator*=(tmp_this);
 	}
 
-	if(this->is_zero() || rhs.is_one())
+	if(this->is_zero())
 		return *this;
+	if(rhs.is_abs_one())
+	{
+		if(rhs.sign==0)
+			sign=1-sign;
+		return *this;
+	}
 	if(rhs.is_zero())
 	{
 		*this=rhs;
 		return *this;
 	}
-
 	decltype(rhs.my_digit_list.size()) cnt=0,i;
+	uint8_t new_sign=!(sign^rhs.sign);
 	my_int tmp_this=std::move(*this);
 
-	my_digit_list={0};
-	if(sign!=rhs.sign)	
-		sign=0;
-	else
-		sign=1;
+	*this=0;
 	for(auto it=rhs.my_digit_list.cbegin();it!=rhs.my_digit_list.cend();it++,cnt++)
 	{
 		my_int tmp=tmp_this*(*it);
@@ -482,19 +491,21 @@ my_int& my_int::operator *=(const my_int &rhs)
 			tmp.my_digit_list.push_front(0);
 		operator+=(tmp);
 	}
+	sign=new_sign;
 	return *this;
+}
+
+my_int operator *(const my_int &a,uint64_t b)
+{
+	return my_int(a)*=b;
 }
 
 my_int operator *(const my_int &a,int64_t b)
 {
-	my_int c=operator *(a,abs(b));
-
-	if(b<0 && c!=0)
-		c.sign=0;
-	return c;
+	return my_int(a)*=b;
 }
 
-my_int operator *(const my_int &a,uint64_t b)
+my_int operator *(const my_int &a,int b)
 {
 	return my_int(a)*=b;
 }
@@ -553,6 +564,61 @@ my_int& my_int::operator /=(int rhs)
 	return operator/=((int64_t)rhs);
 }
 
+my_int& my_int::operator /=(const my_int &rhs)
+{
+	my_int quotient,tmp,low_bound,high_bound;
+	uint8_t org_sign=sign;
+	int compare_res=0;
+	if(rhs.is_zero())
+		throw std::invalid_argument("divided by zero");
+
+	if(this==&rhs)
+	{
+		*this=1;
+		return *this;
+	}
+
+	if(this->is_zero())
+		return *this;
+	if(rhs.is_abs_one())
+	{
+		if(rhs.sign==0)
+			sign=1-sign;
+		return *this;
+	}
+
+
+	//通过二分法找出来，注意这边我们转成正数
+	sign=1;
+	high_bound=*this;
+
+	while(low_bound<=high_bound)
+	{
+		my_int res=(high_bound+low_bound)/2;
+		tmp=res*rhs;
+		if(rhs.sign==0)
+			tmp.sign=1-tmp.sign;
+
+		compare_res=compare(tmp);
+		if(compare_res>=0)
+			quotient=std::move(res);
+		if(compare_res==0)
+			break;
+		else if(compare_res>0)
+			low_bound=res+1;
+		else
+			high_bound=res-1;
+	}
+	
+	*this=std::move(quotient);
+	
+	if(is_zero())
+		sign=1;
+	else
+		sign=!(org_sign^rhs.sign);
+	return *this;
+}
+
 my_int operator /(const my_int &a,uint64_t b)
 {
 	return my_int(a)/=b;
@@ -568,6 +634,11 @@ my_int operator /(const my_int &a,int b)
 	return my_int(a)/=b;
 }
 
+my_int operator /(const my_int &a,const my_int &b)
+{
+	return my_int(a)/=b;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
 	os<<(string)a;
@@ -579,9 +650,9 @@ inline bool my_int::is_zero() const
 	return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
 }
 
-inline bool my_int::is_one() const
+inline bool my_int::is_abs_one() const
 {
-	return my_digit_list.back()==1 && sign==1 && my_digit_list.size()==1;
+	return my_digit_list.back()==1 && my_digit_list.size()==1;
 }
 
 /*
