@@ -44,10 +44,9 @@ int main(int argc, char** argv)
 			assert((i<j)==(my_int(i)<my_int(j)));
 			assert((i==j)==(my_int(i)==my_int(j)));
 			assert((i>j)==(my_int(i)>my_int(j)));
-	//		cout<<"i "<<i<<"j "<<j<<"="<<(my_int(i)+j)<<endl;
 			assert(i+j==(my_int(i)+j));
-
 			assert(i+j==(my_int(i)+my_int(j)));
+			assert(i-j==(my_int(i)-j));
 			assert(i-j==(my_int(i)-my_int(j)));
 			assert(i*j==(my_int(i)*my_int(j)));
 			if(j==0)
@@ -59,6 +58,7 @@ int main(int argc, char** argv)
 		}
 	}
 	assert(my_int(INT64_MAX)+UINT64_MAX==string("27670116110564327422"));
+	assert(my_int(INT64_MAX)-UINT64_MAX==string("-9223372036854775808"));
 
 	my_int a;
 	a=0;
