@@ -481,9 +481,7 @@ my_int operator *(const my_int &a,uint64_t b)
 
 my_int operator *(const my_int &a,const my_int &b)
 {
-	my_int c=a;
-	c*=b;
-	return c;
+	return my_int(a)*=b;
 }
 
 
