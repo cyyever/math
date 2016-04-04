@@ -7,6 +7,7 @@
 #ifndef MY_COMBINAIORICS_H
 #define MY_COMBINAIORICS_H
 
+#include <vector>
 #include <cstdint>
 #include "my_int.h"
 
@@ -23,15 +24,22 @@ namespace my_math
 my_int binomial_coefficient(uint64_t n,uint32_t k);
 
 /*
- *	功能：生成组合
+ *	功能：生成在n个数中选k个数的所有组合
  *	参数：
- *		n,k：在n个数中选k个数的组合
- *		prev_combination：如果*prev_combination非NULL，把第一个组合写入此，否则包括上一次调用此函数生成的组合，此函数把下一个组合写入此
+ *		n,k：参数
  *	返回值：
- *		非NULL：返回*prev_combination
- *		NULL：组合已经全部生成完毕
+ *		第一个组合
  */
-//uint8_t *my_next_combination(uint64_t n,uint64_t k,uint8_t **prev_combination);
+std::vector<bool> my_next_combination(uint64_t n,uint64_t k);
 
+/*
+ *	功能：生成在n个数中选k个数的所有组合
+ *	参数：
+ *		n,k：参数
+ *		prev_combination：上一次调用此函数返回的组合	
+ *	返回值：
+ *		返回下一个组合，如果组合已经全部生成完毕，则vector为空
+ */
+std::vector<bool> my_next_combination(uint64_t n,uint64_t k,const std::vector<bool> &prev_combination);
 }
 #endif

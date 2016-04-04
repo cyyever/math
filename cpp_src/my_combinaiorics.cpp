@@ -53,67 +53,70 @@ my_int binomial_coefficient(uint64_t n,uint32_t k)
 	return numerator;
 }
 
-#ifdef cyy
 /*
- *	功能：生成组合
+ *	功能：生成在n个数中选k个数的所有组合
  *	参数：
- *		n,k：在n个数中选k个数的组合
- *		prev_combination：如果*prev_combination非NULL，把第一个组合写入此，否则包括上一次调用此函数生成的组合，此函数把下一个组合写入此
+ *		n,k：参数
  *	返回值：
- *		非NULL：返回*prev_combination
- *		NULL：组合已经全部生成完毕
+ *		第一个组合
  */
-uint8_t *my_next_combination(uint64_t n,uint64_t k,uint8_t **prev_combination)
+std::vector<bool> my_next_combination(uint64_t n,uint64_t k)
 {
-	uint64_t i,cnt;
-	uint8_t find_zero;
+	if(k>n)
+		throw std::out_of_range("k>n");
+
+	auto res=std::vector<bool>(n,false);
+	for(uint64_t i=0;i<k;i++)
+		res[i]=true;
+	return res;
+}
+
+/*
+ *	功能：生成在n个数中选k个数的所有组合
+ *	参数：
+ *		n,k：参数
+ *		prev_combination：上一次调用此函数返回的组合	
+ *	返回值：
+ *		返回下一个组合，如果组合已经全部生成完毕，则vector为空
+ */
+std::vector<bool> my_next_combination(uint64_t n,uint64_t k,const std::vector<bool> &prev_combination)
+{
+	std::vector<bool>::size_type i,j,cnt;
+	uint8_t find_false;
 
 	if(k>n)
-	{
-		my_log("k is out of range");
-		exit(EXIT_FAILURE);
-	}
-	if(!prev_combination)
-	{
-		my_log("prev_combination is NULL");
-		exit(EXIT_FAILURE);
-	}
+		throw std::out_of_range("k>n");
 
-	if(!*prev_combination)
-	{
-		*prev_combination=calloc(n,1);
-		if(!*prev_combination)
-		{
-			my_log("calloc failed:%m");
-			exit(EXIT_FAILURE);
-		}
-		memset(*prev_combination,1,k);
-		return *prev_combination;
-	}
+	auto res=prev_combination;
+	if(prev_combination.size()!=n)
+		throw std::invalid_argument("wrong prev_combination");
 
 	cnt=0;
-	find_zero=0;
+	find_false=0;
 	i=n-1;
 	while(1)
 	{
-		if((*prev_combination)[i]==1)
+		if(res[i]==true)
 		{
 			cnt++;
-			(*prev_combination)[i]=0;
-			if(find_zero)
+			res[i]=false;
+			if(find_false)
 			{
 				i++;
-				memset((*prev_combination)+i,1,cnt);
-				return *prev_combination;
+				for(j=0;j<cnt;j++)
+					res[i+j]=true;
+
+				return res;
 			}
 		}
 		else
-			find_zero=1;
+			find_false=1;
 		if(i==0)
 			break;
 		i--;
 	}
-	return NULL;
+	res.resize(0);
+	return res;
 }
-#endif
+
 }
