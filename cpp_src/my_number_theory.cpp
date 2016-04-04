@@ -7,13 +7,10 @@
 
 #include "my_number_theory.h"
 
-#include <vector>
 #include <iostream>
 
-using std::vector;
-
 const uint64_t cached_prime_upper_limit=10000000;
-static vector<uint64_t> primes(cached_prime_upper_limit+1,0);
+static std::vector<uint64_t> primes(cached_prime_upper_limit+1,0);
 
 namespace my_math
 {
@@ -135,45 +132,33 @@ bool is_prime(uint64_t num)
  *	返回值：
  *		NULL：失败
  *		非NULL：质数数组，以零结尾
-uint64_t *my_primes(uint64_t upper_limit)
+ */
+std::vector<uint64_t> get_primes(uint64_t upper_limit)
 {
-	uint64_t *local_primes;
 	uint64_t prime;
-	size_t i;
 
 	cache_primes();
 
-	local_primes=malloc(sizeof(*local_primes)*(upper_limit/2+1));
-	if(!local_primes)
-	{
-		my_log("malloc failed:%m");
-		return NULL;
-	}
+	std::vector<uint64_t> res;
 
-	for(i=0;i<prime_num;i++)
+	auto it=primes.begin();
+	for(;it!=primes.end();it++)
 	{
-		if(primes[i]>upper_limit)
-		{
-			local_primes[i]=0;
+		if(*it>upper_limit)
 			break;
-		}
-		local_primes[i]=primes[i];
+		res.push_back(*it);
 	}
 
-	if(i<prime_num)
-		return local_primes;
-
-	for(prime=10000001;prime<=upper_limit;prime+=2)
+	if(it==primes.end())
 	{
-		if(is_prime(prime))
+		for(prime=cached_prime_upper_limit;prime<=upper_limit;prime+=2)
 		{
-			local_primes[i]=prime;
-			i++;
+			if(is_prime(prime))
+				res.push_back(prime);
 		}
 	}
-	local_primes[i]=0;
-	return local_primes;
+	res.push_back(0);
+	return res;
 }
- */
 
 }

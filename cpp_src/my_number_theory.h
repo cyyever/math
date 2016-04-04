@@ -8,6 +8,7 @@
 #define MY_NUMBER_THEORY_H
 
 #include <cstdint>
+#include <vector>
 #include "my_int.h"
 
 namespace my_math
@@ -30,8 +31,8 @@ bool is_prime(uint64_t num);
  *	返回值：
  *		NULL：失败
  *		非NULL：质数数组，以零结尾
-uint64_t *my_primes(uint64_t upper_limit);
  */
+std::vector<uint64_t> get_primes(uint64_t upper_limit);
 
 }
 #endif

@@ -24,5 +24,10 @@ int main(int argc, char** argv)
 	for(auto it=non_primes.begin();it!=non_primes.end();it++)
 		assert(is_prime(*it)==false);
 
+	primes=get_primes(100);
+	for(auto it=primes.begin();it!=primes.end();it++)
+	{
+		cout<<*it<<endl;
+	}
 	return 0;
 }
