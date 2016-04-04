@@ -7,6 +7,10 @@
 #ifndef MY_NUMBER_THEORY_H
 #define MY_NUMBER_THEORY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <inttypes.h>
 #include "my_rat.h"
 
@@ -49,4 +53,8 @@ my_rat *my_binomial(int64_t n,uint32_t k);
  *		NULL：组合已经全部生成完毕
  */
 uint8_t *my_next_combination(uint64_t n,uint64_t k,uint8_t **prev_combination);
+
+#ifdef __cplusplus
+}
+#endif
 #endif

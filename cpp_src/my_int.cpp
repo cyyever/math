@@ -79,12 +79,22 @@ my_int::my_int(int num):my_int((int64_t)num)
 my_int::operator string() const
 {
 	string int_str;
+	uint8_t flag;
+	char tmp[my_digit_num+1];
 	if(sign==0)
 		int_str.push_back('-');
 
+	flag=1;
 	for(auto it=--my_digit_list.end();;it--)
 	{
-		int_str.append(std::to_string(*it));
+		if(flag)
+		{
+			sprintf(tmp,"%" PRId64,*it);
+			flag=0;
+		}
+		else
+			sprintf(tmp,"%0*" PRId64,(int)my_digit_num,*it);
+		int_str.append(tmp);
 		if(it==my_digit_list.begin())
 			break;
 	}
@@ -107,7 +117,7 @@ int my_int::compare(const my_int &rhs) const
 		return -1;
 	else if(sign>rhs.sign)
 		return 1;
-		
+
 	if(my_digit_list.size()<rhs.my_digit_list.size())
 		res=-1;
 	else if(my_digit_list.size()>rhs.my_digit_list.size())
@@ -753,19 +763,20 @@ my_int operator *(const my_int &a,const my_int &b)
 
 my_int& my_int::operator /=(uint64_t rhs)
 {
-	unsigned __int128 tmp;
+	unsigned __int128 tmp,carry;
 	if(rhs==0)
 		throw std::invalid_argument("divided by zero");
 
 	if(this->is_zero() || rhs==1)
 		return *this;
 
-	int64_t carry=0;
+	carry=0;
 	for(auto it=--my_digit_list.end();;it--)
 	{
 		tmp=*it;
-		if(carry!=0)
-			tmp+=carry*my_int::my_base;
+		if(carry)
+			tmp+=carry*my_base;
+
 		if(tmp>=rhs)
 		{
 			*it=tmp/rhs;
@@ -847,9 +858,9 @@ my_int& my_int::operator /=(const my_int &rhs)
 		else
 			high_bound=res-1;
 	}
-	
+
 	*this=std::move(quotient);
-	
+
 	if(is_abs_zero())
 		sign=1;
 	else

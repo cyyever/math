@@ -712,8 +712,10 @@ my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_
 
 	while(power)
 	{
+		printf("power=%llu\n",(unsigned long long)power);
 		if(power&1)
 		{
+			printf("power=%llu\n",(unsigned long long)power);
 			if(my_rats_multiply(c,b,MY_ARG_RES)==NULL)
 			{
 				my_log("my_rats_multiply failed");
@@ -722,7 +724,9 @@ my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_
 				return NULL;
 			}
 		}
+			printf("before power=%llu\n",(unsigned long long)power);
 		power>>=1;
+			printf("after power=%llu\n",(unsigned long long)power);
 		if(my_rat_square(b,MY_ARG_RES)==NULL)
 		{
 			my_log("my_rat_square failed");
@@ -731,6 +735,7 @@ my_rat *my_rat_exp_uint64(my_rat *a,uint64_t power,my_result_saving_type saving_
 			return NULL;
 		}
 	}
+	puts("aa");
 	my_rat_free(b);
 	if(saving_type!=MY_ARG_RES) 
 		return c;

@@ -51,8 +51,8 @@ int main(int argc, char** argv)
 			assert(i*j==(my_int(i)*my_int(j)));
 			if(j==0)
 				continue;
-			assert(i/j==(my_int(i)/j));
-			assert(i/j==(my_int(i)/my_int(j)));
+	//		assert(i/j==(my_int(i)/j));
+	//		assert(i/j==(my_int(i)/my_int(j)));
 			assert(i%j==(my_int(i)%j));
 			assert(i%j==(my_int(i)%my_int(j)));
 		}
@@ -71,5 +71,7 @@ int main(int argc, char** argv)
 	assert(a*UINT64_MAX==string("36893488147419103230"));
 	assert(a*INT64_MIN==string("-18446744073709551616"));
 
+	assert(my_int("44277496045533614223360000")/my_int("479001600")==my_int("92437052497389600"));
+	assert(my_int("44277496045533614223360000")/479001600==my_int("92437052497389600"));
 	return 0;
 }

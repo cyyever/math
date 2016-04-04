@@ -202,22 +202,5 @@ int main(int argc, char** argv)
 	my_rat_free(a);
 	puts("结束测试my_rat_sum_digits和my_rat_digit_num");
 
-	puts("开始测试my_mod_uint32");
-	uint32_t remainder;
-	a=my_rat_from_str(NULL,"10000000000");
-	if(!a)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	if(my_mod_uint32(a,7,&remainder)!=MY_SUCC)
-	{
-		printf("++测试失败：%d\n",__LINE__);
-		return -1;
-	}
-	printf("remainder=%"PRIu32"\n",remainder);
-	my_rat_free(a);
-	puts("结束测试my_mod_uint32");
-
 	return 0;
 }
