@@ -29,8 +29,7 @@ bool is_prime(uint64_t num);
  *	参数：
  *		upper_limit：质数上限
  *	返回值：
- *		NULL：失败
- *		非NULL：质数数组，以零结尾
+ *		质数vector
  */
 std::vector<uint64_t> get_primes(uint64_t upper_limit);
 

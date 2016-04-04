@@ -10,7 +10,7 @@
 #include <iostream>
 
 const uint64_t cached_prime_upper_limit=10000000;
-static std::vector<uint64_t> primes(cached_prime_upper_limit+1,0);
+static std::vector<uint64_t> cached_primes(cached_prime_upper_limit+1,0);
 
 namespace my_math
 {
@@ -25,24 +25,24 @@ static void cache_primes(void)
 {
 	uint64_t i,j;
 
-	if(primes.back()==0)
+	if(cached_primes.back()==0)
 	{
 		//标识质数
 		for(i=2;i<=cached_prime_upper_limit;i++)
-			primes[i]=1;
+			cached_primes[i]=1;
 		for(i=2;i<=cached_prime_upper_limit;i++)
 		{
-			if(primes[i])
+			if(cached_primes[i])
 				for(j=i*2;j<=cached_prime_upper_limit;j+=i)
-					primes[j]=0;
+					cached_primes[j]=0;
 		}
 		//重新定位
 		for(i=2,j=0;i<=cached_prime_upper_limit;i++)
 		{
-			if(primes[i])
-				primes[j++]=i;
+			if(cached_primes[i])
+				cached_primes[j++]=i;
 		}
-		primes.resize(j);
+		cached_primes.resize(j);
 	}
 	return;
 }
@@ -57,7 +57,7 @@ static void cache_primes(void)
  */
 bool is_prime(uint64_t num)
 {
-	decltype(primes.size())	i,j,k;
+	decltype(cached_primes.size())	i,j,k;
 	uint64_t square,prime;
 
 	cache_primes();
@@ -68,18 +68,18 @@ bool is_prime(uint64_t num)
 		return false;
 	if((num&1)==0 && num!=2)
 		return false;
-	if(num<=primes.back())
+	if(num<=cached_primes.back())
 	{
 		i=0;
-		j=primes.size()-1;
+		j=cached_primes.size()-1;
 
 		while(i<=j)
 		{
 			k=(i+j)/2;
 
-			if(num==primes[k])
+			if(num==cached_primes[k])
 				return true;
-			else if(num<primes[k])
+			else if(num<cached_primes[k])
 				j=k-1;
 			else
 				i=k+1;
@@ -89,7 +89,7 @@ bool is_prime(uint64_t num)
 
 	for(i=1;i<100;i++)
 	{
-		if((num%primes[i])==0)
+		if((num%cached_primes[i])==0)
 			return false;
 	}
 
@@ -109,11 +109,11 @@ bool is_prime(uint64_t num)
 		else
 			i=k+1;
 	}
-	for(i=100;i<primes.size();i++)
+	for(i=100;i<cached_primes.size();i++)
 	{
-		if(primes[i]>j)
+		if(cached_primes[i]>j)
 			return true;
-		if((num%primes[i])==0)
+		if((num%cached_primes[i])==0)
 			return false;
 	}
 
@@ -130,8 +130,7 @@ bool is_prime(uint64_t num)
  *	参数：
  *		upper_limit：质数上限
  *	返回值：
- *		NULL：失败
- *		非NULL：质数数组，以零结尾
+ *		质数vector
  */
 std::vector<uint64_t> get_primes(uint64_t upper_limit)
 {
@@ -141,15 +140,15 @@ std::vector<uint64_t> get_primes(uint64_t upper_limit)
 
 	std::vector<uint64_t> res;
 
-	auto it=primes.begin();
-	for(;it!=primes.end();it++)
+	auto it=cached_primes.begin();
+	for(;it!=cached_primes.end();it++)
 	{
 		if(*it>upper_limit)
 			break;
 		res.push_back(*it);
 	}
 
-	if(it==primes.end())
+	if(it==cached_primes.end())
 	{
 		for(prime=cached_prime_upper_limit;prime<=upper_limit;prime+=2)
 		{
@@ -157,7 +156,6 @@ std::vector<uint64_t> get_primes(uint64_t upper_limit)
 				res.push_back(prime);
 		}
 	}
-	res.push_back(0);
 	return res;
 }
 
