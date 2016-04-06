@@ -691,9 +691,17 @@ my_int& my_int::operator *=(uint64_t rhs)
 
 my_int& my_int::operator *=(int64_t rhs)
 {
-	operator*=(abs(rhs));
-	if(rhs<0 && !this->is_zero())
-		sign=1-sign;
+	if(rhs==-1)	//这个常用，为了提高性能，特殊判定
+	{
+		if(!this->is_zero())
+			sign=1-sign;
+	}
+	else
+	{
+		operator*=(abs(rhs));
+		if(rhs<0 && !this->is_zero())
+			sign=1-sign;
+	}
 	return *this;
 }
 

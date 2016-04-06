@@ -17,7 +17,7 @@ using std::endl;
 namespace my_math
 {
 
-my_rat::my_rat():p(0),q(1),sign(1)
+my_rat::my_rat():p(0),q(1)
 {
 }
 
@@ -42,32 +42,29 @@ my_rat::my_rat(const my_int &p,const my_int &q):p(p),q(q)
 	if(q.is_zero())
 		throw std::invalid_argument("q is zero");
 
-	if(p.sign!=q.sign)
-		sign=0;
-	else
-		sign=1;
-	this->p.sign=1;
-	this->q.sign=1;
+	if(q<0)
+	{
+		(this->p)*=-1;
+		(this->q)*=-1;
+	}
 }
 
 my_rat::my_rat(my_int &&p,my_int &&q):p(p),q(q)
 {
 	if(q.is_zero())
 		throw std::invalid_argument("q is zero");
-
-	if(p.sign!=q.sign)
-		sign=0;
-	else
-		sign=1;
-	this->p.sign=1;
-	this->q.sign=1;
+	if(q<0)
+	{
+		(this->p)*=-1;
+		(this->q)*=-1;
+	}
 }
 
 my_rat::operator string() const
 {
 	string tmp;
 	
-	if(sign==0)
+	if(p<0)
 		tmp.push_back('-');
 	tmp.append(p);
 	tmp.push_back('/');
@@ -86,16 +83,12 @@ my_rat::operator string() const
  */
 int my_rat::compare(const my_rat &rhs) const
 {
-	int res;
-	if(sign<rhs.sign)
+	if(p.sign<rhs.p.sign)
 		return -1;
-	else if(sign>rhs.sign)
+	else if(p.sign>rhs.p.sign)
 		return 1;
-
-	res=(p*rhs.q).compare(q*rhs.p);
-	if(sign==0)	//负数
-		res=-res;
-	return res;
+	
+	return (p*rhs.q).compare(q*rhs.p);
 }
 
 bool operator ==(const my_rat &a,const my_rat &b)
@@ -138,7 +131,7 @@ my_rat operator -(const my_rat &a)
 {
 	my_rat b=a;
 	if(!b.is_zero())
-		b.sign=1-b.sign;
+		b.p*=-1;
 	return b;
 }
 
@@ -157,12 +150,12 @@ my_rat& my_rat::operator +=(int rhs)
 
 my_rat& my_rat::operator +=(uint64_t rhs)
 {
-	if(sign==0)	//符号不同，转换成减法
+	if(p<0)	//符号不同，转换成减法
 	{
-		sign=1-sign;
+		p*=-1;
 		operator-=(rhs);
 		if(!is_zero())
-			sign=1-sign;
+			p*=-1;
 		return *this;
 	}
 
@@ -178,12 +171,12 @@ my_rat& my_rat::operator +=(const my_rat &rhs)
 		return *this;
 	}
 
-	if(sign!=rhs.sign)	//符号不同，转换成减法
+	if(p.sign!=rhs.p.sign)	//符号不同，转换成减法
 	{
-		sign=1-sign;
+		p*=-1;
 		operator-=(rhs);
 		if(!is_zero())
-			sign=1-sign;
+			p*=-1;
 		return *this;
 	}
 
@@ -215,25 +208,18 @@ my_rat operator +(const my_rat &a,const my_rat &b)
 
 my_rat& my_rat::operator -=(uint64_t rhs)
 {
-	if(sign==0)	//符号不同，转换成加法
+	if(p<0)	//符号不同，转换成加法
 	{
-		sign=1-sign;
+		p*=-1;
 		operator+=(rhs);
 		if(!is_zero())
-			sign=1-sign;
+			p*=-1;
 		return *this;
 	}
 
 	p-=q*rhs;
 	if(p.is_zero())
-	{
-		set_zero();
-	}
-	else if(p.sign==0)
-	{
-		p.sign=1;
-		sign=1-sign;
-	}
+		q=1;
 	return *this;
 }
 
@@ -254,27 +240,23 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		set_zero();
+		p=1;
+		q=0;
 		return *this;
 	}
 
-	if(sign!=rhs.sign)	//符号不同，转换成加法
+	if(p.sign!=rhs.p.sign)	//符号不同，转换成加法
 	{
-		sign=1-sign;
+		p*=-1;
 		operator+=(rhs);
 		if(!is_zero())
-			sign=1-sign;
+			p*=-1;
 		return *this;
 	}
 
 	my_int tmp_p=p*rhs.q-q*rhs.p;
 	q*=rhs.q;
 	p=tmp_p;
-	if(p.sign==0)
-	{
-		p.sign=1;
-		sign=1-sign;
-	}
 	return *this;
 }
 
@@ -302,7 +284,7 @@ my_rat& my_rat::operator *=(uint64_t rhs)
 {
 	p*=rhs;
 	if(p.is_zero())
-		set_zero();
+		q=1;
 	return *this;
 }
 
@@ -310,7 +292,7 @@ my_rat& my_rat::operator *=(int64_t rhs)
 {
 	operator*=(abs(rhs));
 	if(rhs<0 && !this->is_zero())
-		sign=1-sign;
+		p*=-1;
 	return *this;
 }
 
@@ -325,7 +307,6 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 	{
 		p*=p;
 		q*=q;
-		sign=1;
 		return *this;
 	}
 
@@ -333,8 +314,8 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 		return *this;
 	if(rhs.is_abs_one())
 	{
-		if(rhs.sign==0)
-			sign=1-sign;
+		if(rhs.p<0)
+			p*=-1;
 		return *this;
 	}
 	if(rhs.is_zero())
@@ -345,12 +326,9 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 
 	p*=rhs.p;
 	if(p.is_zero())
-		set_zero();
+		q=1;
 	else
-	{
 		q*=rhs.q;
-		sign=!(sign^rhs.sign);
-	}
 	return *this;
 }
 
@@ -390,7 +368,7 @@ my_rat& my_rat::operator /=(int64_t rhs)
 {
 	operator/=(abs(rhs));
 	if(rhs<0 && !this->is_zero())
-		sign=1-sign;
+		p*=-1;
 	return *this;
 }
 
@@ -408,7 +386,6 @@ my_rat& my_rat::operator /=(const my_rat &rhs)
 	{
 		p=1;
 		q=1;
-		sign=1;
 		return *this;
 	}
 
@@ -417,14 +394,18 @@ my_rat& my_rat::operator /=(const my_rat &rhs)
 
 	if(rhs.is_abs_one())
 	{
-		if(rhs.sign==0)
-			sign=1-sign;
+		if(rhs.p<0)
+			p*=-1;
 		return *this;
 	}
 
 	p*=rhs.q;
 	q*=rhs.p;
-	sign=!(sign^rhs.sign);
+	if(q<0)
+	{
+		p*=-1;
+		q*=-1;
+	}
 	return *this;
 }
 
@@ -456,7 +437,6 @@ my_rat operator /(uint64_t a,const my_rat &b)
 		return my_rat();
 
 	my_rat c(b.q,b.p);
-	c.sign=b.sign;
 	if(a==1)
 		return c;
 	c.p*=a;
@@ -466,7 +446,7 @@ my_rat operator /(int64_t a,const my_rat &b)
 {
 	my_rat c=operator/(abs(a),b);
 	if(a<0 && !c.is_zero())
-		c.sign=1-c.sign;
+		c.p*=-1;
 	return c;
 }
 my_rat operator /(int a,const my_rat &b)

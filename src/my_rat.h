@@ -47,17 +47,8 @@ class my_rat
 		my_rat& operator %=(int rhs);
 		my_rat& operator %=(const my_rat &rhs);
 	private:
-		my_int p;			//分子
-		my_int q;			//分母
-		uint8_t sign;	//1-正数 0-负数
-
-		void set_zero()
-		{
-			p=0;
-			q=1;
-			sign=1;
-			return;
-		}
+		my_int p;			//分子，有理数的符号由它体现
+		my_int q;			//分母，恒为正数
 
 		//对常用的比较我们另外写函数，避免构造对象的开销
 		bool is_zero() const
