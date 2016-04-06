@@ -37,5 +37,21 @@ int main(int argc, char** argv)
 		assert(a==*it);
 	}
 
+	for(auto q=-200;q<=200;q++)
+	{
+		if(q==0)
+			continue;
+		if(q+1==0)
+			continue;
+		assert(my_rat(-1,q)<my_rat(-1,q+1));
+		assert(my_rat(1,q)==my_rat(2,q*2));
+		assert(my_rat(1,q)>my_rat(1,q+1));
+		assert(my_rat(1,q)+my_rat(1,q+1)==my_rat(2*q+1,q*(q+1)));
+		assert(my_rat(1,q)+q==my_rat(q*q+1,q));
+		assert(my_rat(1,q)-q==my_rat(1-q*q,q));
+		assert(my_rat(1,q)*q==my_rat(1,1));
+		assert(my_rat(1,q)/q==my_rat(1,q*q));
+	}
+
 	return 0;
 }

@@ -72,11 +72,7 @@ class my_int
 		//对常用的比较我们另外写函数，避免构造对象的开销
 		bool is_zero() const
 		{
-			return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
-		}
-		bool is_abs_zero() const
-		{
-			return my_digit_list.back()==0 && my_digit_list.size()==1;
+			return my_digit_list.back()==0;
 		}
 		bool is_abs_one() const
 		{

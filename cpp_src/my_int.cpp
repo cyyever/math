@@ -227,7 +227,7 @@ my_int& my_int::operator +=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -305,7 +305,7 @@ my_int& my_int::operator +=(const my_int &rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -390,7 +390,7 @@ my_int& my_int::operator -=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -486,7 +486,7 @@ my_int& my_int::operator -=(uint64_t rhs)
 		my_digit_list.pop_back();
 
 	//如果两个相等的负数相减，这边我们要调整符号为正
-	if(is_abs_zero())
+	if(is_zero())
 		sign=1;
 	return *this;
 }
@@ -516,7 +516,7 @@ my_int& my_int::operator -=(const my_int &rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -592,7 +592,7 @@ my_int& my_int::operator -=(const my_int &rhs)
 		my_digit_list.pop_back();
 
 	//如果两个相等的负数相减，这边我们要调整符号为正
-	if(is_abs_zero())
+	if(is_zero())
 		sign=1;
 	return *this;
 }
@@ -794,7 +794,7 @@ my_int& my_int::operator /=(uint64_t rhs)
 	while(my_digit_list.back()==0 && my_digit_list.size()>1)
 		my_digit_list.pop_back();
 
-	if(is_abs_zero())
+	if(is_zero())
 		sign=1;
 	return *this;
 }
@@ -860,7 +860,7 @@ my_int& my_int::operator /=(const my_int &rhs)
 
 	*this=std::move(quotient);
 
-	if(is_abs_zero())
+	if(is_zero())
 		sign=1;
 	else
 		sign=!(org_sign^rhs.sign);

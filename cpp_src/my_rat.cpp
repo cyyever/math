@@ -17,6 +17,10 @@ using std::endl;
 namespace my_math
 {
 
+my_rat::my_rat():p(0),q(1),sign(1)
+{
+}
+
 /*
  *	功能：通过字符串构造有理数，字符串必须是分数形式
  * 	参数：
@@ -157,7 +161,7 @@ my_rat& my_rat::operator +=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -178,7 +182,7 @@ my_rat& my_rat::operator +=(const my_rat &rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -215,13 +219,17 @@ my_rat& my_rat::operator -=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_abs_zero())
+		if(!is_zero())
 			sign=1-sign;
 		return *this;
 	}
 
 	p-=q*rhs;
-	if(p.sign==0)
+	if(p.is_zero())
+	{
+		set_zero();
+	}
+	else if(p.sign==0)
 	{
 		p.sign=1;
 		sign=1-sign;
@@ -246,9 +254,7 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		p=0;
-		q=1;
-		sign=1;
+		set_zero();
 		return *this;
 	}
 
@@ -292,35 +298,11 @@ my_rat operator -(const my_rat &a,const my_rat &b)
 	return my_rat(a)-=b;
 }
 
-my_rat& my_rat::operator ++()
-{
-	operator+=(1);
-	return *this;
-}
-
-my_rat& my_rat::operator --()
-{
-	operator-=(1);
-	return *this;
-}
-
-my_rat my_rat::operator ++(int)
-{
-	my_rat tmp=*this;
-	operator+=(1);
-	return tmp;
-}
-
-my_rat my_rat::operator --(int)
-{
-	my_rat tmp=*this;
-	operator-=(1);
-	return tmp;
-}
-
 my_rat& my_rat::operator *=(uint64_t rhs)
 {
 	p*=rhs;
+	if(p.is_zero())
+		set_zero();
 	return *this;
 }
 
@@ -362,8 +344,13 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 	}
 
 	p*=rhs.p;
-	q*=rhs.q;
-	sign=!(sign^rhs.sign);
+	if(p.is_zero())
+		set_zero();
+	else
+	{
+		q*=rhs.q;
+		sign=!(sign^rhs.sign);
+	}
 	return *this;
 }
 
@@ -387,43 +374,15 @@ my_rat operator *(const my_rat &a,const my_rat &b)
 	return my_rat(a)*=b;
 }
 
-#ifdef cyy
 my_rat& my_rat::operator /=(uint64_t rhs)
 {
-	unsigned __int128 tmp,carry;
 	if(rhs==0)
 		throw std::invalid_argument("divided by zero");
 
 	if(this->is_zero() || rhs==1)
 		return *this;
 
-	carry=0;
-	for(auto it=--my_digit_list.end();;it--)
-	{
-		tmp=*it;
-		if(carry)
-			tmp+=carry*my_base;
-
-		if(tmp>=rhs)
-		{
-			*it=tmp/rhs;
-			carry=tmp%rhs;
-		}
-		else
-		{
-			*it=0;
-			carry=tmp;
-		}
-		if(it==my_digit_list.begin())
-			break;
-	}
-
-	//去除前面的0
-	while(my_digit_list.back()==0 && my_digit_list.size()>1)
-		my_digit_list.pop_back();
-
-	if(is_abs_zero())
-		sign=1;
+	q*=rhs;
 	return *this;
 }
 
@@ -442,59 +401,30 @@ my_rat& my_rat::operator /=(int rhs)
 
 my_rat& my_rat::operator /=(const my_rat &rhs)
 {
-	my_rat quotient,tmp,low_bound,high_bound;
-	uint8_t org_sign=sign;
-	int compare_res=0;
 	if(rhs.is_zero())
 		throw std::invalid_argument("divided by zero");
 
 	if(this==&rhs)
 	{
-		*this=1;
+		p=1;
+		q=1;
+		sign=1;
 		return *this;
 	}
 
 	if(this->is_zero())
 		return *this;
 
-	/*
 	if(rhs.is_abs_one())
 	{
 		if(rhs.sign==0)
 			sign=1-sign;
 		return *this;
 	}
-	*/
 
-
-	//通过二分法找出来，注意这边我们转成正数
-	sign=1;
-	high_bound=*this;
-
-	while(low_bound<=high_bound)
-	{
-		my_rat res=(high_bound+low_bound)/2;
-		tmp=res*rhs;
-		if(rhs.sign==0)
-			tmp.sign=1-tmp.sign;
-
-		compare_res=compare(tmp);
-		if(compare_res>=0)
-			quotient=std::move(res);
-		if(compare_res==0)
-			break;
-		else if(compare_res>0)
-			low_bound=res+1;
-		else
-			high_bound=res-1;
-	}
-
-	*this=std::move(quotient);
-
-	if(is_abs_zero())
-		sign=1;
-	else
-		sign=!(org_sign^rhs.sign);
+	p*=rhs.q;
+	q*=rhs.p;
+	sign=!(sign^rhs.sign);
 	return *this;
 }
 
@@ -518,47 +448,30 @@ my_rat operator /(const my_rat &a,const my_rat &b)
 	return my_rat(a)/=b;
 }
 
-my_rat& my_rat::operator %=(uint64_t rhs)
+my_rat operator /(uint64_t a,const my_rat &b)
 {
-	*this=(*this)-((*this)/rhs)*rhs;
-	return *this;
-}
+	if(b.is_zero())
+		throw std::invalid_argument("divided by zero");
+	if(a==0)
+		return my_rat();
 
-my_rat& my_rat::operator %=(int64_t rhs)
-{
-	*this=(*this)-((*this)/rhs)*rhs;
-	return *this;
+	my_rat c(b.q,b.p);
+	c.sign=b.sign;
+	if(a==1)
+		return c;
+	c.p*=a;
+	return c;
 }
-
-my_rat& my_rat::operator %=(int rhs)
+my_rat operator /(int64_t a,const my_rat &b)
 {
-	return operator%=((int64_t)rhs);
+	my_rat c=operator/(abs(a),b);
+	if(a<0 && !c.is_zero())
+		c.sign=1-c.sign;
+	return c;
 }
-
-my_rat& my_rat::operator %=(const my_rat &rhs)
+my_rat operator /(int a,const my_rat &b)
 {
-	*this=(*this)-((*this)/rhs)*rhs;
-	return *this;
-}
-
-my_rat operator %(const my_rat &a,uint64_t b)
-{
-	return my_rat(a)%=b;
-}
-
-my_rat operator %(const my_rat &a,int64_t b)
-{
-	return my_rat(a)%=b;
-}
-
-my_rat operator %(const my_rat &a,int b)
-{
-	return my_rat(a)%=b;
-}
-
-my_rat operator %(const my_rat &a,const my_rat &b)
-{
-	return my_rat(a)%=b;
+	return operator/((int64_t)a,b);
 }
 
 ostream &operator <<(ostream &os,const my_rat &a)
@@ -567,22 +480,4 @@ ostream &operator <<(ostream &os,const my_rat &a)
 	return os;
 }
 
-/*
- *	功能：检查传入的字符串是否有理数，即是否匹配 ^[+-]?[1-9][0-9]*$
- * 	参数：
- *		str：要检查的字符串
- * 	返回值：
- *		true：是
- *		false：不是
- */
-bool my_rat::is_valid_int_str(const string &str)
-{
-	std::regex int_regex("^[+-]?(0|[1-9][0-9]*)$");
-	std::smatch m;
-	if(std::regex_search(str,m,int_regex))
-		return true;
-	else
-		return false;
-}
-#endif
 }
