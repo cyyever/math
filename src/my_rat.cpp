@@ -39,9 +39,8 @@ my_rat::my_rat(const string &rat_str)
 
 my_rat::my_rat(const my_int &p,const my_int &q):p(p),q(q)
 {
-	if(q.is_zero())
+	if(q==0)
 		throw std::invalid_argument("q is zero");
-
 	if(q<0)
 	{
 		(this->p)*=-1;
@@ -51,7 +50,7 @@ my_rat::my_rat(const my_int &p,const my_int &q):p(p),q(q)
 
 my_rat::my_rat(my_int &&p,my_int &&q):p(p),q(q)
 {
-	if(q.is_zero())
+	if(q==0)
 		throw std::invalid_argument("q is zero");
 	if(q<0)
 	{
@@ -83,10 +82,13 @@ my_rat::operator string() const
  */
 int my_rat::compare(const my_rat &rhs) const
 {
-	if(p.sign<rhs.p.sign)
-		return -1;
-	else if(p.sign>rhs.p.sign)
-		return 1;
+	if(p.diffrent_sign(rhs.p))
+	{
+		if(p<0)
+			return -1;
+		else
+			return 1;
+	}
 	
 	return (p*rhs.q).compare(q*rhs.p);
 }
@@ -171,7 +173,7 @@ my_rat& my_rat::operator +=(const my_rat &rhs)
 		return *this;
 	}
 
-	if(p.sign!=rhs.p.sign)	//符号不同，转换成减法
+	if(p.diffrent_sign(rhs.p))	//符号不同，转换成减法
 	{
 		p*=-1;
 		operator-=(rhs);
@@ -218,7 +220,7 @@ my_rat& my_rat::operator -=(uint64_t rhs)
 	}
 
 	p-=q*rhs;
-	if(p.is_zero())
+	if(p==0)
 		q=1;
 	return *this;
 }
@@ -245,7 +247,7 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 		return *this;
 	}
 
-	if(p.sign!=rhs.p.sign)	//符号不同，转换成加法
+	if(p.diffrent_sign(rhs.p))	//符号不同，转换成加法
 	{
 		p*=-1;
 		operator+=(rhs);
@@ -283,7 +285,7 @@ my_rat operator -(const my_rat &a,const my_rat &b)
 my_rat& my_rat::operator *=(uint64_t rhs)
 {
 	p*=rhs;
-	if(p.is_zero())
+	if(p==0)
 		q=1;
 	return *this;
 }
@@ -325,7 +327,7 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 	}
 
 	p*=rhs.p;
-	if(p.is_zero())
+	if(p==0)
 		q=1;
 	else
 		q*=rhs.q;

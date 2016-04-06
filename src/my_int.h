@@ -31,6 +31,12 @@ class my_int
 		my_int(int num);
 		~my_int() =default;
 		operator string() const;
+		bool diffrent_sign(const my_int &rhs) const
+		{
+			return sign!=rhs.sign;
+		}
+		int compare(const my_int &rhs) const;
+
 		my_int& operator +=(uint64_t rhs);
 		my_int& operator +=(int64_t rhs);
 		my_int& operator +=(int rhs);
@@ -79,7 +85,6 @@ class my_int
 			return my_digit_list.back()==1 && my_digit_list.size()==1;
 		}
 
-		int compare(const my_int &rhs) const;
 
 
 
@@ -110,7 +115,7 @@ class my_int
 	friend my_int operator %(const my_int &a,int64_t b);
 	friend my_int operator %(const my_int &a,int b);
 	friend my_int operator %(const my_int &a,const my_int &b);
-	friend class my_rat;
+	//friend class my_rat;
 };
 
 uint64_t abs(int64_t num);

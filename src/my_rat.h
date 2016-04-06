@@ -53,7 +53,7 @@ class my_rat
 		//对常用的比较我们另外写函数，避免构造对象的开销
 		bool is_zero() const
 		{
-			return p.is_zero();
+			return p==0;
 		}
 		bool is_abs_one() const
 		{
