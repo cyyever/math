@@ -148,6 +148,17 @@ int my_int::compare(const my_int &rhs) const
 	return res;
 }
 
+/*
+ *	功能：获取整数的位数
+ * 	参数：
+ * 		无
+ * 	返回值：
+ * 		位数
+ */
+uint64_t my_int::digit_num() const
+{
+	return my_digit_num*(my_digit_list.size()-1)+std::to_string(my_digit_list.back()).size();
+}
 uint64_t abs(int64_t num)
 {
 	uint64_t tmp;

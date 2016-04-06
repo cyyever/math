@@ -18,8 +18,6 @@ using std::ostream;
 namespace my_math
 {
 
-class my_rat;
-
 //整数表示成 (sign) (my_digit ... my_digit)*10^power，10^10进制
 class my_int
 {
@@ -36,6 +34,7 @@ class my_int
 			return sign!=rhs.sign;
 		}
 		int compare(const my_int &rhs) const;
+		uint64_t digit_num() const;
 
 		my_int& operator +=(uint64_t rhs);
 		my_int& operator +=(int64_t rhs);
@@ -115,7 +114,6 @@ class my_int
 	friend my_int operator %(const my_int &a,int64_t b);
 	friend my_int operator %(const my_int &a,int b);
 	friend my_int operator %(const my_int &a,const my_int &b);
-	//friend class my_rat;
 };
 
 uint64_t abs(int64_t num);

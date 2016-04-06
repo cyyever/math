@@ -26,6 +26,14 @@ class my_rat
 		my_rat(my_int &&p,my_int &&q);
 		~my_rat() =default;
 		operator string() const;
+		const my_int &get_numeintor() const	//获取有理数的分子
+		{
+			return p;
+		}
+		const my_int &get_denominator() const	//获取有理数的分母
+		{
+			return q;
+		}
 		my_rat& operator +=(uint64_t rhs);
 		my_rat& operator +=(int64_t rhs);
 		my_rat& operator +=(int rhs);
