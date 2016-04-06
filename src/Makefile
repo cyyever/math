@@ -1,27 +1,30 @@
 PKG_NAME=my_math
 TARGET_LIB=lib$(PKG_NAME).so
-SRCS=$(wildcard *.c)
-DEPS=$(patsubst %.c,%.d,$(SRCS))
-OBJS=$(patsubst %.c,%.o,$(SRCS))
 HEADERS=$(wildcard *.h)
-CC=gcc 
-CFLAGS=-O2 -Wall -Wextra -fPIC -g
+SRCS=$(wildcard *.cpp)
+OBJS=$(patsubst %.cpp,%.o,$(SRCS))
+#CXX=clang++
+CPPFLAGS=-O2 -Wall -Wextra -fPIC -g -std=c++11 
+ifneq ($(NDEBUG),0)
+	CPPFLAGS+= -DNDEBUG
+endif
 LDFLAGS=-shared 
 .PHONY:all clean install
 all:
-	-make $(TARGET_LIB)
-	-$(RM) $(DEPS) $(OBJS) *~
+	make clean
+	make $(TARGET_LIB)
 $(TARGET_LIB):$(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 clean:
-	-$(RM) $(TARGET_LIB) $(DEPS) $(OBJS) *~
+	-$(RM) $(TARGET_LIB) $(OBJS) *~
 install:all
 	install -D $(TARGET_LIB) $(DESTDIR)/usr/local/lib/$(PKG_NAME)/$(TARGET_LIB)
 	install -d $(DESTDIR)/usr/local/include/$(PKG_NAME)
 	install -t $(DESTDIR)/usr/local/include/$(PKG_NAME) $(HEADERS)
-	#echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
+	echo "/usr/local/lib/$(PKG_NAME)" > $(DESTDIR)/etc/ld.so.conf.d/$(PKG_NAME).conf
 	ldconfig
-%.d:%.c
-	@set -e; $(RM) $@; \
-	$(CC) $(CFLAGS) -M $< | sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $*)\1.o $@ : ,g' > $@;
--include $(DEPS)
+	make clean
+
+debug-install:
+	make clean
+	NDEBUG=0 make install 
