@@ -148,7 +148,7 @@ int my_int::compare(const my_int &rhs) const
 	return res;
 }
 
-uint64_t inline abs(int64_t num)
+uint64_t abs(int64_t num)
 {
 	uint64_t tmp;
 	if(num>=0)
@@ -227,7 +227,7 @@ my_int& my_int::operator +=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -305,7 +305,7 @@ my_int& my_int::operator +=(const my_int &rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -390,7 +390,7 @@ my_int& my_int::operator -=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -508,15 +508,15 @@ my_int& my_int::operator -=(const my_int &rhs)
 {
 	if(this==&rhs)
 	{
-		my_int tmp_this=*this;
-		return operator-=(tmp_this);
+		*this=0;
+		return *this;
 	}
 
 	if(sign!=rhs.sign)	//符号不同，转换成加法
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
@@ -649,9 +649,8 @@ my_int& my_int::operator *=(uint64_t rhs)
 	unsigned __int128 tmp_my_digit;
 
 	if(this->is_zero() || rhs==1)
-	{
 		return *this;
-	}
+
 	if(rhs==0)
 	{
 		*this=0;

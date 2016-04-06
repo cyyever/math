@@ -117,7 +117,7 @@ class my_int
 	friend class my_rat;
 };
 
-uint64_t inline abs(int64_t num);
+uint64_t abs(int64_t num);
 
 bool operator ==(const my_int &a,const my_int &b);
 bool operator !=(const my_int &a,const my_int &b);

@@ -94,7 +94,6 @@ int my_rat::compare(const my_rat &rhs) const
 	return res;
 }
 
-
 bool operator ==(const my_rat &a,const my_rat &b)
 {
 	if(a.compare(b)==0)
@@ -138,7 +137,6 @@ my_rat operator -(const my_rat &a)
 		b.sign=1-b.sign;
 	return b;
 }
-#ifdef cyy
 
 my_rat& my_rat::operator +=(int64_t rhs)
 {
@@ -159,69 +157,12 @@ my_rat& my_rat::operator +=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
-	unsigned __int128 tmp,carry;
-	auto it=my_digit_list.begin();
 
-	tmp=(unsigned __int128)(*it)+rhs;
-
-	if(tmp>=my_base)
-	{
-		carry=1;
-		tmp-=my_base;
-		if(tmp>=my_base)
-		{
-			carry+=(tmp/my_base);
-			*it=tmp%my_base;
-		}
-		else
-			*it=tmp;
-
-		it++;
-
-		while(it!=my_digit_list.end())
-		{
-			tmp=*it+carry;
-			if(tmp>=my_base)
-			{
-				carry=1;
-				tmp-=my_base;
-				if(tmp>=my_base)
-				{
-					carry+=(tmp/my_base);
-					*it=tmp%my_base;
-				}
-				else
-					*it=tmp;
-			}
-			else
-			{
-				*it=tmp;
-				carry=0;
-				break;
-			}
-			it++;
-		}
-
-		if(carry>0)
-		{
-			if(carry<my_base)
-				my_digit_list.push_back(carry);
-			else
-			{
-				while(carry)
-				{
-					my_digit_list.push_back(carry%my_base);
-					carry/=my_base;
-				}
-			}
-		}
-	}
-	else
-		*it=tmp;
+	p+=q*rhs;
 	return *this;
 }
 
@@ -229,70 +170,22 @@ my_rat& my_rat::operator +=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_rat tmp_this=*this;
-		return operator+=(tmp_this);
+		p*=2;
+		return *this;
 	}
 
 	if(sign!=rhs.sign)	//符号不同，转换成减法
 	{
 		sign=1-sign;
 		operator-=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
-	uint8_t carry=0;
 
-	auto it=my_digit_list.begin();
-	auto it2=rhs.my_digit_list.cbegin();
-	for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
-	{
-		*it+=*it2+carry;
-		if((*it)>=my_base)
-		{
-			carry=1;
-			*it-=my_base;
-		}
-		else
-			carry=0;
-	}
-	if(it2!=rhs.my_digit_list.cend())
-	{
-		do
-		{
-			int64_t my_digit=*it2+carry;
-
-			if(my_digit>=my_base)
-			{
-				carry=1;
-				my_digit-=my_base;
-			}
-			else
-				carry=0;
-			my_digit_list.push_back(my_digit);
-			it2++;
-		}
-		while(it2!=rhs.my_digit_list.cend());
-	}
-	else if(carry==1 && it!=my_digit_list.end())
-	{
-		do
-		{
-			*it+=1;
-			if((*it)>=my_base)
-				*it-=my_base;
-			else
-			{
-				carry=0;
-				break;
-			}
-			it++;
-		}
-		while(it!=my_digit_list.end());
-	}
-
-	if(carry==1)
-		my_digit_list.push_back(1);
+	my_int tmp_p=p*rhs.q+q*rhs.p;
+	q*=rhs.q;
+	p=tmp_p;
 	return *this;
 }
 
@@ -322,104 +215,17 @@ my_rat& my_rat::operator -=(uint64_t rhs)
 	{
 		sign=1-sign;
 		operator+=(rhs);
-		if(!is_zero())
+		if(!is_abs_zero())
 			sign=1-sign;
 		return *this;
 	}
 
-	__int128 tmp,carry;
-	auto it=my_digit_list.begin();
-
-	tmp=(__int128)(*it)-rhs;
-
-	if(tmp<0)
+	p-=q*rhs;
+	if(p.sign==0)
 	{
-		carry=1;
-		tmp+=my_base;
-		if(tmp<0)
-		{
-			carry+=((-tmp)/my_base);
-			tmp+=(carry-1)*my_base;
-			if(tmp<0)
-			{
-				carry++;
-				tmp+=my_base;
-			}
-		}
-		*it=tmp;
-
-		it++;
-
-		while(it!=my_digit_list.end())
-		{
-			tmp=*it-carry;
-			if(tmp<0)
-			{
-				carry=1;
-				tmp+=my_base;
-				if(tmp<0)
-				{
-					carry+=((-tmp)/my_base);
-					tmp+=(carry-1)*my_base;
-					if(tmp<0)
-					{
-						carry++;
-						tmp+=my_base;
-					}
-				}
-				*it=tmp;
-			}
-			else
-			{
-				*it=tmp;
-				carry=0;
-				break;
-			}
-			it++;
-		}
-
-		if(carry>0)
-		{
-			//这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
-			for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
-				*it=-(*it);
-
-			if(carry<my_base)
-				my_digit_list.push_back(carry);
-			else
-			{
-				while(carry)
-				{
-					my_digit_list.push_back(carry%my_base);
-					carry/=my_base;
-				}
-			}
-
-			carry=0;
-			for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
-			{
-				*it-=carry;
-				if(*it<0)
-				{
-					*it+=my_base;
-					carry=1;
-				}
-				else
-					carry=0;
-			}
-			sign=1-sign;
-		}
+		p.sign=1;
+		sign=1-sign;
 	}
-	else
-		*it=tmp;
-
-	//去除前面的0
-	while(my_digit_list.back()==0 && my_digit_list.size()>1)
-		my_digit_list.pop_back();
-
-	//如果两个相等的负数相减，这边我们要调整符号为正
-	if(is_abs_zero())
-		sign=1;
 	return *this;
 }
 
@@ -440,8 +246,10 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_rat tmp_this=*this;
-		return operator-=(tmp_this);
+		p=0;
+		q=1;
+		sign=1;
+		return *this;
 	}
 
 	if(sign!=rhs.sign)	//符号不同，转换成加法
@@ -453,79 +261,14 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 		return *this;
 	}
 
-	uint8_t carry=0;
-
-	auto it=my_digit_list.begin();
-	auto it2=rhs.my_digit_list.cbegin();
-	for(;it!=my_digit_list.end()&&it2!=rhs.my_digit_list.cend();it++,it2++)
+	my_int tmp_p=p*rhs.q-q*rhs.p;
+	q*=rhs.q;
+	p=tmp_p;
+	if(p.sign==0)
 	{
-		*it-=(*it2+carry);
-		if((*it)<0)
-		{
-			*it+=my_base;
-			carry=1;
-		}
-		else
-			carry=0;
-	}
-	if(it2!=rhs.my_digit_list.cend())
-	{
-		do{
-			int64_t my_digit=-(*it2+carry);
-
-			if(my_digit<0)
-			{
-				my_digit+=my_base;
-				carry=1;
-			}
-			else
-				carry=0;
-			my_digit_list.push_back(my_digit);
-			it2++;
-		}
-		while(it2!=rhs.my_digit_list.cend());
-	}
-	else if(carry==1)
-	{
-		for(;it!=my_digit_list.end();it++)
-		{
-			*it-=1;
-			if((*it)<0)
-				*it+=my_base;
-			else
-			{
-				carry=0;
-				break;
-			}
-		}
-	}
-
-	if(carry==1)
-	{
-		my_digit_list.push_back(-1);
-		//这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
-		carry=0;
-		for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
-		{
-			*it=-(*it+carry);
-			if(*it<0)
-			{
-				*it+=my_base;
-				carry=1;
-			}
-			else
-				carry=0;
-		}
+		p.sign=1;
 		sign=1-sign;
 	}
-
-	//去除前面的0
-	while(my_digit_list.back()==0 && my_digit_list.size()>1)
-		my_digit_list.pop_back();
-
-	//如果两个相等的负数相减，这边我们要调整符号为正
-	if(is_abs_zero())
-		sign=1;
 	return *this;
 }
 
@@ -577,48 +320,7 @@ my_rat my_rat::operator --(int)
 
 my_rat& my_rat::operator *=(uint64_t rhs)
 {
-	int64_t carry;
-	unsigned __int128 tmp_my_digit;
-
-	if(this->is_zero() || rhs==1)
-	{
-		return *this;
-	}
-	if(rhs==0)
-	{
-		*this=0;
-		return *this;
-	}
-
-	carry=0;
-	for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
-	{
-		tmp_my_digit=(unsigned __int128)(*it)*rhs+carry;
-		if(tmp_my_digit>=my_rat::my_base)
-		{
-			*it=tmp_my_digit%my_rat::my_base;
-			carry=tmp_my_digit/my_rat::my_base;
-		}
-		else
-		{
-			*it=tmp_my_digit;
-			carry=0;
-		}
-	}
-
-	while(carry)
-	{
-		if(carry>=my_rat::my_base)
-		{
-			my_digit_list.push_back(carry%my_rat::my_base);
-			carry/=my_rat::my_base;
-		}
-		else
-		{
-			my_digit_list.push_back(carry);
-			carry=0;
-		}
-	}
+	p*=rhs;
 	return *this;
 }
 
@@ -639,8 +341,10 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_rat tmp_this=*this;
-		return operator*=(tmp_this);
+		p*=p;
+		q*=q;
+		sign=1;
+		return *this;
 	}
 
 	if(this->is_zero())
@@ -656,19 +360,10 @@ my_rat& my_rat::operator *=(const my_rat &rhs)
 		*this=rhs;
 		return *this;
 	}
-	decltype(rhs.my_digit_list.size()) cnt=0,i;
-	uint8_t new_sign=!(sign^rhs.sign);
-	my_rat tmp_this=std::move(*this);
 
-	*this=0;
-	for(auto it=rhs.my_digit_list.cbegin();it!=rhs.my_digit_list.cend();it++,cnt++)
-	{
-		my_rat tmp=tmp_this*(*it);
-		for(i=0;i<cnt;i++)
-			tmp.my_digit_list.push_front(0);
-		operator+=(tmp);
-	}
-	sign=new_sign;
+	p*=rhs.p;
+	q*=rhs.q;
+	sign=!(sign^rhs.sign);
 	return *this;
 }
 
@@ -692,7 +387,7 @@ my_rat operator *(const my_rat &a,const my_rat &b)
 	return my_rat(a)*=b;
 }
 
-
+#ifdef cyy
 my_rat& my_rat::operator /=(uint64_t rhs)
 {
 	unsigned __int128 tmp,carry;
@@ -761,12 +456,15 @@ my_rat& my_rat::operator /=(const my_rat &rhs)
 
 	if(this->is_zero())
 		return *this;
+
+	/*
 	if(rhs.is_abs_one())
 	{
 		if(rhs.sign==0)
 			sign=1-sign;
 		return *this;
 	}
+	*/
 
 
 	//通过二分法找出来，注意这边我们转成正数
@@ -867,21 +565,6 @@ ostream &operator <<(ostream &os,const my_rat &a)
 {
 	os<<(string)a;
 	return os;
-}
-
-inline bool my_rat::is_zero() const
-{
-	return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
-}
-
-inline bool my_rat::is_abs_zero() const
-{
-	return my_digit_list.back()==0 && my_digit_list.size()==1;
-}
-
-inline bool my_rat::is_abs_one() const
-{
-	return my_digit_list.back()==1 && my_digit_list.size()==1;
 }
 
 /*

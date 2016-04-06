@@ -63,6 +63,10 @@ class my_rat
 		{
 			return p.is_abs_zero();
 		}
+		bool is_abs_one() const
+		{
+			return p==q;
+		}
 		int compare(const my_rat &rhs) const;
 
 	friend bool operator ==(const my_rat &a,const my_rat &b);

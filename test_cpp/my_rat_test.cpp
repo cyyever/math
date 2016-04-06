@@ -37,43 +37,5 @@ int main(int argc, char** argv)
 		assert(a==*it);
 	}
 
-	/*
-	for(auto i=-200;i<=200;i++)
-	{
-		for(auto j=-200;j<=200;j++)
-		{
-			assert((i<j)==(my_rat(i)<my_rat(j)));
-			assert((i==j)==(my_rat(i)==my_rat(j)));
-			assert((i>j)==(my_rat(i)>my_rat(j)));
-			assert(i+j==(my_rat(i)+j));
-			assert(i+j==(my_rat(i)+my_rat(j)));
-			assert(i-j==(my_rat(i)-j));
-			assert(i-j==(my_rat(i)-my_rat(j)));
-			assert(i*j==(my_rat(i)*my_rat(j)));
-			if(j==0)
-				continue;
-	//		assert(i/j==(my_rat(i)/j));
-	//		assert(i/j==(my_rat(i)/my_rat(j)));
-			assert(i%j==(my_rat(i)%j));
-			assert(i%j==(my_rat(i)%my_rat(j)));
-		}
-	}
-	assert(my_rat(INT64_MAX)+UINT64_MAX==string("27670116110564327422"));
-	assert(my_rat(INT64_MAX)-UINT64_MAX==string("-9223372036854775808"));
-
-	my_rat a;
-	a=0;
-	assert(++a==1);
-	assert(--a==0);
-	assert((a++)==0 && a==1);
-	assert((a--)==1 && a==0);
-
-	a=2;
-	assert(a*UINT64_MAX==string("36893488147419103230"));
-	assert(a*INT64_MIN==string("-18446744073709551616"));
-
-	assert(my_rat("44277496045533614223360000")/my_rat("479001600")==my_rat("92437052497389600"));
-	assert(my_rat("44277496045533614223360000")/479001600==my_rat("92437052497389600"));
-	*/
 	return 0;
 }
