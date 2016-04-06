@@ -51,8 +51,8 @@ int main(int argc, char** argv)
 			assert(i*j==(my_int(i)*my_int(j)));
 			if(j==0)
 				continue;
-	//		assert(i/j==(my_int(i)/j));
-	//		assert(i/j==(my_int(i)/my_int(j)));
+			assert(i/j==(my_int(i)/j));
+			assert(i/j==(my_int(i)/my_int(j)));
 			assert(i%j==(my_int(i)%j));
 			assert(i%j==(my_int(i)%my_int(j)));
 		}

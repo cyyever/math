@@ -1,16 +1,15 @@
 /*
- *	程序名：my_int.cpp
+ *	程序名：my_rat.cpp
  *	作者：陈源源
- *	日期：2016-03-28
- *	功能：整数相关类和函数
+ *	日期：2016-04-06
+ *	功能：有理数相关类和函数
  */
 
 #include <cstdlib>
-#include <regex>
 #include <iostream>
 #include <algorithm>
 
-#include "my_int.h"
+#include "my_rat.h"
 
 using std::cout;
 using std::endl;
@@ -18,99 +17,70 @@ using std::endl;
 namespace my_math
 {
 
-my_int::my_int():sign(1)
+/*
+ *	功能：通过字符串构造有理数，字符串必须是分数形式
+ * 	参数：
+ *		rat_str：字符串
+ * 	返回值：
+ * 		无
+ */
+my_rat::my_rat(const string &rat_str)
 {
-	my_digit_list.push_back(0);
+	auto i=rat_str.find('/');
+	if(i==string::npos)
+		throw std::invalid_argument(rat_str);
+	*this=my_rat(my_int(rat_str.substr(0,i)),my_int(rat_str.substr(i+1)));
 	return;
 }
 
-my_int::my_int(const string &int_str):sign(1)
+my_rat::my_rat(const my_int &p,const my_int &q):p(p),q(q)
 {
-	decltype(int_str.size()) i,first_digit_index;
-	if(!is_valid_int_str(int_str))
-		throw std::invalid_argument(int_str);
+	if(q.is_zero())
+		throw std::invalid_argument("q is zero");
 
-	if(int_str[0]=='-')
-	{
+	if(p.sign!=q.sign)
 		sign=0;
-		first_digit_index=1;
-	}
 	else
-		first_digit_index=0;
-
-	i=int_str.size();
-	while(i-first_digit_index>=my_digit_num)
-	{
-		my_digit_list.push_back(stoll(int_str.substr(i-my_digit_num,my_digit_num)));
-		i-=my_digit_num;
-	}
-	if(i-first_digit_index>0)
-		my_digit_list.push_back(stoll(int_str.substr(first_digit_index,i-first_digit_index)));
-	return;
+		sign=1;
+	this->p.sign=1;
+	this->q.sign=1;
 }
 
-my_int::my_int(uint64_t num):sign(1)
+my_rat::my_rat(my_int &&p,my_int &&q):p(p),q(q)
 {
-	if(num<my_base)
-		my_digit_list.push_back(num);
-	else
-	{
-		while(num)
-		{
-			my_digit_list.push_back(num%my_base);
-			num/=my_base;
-		}
-	}
-	return;
-}
+	if(q.is_zero())
+		throw std::invalid_argument("q is zero");
 
-my_int::my_int(int64_t num)
-{
-	*this=my_int(abs(num));
-	if(num<0)
+	if(p.sign!=q.sign)
 		sign=0;
-	return;
+	else
+		sign=1;
+	this->p.sign=1;
+	this->q.sign=1;
 }
 
-my_int::my_int(int num):my_int((int64_t)num)
+my_rat::operator string() const
 {
-}
-
-my_int::operator string() const
-{
-	string int_str;
-	uint8_t flag;
-	char tmp[my_digit_num+1];
+	string tmp;
+	
 	if(sign==0)
-		int_str.push_back('-');
-
-	flag=1;
-	for(auto it=--my_digit_list.end();;it--)
-	{
-		if(flag)
-		{
-			sprintf(tmp,"%" PRId64,*it);
-			flag=0;
-		}
-		else
-			sprintf(tmp,"%0*" PRId64,(int)my_digit_num,*it);
-		int_str.append(tmp);
-		if(it==my_digit_list.begin())
-			break;
-	}
-	return int_str;
+		tmp.push_back('-');
+	tmp.append(p);
+	tmp.push_back('/');
+	tmp.append(q);
+	return tmp;
 }
 
 /*
- *	功能：比较和另一个整数的大小
+ *	功能：比较和另一个有理数的大小
  * 	参数：
- *		rhs：另一个整数
+ *		rhs：另一个有理数
  * 	返回值：
- * 		>0：大于另一个整数
- * 		0：两个整数相等
- * 		<0：小于另一个整数
+ * 		>0：大于另一个有理数
+ * 		0：两个有理数相等
+ * 		<0：小于另一个有理数
  */
-int my_int::compare(const my_int &rhs) const
+int my_rat::compare(const my_rat &rhs) const
 {
 	int res;
 	if(sign<rhs.sign)
@@ -118,97 +88,59 @@ int my_int::compare(const my_int &rhs) const
 	else if(sign>rhs.sign)
 		return 1;
 
-	if(my_digit_list.size()<rhs.my_digit_list.size())
-		res=-1;
-	else if(my_digit_list.size()>rhs.my_digit_list.size())
-		res=1;
-	else
-	{
-		res=0;
-		auto it=--my_digit_list.end();
-		auto it2=--rhs.my_digit_list.cend();
-		for(;;it--,it2--)
-		{
-			if(*it<*it2)
-			{
-				res=-1;
-				break;
-			}
-			else if(*it>*it2)
-			{
-				res=1;
-				break;
-			}
-			if(it==my_digit_list.begin())
-				break;
-		}
-	}
+	res=(p*rhs.q).compare(q*rhs.p);
 	if(sign==0)	//负数
 		res=-res;
 	return res;
 }
 
-uint64_t inline abs(int64_t num)
-{
-	uint64_t tmp;
-	if(num>=0)
-		return (uint64_t)num;
 
-	if(num==INT64_MIN)
-	{
-		tmp=INT64_MAX;
-		tmp++;
-	}
-	else
-		tmp=-num;
-	return tmp;
-}
-
-bool operator ==(const my_int &a,const my_int &b)
+bool operator ==(const my_rat &a,const my_rat &b)
 {
 	if(a.compare(b)==0)
 		return true;
 	return false;
 }
 
-bool operator !=(const my_int &a,const my_int &b)
+bool operator !=(const my_rat &a,const my_rat &b)
 {
 	return !(a==b);
 }
 
-bool operator <(const my_int &a,const my_int &b)
+bool operator <(const my_rat &a,const my_rat &b)
 {
 	if(a.compare(b)<0)
 		return true;
 	return false;
 }
 
-bool operator <=(const my_int &a,const my_int &b)
+bool operator <=(const my_rat &a,const my_rat &b)
 {
 	if(a.compare(b)<=0)
 		return true;
 	return false;
 }
 
-bool operator >(const my_int &a,const my_int &b)
+bool operator >(const my_rat &a,const my_rat &b)
 {
 	return !(a<=b);
 }
 
-bool operator >=(const my_int &a,const my_int &b)
+bool operator >=(const my_rat &a,const my_rat &b)
 {
 	return !(a<b);
 }
 
-my_int operator -(const my_int &a)
+my_rat operator -(const my_rat &a)
 {
-	my_int b=a;
+	my_rat b=a;
 	if(!b.is_zero())
 		b.sign=1-b.sign;
 	return b;
 }
+#ifdef cyy
 
-my_int& my_int::operator +=(int64_t rhs)
+my_rat& my_rat::operator +=(int64_t rhs)
 {
 	if(rhs>=0)
 		return operator+=((uint64_t)rhs);
@@ -216,12 +148,12 @@ my_int& my_int::operator +=(int64_t rhs)
 		return operator-=(abs(rhs));
 }
 
-my_int& my_int::operator +=(int rhs)
+my_rat& my_rat::operator +=(int rhs)
 {
 	return operator+=((int64_t)rhs);
 }
 
-my_int& my_int::operator +=(uint64_t rhs)
+my_rat& my_rat::operator +=(uint64_t rhs)
 {
 	if(sign==0)	//符号不同，转换成减法
 	{
@@ -293,11 +225,11 @@ my_int& my_int::operator +=(uint64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator +=(const my_int &rhs)
+my_rat& my_rat::operator +=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_int tmp_this=*this;
+		my_rat tmp_this=*this;
 		return operator+=(tmp_this);
 	}
 
@@ -364,27 +296,27 @@ my_int& my_int::operator +=(const my_int &rhs)
 	return *this;
 }
 
-my_int operator +(const my_int &a,uint64_t b)
+my_rat operator +(const my_rat &a,uint64_t b)
 {
-	return my_int(a)+=b;
+	return my_rat(a)+=b;
 }
 
-my_int operator +(const my_int &a,int64_t b)
+my_rat operator +(const my_rat &a,int64_t b)
 {
-	return my_int(a)+=b;
+	return my_rat(a)+=b;
 }
 
-my_int operator +(const my_int &a,int b)
+my_rat operator +(const my_rat &a,int b)
 {
-	return my_int(a)+=b;
+	return my_rat(a)+=b;
 }
 
-my_int operator +(const my_int &a,const my_int &b)
+my_rat operator +(const my_rat &a,const my_rat &b)
 {
-	return my_int(a)+=b;
+	return my_rat(a)+=b;
 }
 
-my_int& my_int::operator -=(uint64_t rhs)
+my_rat& my_rat::operator -=(uint64_t rhs)
 {
 	if(sign==0)	//符号不同，转换成加法
 	{
@@ -491,7 +423,7 @@ my_int& my_int::operator -=(uint64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator -=(int64_t rhs)
+my_rat& my_rat::operator -=(int64_t rhs)
 {
 	if(rhs>=0)
 		return operator-=((uint64_t)rhs);
@@ -499,16 +431,16 @@ my_int& my_int::operator -=(int64_t rhs)
 		return operator+=(abs(rhs));
 }
 
-my_int& my_int::operator -=(int rhs)
+my_rat& my_rat::operator -=(int rhs)
 {
 	return operator-=((int64_t)rhs);
 }
 
-my_int& my_int::operator -=(const my_int &rhs)
+my_rat& my_rat::operator -=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_int tmp_this=*this;
+		my_rat tmp_this=*this;
 		return operator-=(tmp_this);
 	}
 
@@ -597,53 +529,53 @@ my_int& my_int::operator -=(const my_int &rhs)
 	return *this;
 }
 
-my_int operator -(const my_int &a,uint64_t b)
+my_rat operator -(const my_rat &a,uint64_t b)
 {
-	return my_int(a)-=b;
+	return my_rat(a)-=b;
 }
 
-my_int operator -(const my_int &a,int64_t b)
+my_rat operator -(const my_rat &a,int64_t b)
 {
-	return my_int(a)-=b;
+	return my_rat(a)-=b;
 }
 
-my_int operator -(const my_int &a,int b)
+my_rat operator -(const my_rat &a,int b)
 {
-	return my_int(a)-=b;
+	return my_rat(a)-=b;
 }
 
-my_int operator -(const my_int &a,const my_int &b)
+my_rat operator -(const my_rat &a,const my_rat &b)
 {
-	return my_int(a)-=b;
+	return my_rat(a)-=b;
 }
 
-my_int& my_int::operator ++()
+my_rat& my_rat::operator ++()
 {
 	operator+=(1);
 	return *this;
 }
 
-my_int& my_int::operator --()
+my_rat& my_rat::operator --()
 {
 	operator-=(1);
 	return *this;
 }
 
-my_int my_int::operator ++(int)
+my_rat my_rat::operator ++(int)
 {
-	my_int tmp=*this;
+	my_rat tmp=*this;
 	operator+=(1);
 	return tmp;
 }
 
-my_int my_int::operator --(int)
+my_rat my_rat::operator --(int)
 {
-	my_int tmp=*this;
+	my_rat tmp=*this;
 	operator-=(1);
 	return tmp;
 }
 
-my_int& my_int::operator *=(uint64_t rhs)
+my_rat& my_rat::operator *=(uint64_t rhs)
 {
 	int64_t carry;
 	unsigned __int128 tmp_my_digit;
@@ -662,10 +594,10 @@ my_int& my_int::operator *=(uint64_t rhs)
 	for(auto it=my_digit_list.begin();it!=my_digit_list.end();it++)
 	{
 		tmp_my_digit=(unsigned __int128)(*it)*rhs+carry;
-		if(tmp_my_digit>=my_int::my_base)
+		if(tmp_my_digit>=my_rat::my_base)
 		{
-			*it=tmp_my_digit%my_int::my_base;
-			carry=tmp_my_digit/my_int::my_base;
+			*it=tmp_my_digit%my_rat::my_base;
+			carry=tmp_my_digit/my_rat::my_base;
 		}
 		else
 		{
@@ -676,10 +608,10 @@ my_int& my_int::operator *=(uint64_t rhs)
 
 	while(carry)
 	{
-		if(carry>=my_int::my_base)
+		if(carry>=my_rat::my_base)
 		{
-			my_digit_list.push_back(carry%my_int::my_base);
-			carry/=my_int::my_base;
+			my_digit_list.push_back(carry%my_rat::my_base);
+			carry/=my_rat::my_base;
 		}
 		else
 		{
@@ -690,7 +622,7 @@ my_int& my_int::operator *=(uint64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator *=(int64_t rhs)
+my_rat& my_rat::operator *=(int64_t rhs)
 {
 	operator*=(abs(rhs));
 	if(rhs<0 && !this->is_zero())
@@ -698,16 +630,16 @@ my_int& my_int::operator *=(int64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator *=(int rhs)
+my_rat& my_rat::operator *=(int rhs)
 {
 	return operator*=((int64_t)rhs);
 }
 
-my_int& my_int::operator *=(const my_int &rhs)
+my_rat& my_rat::operator *=(const my_rat &rhs)
 {
 	if(this==&rhs)
 	{
-		my_int tmp_this=*this;
+		my_rat tmp_this=*this;
 		return operator*=(tmp_this);
 	}
 
@@ -726,12 +658,12 @@ my_int& my_int::operator *=(const my_int &rhs)
 	}
 	decltype(rhs.my_digit_list.size()) cnt=0,i;
 	uint8_t new_sign=!(sign^rhs.sign);
-	my_int tmp_this=std::move(*this);
+	my_rat tmp_this=std::move(*this);
 
 	*this=0;
 	for(auto it=rhs.my_digit_list.cbegin();it!=rhs.my_digit_list.cend();it++,cnt++)
 	{
-		my_int tmp=tmp_this*(*it);
+		my_rat tmp=tmp_this*(*it);
 		for(i=0;i<cnt;i++)
 			tmp.my_digit_list.push_front(0);
 		operator+=(tmp);
@@ -740,28 +672,28 @@ my_int& my_int::operator *=(const my_int &rhs)
 	return *this;
 }
 
-my_int operator *(const my_int &a,uint64_t b)
+my_rat operator *(const my_rat &a,uint64_t b)
 {
-	return my_int(a)*=b;
+	return my_rat(a)*=b;
 }
 
-my_int operator *(const my_int &a,int64_t b)
+my_rat operator *(const my_rat &a,int64_t b)
 {
-	return my_int(a)*=b;
+	return my_rat(a)*=b;
 }
 
-my_int operator *(const my_int &a,int b)
+my_rat operator *(const my_rat &a,int b)
 {
-	return my_int(a)*=b;
+	return my_rat(a)*=b;
 }
 
-my_int operator *(const my_int &a,const my_int &b)
+my_rat operator *(const my_rat &a,const my_rat &b)
 {
-	return my_int(a)*=b;
+	return my_rat(a)*=b;
 }
 
 
-my_int& my_int::operator /=(uint64_t rhs)
+my_rat& my_rat::operator /=(uint64_t rhs)
 {
 	unsigned __int128 tmp,carry;
 	if(rhs==0)
@@ -800,7 +732,7 @@ my_int& my_int::operator /=(uint64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator /=(int64_t rhs)
+my_rat& my_rat::operator /=(int64_t rhs)
 {
 	operator/=(abs(rhs));
 	if(rhs<0 && !this->is_zero())
@@ -808,14 +740,14 @@ my_int& my_int::operator /=(int64_t rhs)
 	return *this;
 }
 
-my_int& my_int::operator /=(int rhs)
+my_rat& my_rat::operator /=(int rhs)
 {
 	return operator/=((int64_t)rhs);
 }
 
-my_int& my_int::operator /=(const my_int &rhs)
+my_rat& my_rat::operator /=(const my_rat &rhs)
 {
-	my_int quotient,tmp,low_bound,high_bound;
+	my_rat quotient,tmp,low_bound,high_bound;
 	uint8_t org_sign=sign;
 	int compare_res=0;
 	if(rhs.is_zero())
@@ -843,7 +775,7 @@ my_int& my_int::operator /=(const my_int &rhs)
 
 	while(low_bound<=high_bound)
 	{
-		my_int res=(high_bound+low_bound)/2;
+		my_rat res=(high_bound+low_bound)/2;
 		tmp=res*rhs;
 		if(rhs.sign==0)
 			tmp.sign=1-tmp.sign;
@@ -868,84 +800,99 @@ my_int& my_int::operator /=(const my_int &rhs)
 	return *this;
 }
 
-my_int operator /(const my_int &a,uint64_t b)
+my_rat operator /(const my_rat &a,uint64_t b)
 {
-	return my_int(a)/=b;
+	return my_rat(a)/=b;
 }
 
-my_int operator /(const my_int &a,int64_t b)
+my_rat operator /(const my_rat &a,int64_t b)
 {
-	return my_int(a)/=b;
+	return my_rat(a)/=b;
 }
 
-my_int operator /(const my_int &a,int b)
+my_rat operator /(const my_rat &a,int b)
 {
-	return my_int(a)/=b;
+	return my_rat(a)/=b;
 }
 
-my_int operator /(const my_int &a,const my_int &b)
+my_rat operator /(const my_rat &a,const my_rat &b)
 {
-	return my_int(a)/=b;
+	return my_rat(a)/=b;
 }
 
-my_int& my_int::operator %=(uint64_t rhs)
-{
-	*this=(*this)-((*this)/rhs)*rhs;
-	return *this;
-}
-
-my_int& my_int::operator %=(int64_t rhs)
+my_rat& my_rat::operator %=(uint64_t rhs)
 {
 	*this=(*this)-((*this)/rhs)*rhs;
 	return *this;
 }
 
-my_int& my_int::operator %=(int rhs)
+my_rat& my_rat::operator %=(int64_t rhs)
+{
+	*this=(*this)-((*this)/rhs)*rhs;
+	return *this;
+}
+
+my_rat& my_rat::operator %=(int rhs)
 {
 	return operator%=((int64_t)rhs);
 }
 
-my_int& my_int::operator %=(const my_int &rhs)
+my_rat& my_rat::operator %=(const my_rat &rhs)
 {
 	*this=(*this)-((*this)/rhs)*rhs;
 	return *this;
 }
 
-my_int operator %(const my_int &a,uint64_t b)
+my_rat operator %(const my_rat &a,uint64_t b)
 {
-	return my_int(a)%=b;
+	return my_rat(a)%=b;
 }
 
-my_int operator %(const my_int &a,int64_t b)
+my_rat operator %(const my_rat &a,int64_t b)
 {
-	return my_int(a)%=b;
+	return my_rat(a)%=b;
 }
 
-my_int operator %(const my_int &a,int b)
+my_rat operator %(const my_rat &a,int b)
 {
-	return my_int(a)%=b;
+	return my_rat(a)%=b;
 }
 
-my_int operator %(const my_int &a,const my_int &b)
+my_rat operator %(const my_rat &a,const my_rat &b)
 {
-	return my_int(a)%=b;
+	return my_rat(a)%=b;
 }
 
-ostream &operator <<(ostream &os,const my_int &a)
+ostream &operator <<(ostream &os,const my_rat &a)
 {
 	os<<(string)a;
 	return os;
 }
 
+inline bool my_rat::is_zero() const
+{
+	return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
+}
+
+inline bool my_rat::is_abs_zero() const
+{
+	return my_digit_list.back()==0 && my_digit_list.size()==1;
+}
+
+inline bool my_rat::is_abs_one() const
+{
+	return my_digit_list.back()==1 && my_digit_list.size()==1;
+}
+
 /*
- *	功能：检查传入的字符串是否整数，即是否匹配 ^[+-]?[1-9][0-9]*$
+ *	功能：检查传入的字符串是否有理数，即是否匹配 ^[+-]?[1-9][0-9]*$
  * 	参数：
  *		str：要检查的字符串
  * 	返回值：
  *		true：是
  *		false：不是
  */
-bool my_int::is_valid_int_str(const string &str)
+bool my_rat::is_valid_int_str(const string &str)
 {
 	std::regex int_regex("^[+-]?(0|[1-9][0-9]*)$");
 	std::smatch m;
@@ -954,5 +901,5 @@ bool my_int::is_valid_int_str(const string &str)
 	else
 		return false;
 }
-
+#endif
 }

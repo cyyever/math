@@ -18,6 +18,8 @@ using std::ostream;
 namespace my_math
 {
 
+class my_rat;
+
 //整数表示成 (sign) (my_digit ... my_digit)*10^power，10^10进制
 class my_int
 {
@@ -68,9 +70,18 @@ class my_int
 		uint8_t sign;	//1-正数 0-负数
 
 		//对常用的比较我们另外写函数，避免构造对象的开销
-		inline bool is_zero() const;				
-		inline bool is_abs_zero() const;				
-		inline bool is_abs_one() const;
+		bool is_zero() const
+		{
+			return my_digit_list.back()==0 && sign==1 && my_digit_list.size()==1;
+		}
+		bool is_abs_zero() const
+		{
+			return my_digit_list.back()==0 && my_digit_list.size()==1;
+		}
+		bool is_abs_one() const
+		{
+			return my_digit_list.back()==1 && my_digit_list.size()==1;
+		}
 
 		int compare(const my_int &rhs) const;
 
@@ -103,6 +114,7 @@ class my_int
 	friend my_int operator %(const my_int &a,int64_t b);
 	friend my_int operator %(const my_int &a,int b);
 	friend my_int operator %(const my_int &a,const my_int &b);
+	friend class my_rat;
 };
 
 uint64_t inline abs(int64_t num);
