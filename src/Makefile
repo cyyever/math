@@ -3,7 +3,7 @@ TARGET_LIB=lib$(PKG_NAME).so
 HEADERS=$(wildcard *.h)
 SRCS=$(wildcard *.cpp)
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
-#CXX=clang++
+CXX=clang++
 CPPFLAGS=-O2 -Wall -Wextra -fPIC -g -std=c++11 
 ifneq ($(NDEBUG),0)
 	CPPFLAGS+= -DNDEBUG

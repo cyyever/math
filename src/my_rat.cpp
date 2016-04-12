@@ -529,7 +529,7 @@ my_rat &my_rat::simplify()
 
 ostream &operator <<(ostream &os,const my_rat &a)
 {
-	os<<(string)a;
+	os<<static_cast<string>(a);
 	return os;
 }
 

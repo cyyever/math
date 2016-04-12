@@ -145,6 +145,8 @@ my_int operator %(const my_int &a,uint64_t b);
 my_int operator %(const my_int &a,int64_t b);
 my_int operator %(const my_int &a,int b);
 my_int operator %(const my_int &a,const my_int &b);
+my_int power(const my_int &base,uint64_t power);
+my_int factorial(uint64_t n);
 
 ostream &operator <<(ostream &os,const my_int &a);
 }

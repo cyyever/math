@@ -949,9 +949,50 @@ my_int operator %(const my_int &a,const my_int &b)
 	return my_int(a)%=b;
 }
 
+/*
+ *	功能：计算base的power次的乘方
+ * 	参数：
+ *		base：底数
+ *		power：指数
+ * 	返回值：
+ * 		乘方
+ */
+my_int power(const my_int &base,uint64_t power)
+{
+	my_int res=1;
+	my_int tmp_base=base;
+
+	while(power)
+	{
+		if(power&1)
+			res*=tmp_base;
+		power>>=1;
+		tmp_base*=tmp_base;
+	}       
+	return res;
+}
+
+/*
+ *	功能：计算n的阶乘
+ * 	参数：
+ *		n：参数
+ * 	返回值：
+ * 		阶乘
+ */
+my_int factorial(uint64_t n)
+{
+	my_int res=1;
+	while(n>=2)
+	{
+		res*=n;
+		n--;
+	}
+	return res;
+}
+
 ostream &operator <<(ostream &os,const my_int &a)
 {
-	os<<(string)a;
+	os<<static_cast<string>(a);
 	return os;
 }
 
