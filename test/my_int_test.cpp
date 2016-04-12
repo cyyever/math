@@ -39,6 +39,7 @@ int main(int argc, char** argv)
 
 	assert(my_int(0).digit_num()==1);
 	assert(my_int(10).digit_num()==2);
+
 	for(auto i=-200;i<=200;i++)
 	{
 		for(auto j=-200;j<=200;j++)

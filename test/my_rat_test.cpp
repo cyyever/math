@@ -37,21 +37,24 @@ int main(int argc, char** argv)
 		assert(a==*it);
 	}
 
-	for(auto q=-200;q<=200;q++)
+	for(auto i=-200;i<=200;i++)
 	{
-		if(q==0)
-			continue;
-		if(q+1==0)
-			continue;
-		assert(my_rat(-1,q)<my_rat(-1,q+1));
-		assert(my_rat(1,q)==my_rat(2,q*2));
-		assert(my_rat(1,q)>my_rat(1,q+1));
-		assert(my_rat(1,q)+my_rat(1,q+1)==my_rat(2*q+1,q*(q+1)));
-		assert(my_rat(1,q)+q==my_rat(q*q+1,q));
-		assert(my_rat(1,q)-q==my_rat(1-q*q,q));
-		assert(my_rat(1,q)*q==my_rat(1,1));
-		assert(my_rat(1,q)/q==my_rat(1,q*q));
+		for(auto j=-200;j<=200;j++)
+		{
+			assert((i<j)==(my_rat(i,1)<my_rat(j,1)));
+			assert((i==j)==(my_rat(i,1)==my_rat(j,1)));
+			assert((i>j)==(my_rat(i,1)>my_rat(j,1)));
+			assert(i+j==(my_rat(i,1)+my_rat(j,1)).numerator());
+			assert(i-j==(my_rat(i,1)-my_rat(j,1)).numerator());
+			assert(i*j==(my_rat(i,1)*my_rat(j,1)).numerator());
+			if(j==0)
+				continue;
+	//		assert(i/j==(my_rat(i,1)/my_rat(j,1)));
+		}
 	}
 
+	assert(my_rat(-3,7).simplify()==my_rat(-3,7));
+	assert(my_rat(-14,77).simplify()==my_rat(-2,11));
+	assert(my_rat(-5,5).simplify()==my_rat(-1,1));
 	return 0;
 }

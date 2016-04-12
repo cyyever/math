@@ -41,6 +41,11 @@ my_rat::my_rat(const my_int &p,const my_int &q):p(p),q(q)
 {
 	if(q==0)
 		throw std::invalid_argument("q is zero");
+	if(p==0)
+	{
+		(this->p)=0;
+		(this->q)=1;
+	}
 	if(q<0)
 	{
 		(this->p)*=-1;
@@ -52,6 +57,11 @@ my_rat::my_rat(my_int &&p,my_int &&q):p(p),q(q)
 {
 	if(q==0)
 		throw std::invalid_argument("q is zero");
+	if(p==0)
+	{
+		(this->p)=0;
+		(this->q)=1;
+	}
 	if(q<0)
 	{
 		(this->p)*=-1;
@@ -173,6 +183,11 @@ my_rat& my_rat::operator +=(const my_rat &rhs)
 		return *this;
 	}
 
+	if(is_zero())
+	{
+		*this=rhs;
+		return *this;
+	}
 	if(p.diffrent_sign(rhs.p))	//符号不同，转换成减法
 	{
 		p*=-1;
@@ -244,6 +259,12 @@ my_rat& my_rat::operator -=(const my_rat &rhs)
 	{
 		p=1;
 		q=0;
+		return *this;
+	}
+
+	if(is_zero())
+	{
+		*this=rhs*-1;
 		return *this;
 	}
 
@@ -454,6 +475,56 @@ my_rat operator /(int64_t a,const my_rat &b)
 my_rat operator /(int a,const my_rat &b)
 {
 	return operator/((int64_t)a,b);
+}
+
+my_rat &my_rat::simplify()
+{
+	my_int tmp_p,tmp_q,m;
+	int cmp_res;
+	bool is_negative;
+
+	cmp_res=p.compare(0);
+
+	if(cmp_res==0)
+		return *this;
+	if(cmp_res<0)
+	{
+		is_negative=true;
+		p*=-1;
+	}
+	else
+		is_negative=false;
+
+	if(p==1 || q==1)
+	{
+		if(is_negative)
+			p*=-1;
+		return *this;
+	}
+
+	tmp_p=p;
+	tmp_q=q;
+	//用欧几里得算法找到最大公约数
+	cmp_res=p.compare(q);
+	if(cmp_res<0)
+	{
+		p=tmp_q;
+		q=tmp_p;
+	}
+
+	while(1)
+	{
+		m=p%q;
+		if(m==0)
+			break;
+		p=std::move(q);
+		q=m;
+	}
+	p=tmp_p/q;
+	q=tmp_q/q;
+	if(is_negative)
+		p*=-1;
+	return *this;
 }
 
 ostream &operator <<(ostream &os,const my_rat &a)
