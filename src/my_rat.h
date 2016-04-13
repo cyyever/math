@@ -34,6 +34,8 @@ class my_rat
 		{
 			return q;
 		}
+		int compare(const my_rat &rhs) const;
+		int compare(const my_int &rhs) const;
 		my_rat& operator +=(uint64_t rhs);
 		my_rat& operator +=(int64_t rhs);
 		my_rat& operator +=(int rhs);
@@ -69,8 +71,6 @@ class my_rat
 		{
 			return p==q;
 		}
-		int compare(const my_rat &rhs) const;
-		int compare(const my_int &rhs) const;
 
 	friend bool operator ==(const my_rat &a,const my_rat &b);
 	friend bool operator ==(const my_rat &a,const my_int &b);

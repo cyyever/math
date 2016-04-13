@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 	for(auto it=valid_rational_str.begin();it!=valid_rational_str.end();it++)
 	{
 		my_rat a(*it);
-		assert(a==*it);
+		assert(a==my_rat(*it));
 	}
 
 	for(auto i=-200;i<=200;i++)
@@ -42,14 +42,16 @@ int main(int argc, char** argv)
 		for(auto j=-200;j<=200;j++)
 		{
 			assert((i<j)==(my_rat(i,1)<my_rat(j,1)));
+			assert((i<j)==(my_rat(i,1)<my_int(j)));
 			assert((i==j)==(my_rat(i,1)==my_rat(j,1)));
+			assert((i==j)==(my_rat(i,1)==my_int(j)));
 			assert((i>j)==(my_rat(i,1)>my_rat(j,1)));
+			assert((i>j)==(my_rat(i,1)>my_int(j)));
 			assert(i+j==(my_rat(i,1)+my_rat(j,1)).numerator());
 			assert(i-j==(my_rat(i,1)-my_rat(j,1)).numerator());
 			assert(i*j==(my_rat(i,1)*my_rat(j,1)).numerator());
 			if(j==0)
 				continue;
-	//		assert(i/j==(my_rat(i,1)/my_rat(j,1)));
 		}
 	}
 

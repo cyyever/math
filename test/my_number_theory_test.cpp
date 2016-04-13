@@ -26,8 +26,18 @@ int main(int argc, char** argv)
 
 	primes=get_primes(100);
 	for(auto it=primes.begin();it!=primes.end();it++)
-	{
 		cout<<*it<<endl;
+
+	try
+	{
+		gcd(0,0);
 	}
+	catch(invalid_argument &e)
+	{
+		cout<<"gcd failed:"<<e.what()<<endl;
+	}
+	assert(gcd(-3,7)==1);
+	assert(gcd(-14,77)==7);
+	assert(gcd(-5,5)==5);
 	return 0;
 }
