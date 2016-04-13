@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "my_int.h"
+#include "my_arithmetic.h"
 
 using std::cout;
 using std::endl;
@@ -158,21 +159,6 @@ int my_int::compare(const my_int &rhs) const
 uint64_t my_int::digit_num() const
 {
 	return my_digit_num*(my_digit_list.size()-1)+std::to_string(my_digit_list.back()).size();
-}
-uint64_t abs(int64_t num)
-{
-	uint64_t tmp;
-	if(num>=0)
-		return (uint64_t)num;
-
-	if(num==INT64_MIN)
-	{
-		tmp=INT64_MAX;
-		tmp++;
-	}
-	else
-		tmp=-num;
-	return tmp;
 }
 
 bool operator ==(const my_int &a,const my_int &b)
@@ -947,47 +933,6 @@ my_int operator %(const my_int &a,int b)
 my_int operator %(const my_int &a,const my_int &b)
 {
 	return my_int(a)%=b;
-}
-
-/*
- *	功能：计算base的power次的乘方
- * 	参数：
- *		base：底数
- *		power：指数
- * 	返回值：
- * 		乘方
- */
-my_int power(const my_int &base,uint64_t power)
-{
-	my_int res=1;
-	my_int tmp_base=base;
-
-	while(power)
-	{
-		if(power&1)
-			res*=tmp_base;
-		power>>=1;
-		tmp_base*=tmp_base;
-	}       
-	return res;
-}
-
-/*
- *	功能：计算n的阶乘
- * 	参数：
- *		n：参数
- * 	返回值：
- * 		阶乘
- */
-my_int factorial(uint64_t n)
-{
-	my_int res=1;
-	while(n>=2)
-	{
-		res*=n;
-		n--;
-	}
-	return res;
 }
 
 ostream &operator <<(ostream &os,const my_int &a)

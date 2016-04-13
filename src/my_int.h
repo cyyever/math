@@ -29,12 +29,23 @@ class my_int
 		my_int(int num);
 		~my_int() =default;
 		operator string() const;
+		/*
+		operator bool() const
+		{
+			return !is_zero();
+		}
+		*/
 		bool diffrent_sign(const my_int &rhs) const
 		{
 			return sign!=rhs.sign;
 		}
 		int compare(const my_int &rhs) const;
 		uint64_t digit_num() const;
+
+		bool is_odd() const
+		{
+			return my_digit_list.back()&1;
+		}
 
 		my_int& operator +=(uint64_t rhs);
 		my_int& operator +=(int64_t rhs);
@@ -85,8 +96,6 @@ class my_int
 		}
 
 
-
-
 	friend bool operator ==(const my_int &a,const my_int &b);
 	friend bool operator !=(const my_int &a,const my_int &b);
 	friend bool operator <(const my_int &a,const my_int &b);
@@ -116,7 +125,6 @@ class my_int
 	friend my_int operator %(const my_int &a,const my_int &b);
 };
 
-uint64_t abs(int64_t num);
 
 bool operator ==(const my_int &a,const my_int &b);
 bool operator !=(const my_int &a,const my_int &b);
@@ -145,8 +153,6 @@ my_int operator %(const my_int &a,uint64_t b);
 my_int operator %(const my_int &a,int64_t b);
 my_int operator %(const my_int &a,int b);
 my_int operator %(const my_int &a,const my_int &b);
-my_int power(const my_int &base,uint64_t power);
-my_int factorial(uint64_t n);
 
 ostream &operator <<(ostream &os,const my_int &a);
 }

@@ -10,6 +10,8 @@
 #include <algorithm>
 
 #include "my_rat.h"
+#include "my_arithmetic.h"
+#include "my_number_theory.h"
 
 using std::cout;
 using std::endl;
@@ -479,51 +481,9 @@ my_rat operator /(int a,const my_rat &b)
 
 my_rat &my_rat::simplify()
 {
-	my_int tmp_p,tmp_q,m;
-	int cmp_res;
-	bool is_negative;
-
-	cmp_res=p.compare(0);
-
-	if(cmp_res==0)
-		return *this;
-	if(cmp_res<0)
-	{
-		is_negative=true;
-		p*=-1;
-	}
-	else
-		is_negative=false;
-
-	if(p==1 || q==1)
-	{
-		if(is_negative)
-			p*=-1;
-		return *this;
-	}
-
-	tmp_p=p;
-	tmp_q=q;
-	//用欧几里得算法找到最大公约数
-	cmp_res=p.compare(q);
-	if(cmp_res<0)
-	{
-		p=tmp_q;
-		q=tmp_p;
-	}
-
-	while(1)
-	{
-		m=p%q;
-		if(m==0)
-			break;
-		p=std::move(q);
-		q=m;
-	}
-	p=tmp_p/q;
-	q=tmp_q/q;
-	if(is_negative)
-		p*=-1;
+	my_int gcd_int=gcd(p,q);
+	p/=gcd_int;
+	q/=gcd_int;
 	return *this;
 }
 

@@ -159,4 +159,46 @@ std::vector<uint64_t> get_primes(uint64_t upper_limit)
 	return res;
 }
 
+/*
+ *	功能：计算两个整数的最大公约数
+ *	参数：
+ *		a，b：整数
+ *	返回值：
+ *		最大公约数
+ */
+my_int gcd(const my_int &a,const my_int &b)
+{
+	my_int p,q,tmp,m;
+	int cmp_res;
+
+	if(a==0 && b==0)
+		throw std::invalid_argument("a and b are zero");
+	p=(a>=0)?a:-a;
+	q=(b>=0)?b:-b;
+
+	if(p<=1)
+		return q;
+	if(q<=1)
+		return p;
+
+	//用欧几里得算法找到最大公约数
+	cmp_res=p.compare(q);
+	if(cmp_res<0)
+	{
+		tmp=std::move(p);
+		p=std::move(q);
+		q=std::move(tmp);
+	}
+
+	while(1)
+	{
+		m=p%q;
+		if(m==0)
+			break;
+		p=std::move(q);
+		q=m;
+	}
+	return q;
+}
+
 }

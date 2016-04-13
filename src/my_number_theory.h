@@ -33,5 +33,13 @@ bool is_prime(uint64_t num);
  */
 std::vector<uint64_t> get_primes(uint64_t upper_limit);
 
+/*
+ *	功能：计算两个整数的最大公约数
+ *	参数：
+ *		a，b：整数
+ *	返回值：
+ *		最大公约数
+ */
+my_int gcd(const my_int &a,const my_int &b);
 }
 #endif

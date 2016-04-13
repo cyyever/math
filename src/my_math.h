@@ -9,6 +9,7 @@
 
 #include "my_int.h"
 #include "my_rat.h"
+#include "my_arithmetic.h"
 #include "my_number_theory.h"
 #include "my_combinaiorics.h"
 
