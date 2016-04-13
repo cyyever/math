@@ -163,9 +163,7 @@ uint64_t my_int::digit_num() const
 
 bool operator ==(const my_int &a,const my_int &b)
 {
-	if(a.compare(b)==0)
-		return true;
-	return false;
+	return a.compare(b)==0;
 }
 
 bool operator !=(const my_int &a,const my_int &b)
@@ -175,16 +173,12 @@ bool operator !=(const my_int &a,const my_int &b)
 
 bool operator <(const my_int &a,const my_int &b)
 {
-	if(a.compare(b)<0)
-		return true;
-	return false;
+	return a.compare(b)<0;
 }
 
 bool operator <=(const my_int &a,const my_int &b)
 {
-	if(a.compare(b)<=0)
-		return true;
-	return false;
+	return a.compare(b)<=0;
 }
 
 bool operator >(const my_int &a,const my_int &b)

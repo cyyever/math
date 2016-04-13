@@ -49,6 +49,7 @@ class my_rat
 		my_rat& operator /=(uint64_t rhs);
 		my_rat& operator /=(int64_t rhs);
 		my_rat& operator /=(int rhs);
+		my_rat& operator /=(const my_int &rhs);
 		my_rat& operator /=(const my_rat &rhs);
 		my_rat& operator %=(uint64_t rhs);
 		my_rat& operator %=(int64_t rhs);
@@ -69,13 +70,20 @@ class my_rat
 			return p==q;
 		}
 		int compare(const my_rat &rhs) const;
+		int compare(const my_int &rhs) const;
 
 	friend bool operator ==(const my_rat &a,const my_rat &b);
+	friend bool operator ==(const my_rat &a,const my_int &b);
 	friend bool operator !=(const my_rat &a,const my_rat &b);
+	friend bool operator !=(const my_rat &a,const my_int &b);
 	friend bool operator <(const my_rat &a,const my_rat &b);
+	friend bool operator <(const my_rat &a,const my_int &b);
 	friend bool operator <=(const my_rat &a,const my_rat &b);
+	friend bool operator <=(const my_rat &a,const my_int &b);
 	friend bool operator >(const my_rat &a,const my_rat &b);
+	friend bool operator >(const my_rat &a,const my_int &b);
 	friend bool operator >=(const my_rat &a,const my_rat &b);
+	friend bool operator >=(const my_rat &a,const my_int &b);
 	friend my_rat operator -(const my_rat &a);
 	friend my_rat operator +(const my_rat &a,uint64_t b);
 	friend my_rat operator +(const my_rat &a,int64_t b);
@@ -99,11 +107,17 @@ class my_rat
 };
 
 bool operator ==(const my_rat &a,const my_rat &b);
+bool operator ==(const my_rat &a,const my_int &b);
 bool operator !=(const my_rat &a,const my_rat &b);
+bool operator !=(const my_rat &a,const my_int &b);
 bool operator <(const my_rat &a,const my_rat &b);
+bool operator <(const my_rat &a,const my_int &b);
 bool operator <=(const my_rat &a,const my_rat &b);
+bool operator <=(const my_rat &a,const my_int &b);
 bool operator >(const my_rat &a,const my_rat &b);
+bool operator >(const my_rat &a,const my_int &b);
 bool operator >=(const my_rat &a,const my_rat &b);
+bool operator >=(const my_rat &a,const my_int &b);
 my_rat operator -(const my_rat &a);
 my_rat operator +(const my_rat &a,uint64_t b);
 my_rat operator +(const my_rat &a,int64_t b);

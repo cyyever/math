@@ -105,11 +105,36 @@ int my_rat::compare(const my_rat &rhs) const
 	return (p*rhs.q).compare(q*rhs.p);
 }
 
+/*
+ *	功能：比较和另一个整数的大小
+ * 	参数：
+ *		rhs：另一个整数
+ * 	返回值：
+ * 		>0：大于另一个整数
+ * 		0：两个数相等
+ * 		<0：小于另一个整数
+ */
+int my_rat::compare(const my_int &rhs) const
+{
+	if(p.diffrent_sign(rhs))
+	{
+		if(p<0)
+			return -1;
+		else
+			return 1;
+	}
+	
+	return p.compare(q*rhs);
+}
+
 bool operator ==(const my_rat &a,const my_rat &b)
 {
-	if(a.compare(b)==0)
-		return true;
-	return false;
+	return a.compare(b)==0;
+}
+
+bool operator ==(const my_rat &a,const my_int &b)
+{
+	return a.compare(b)==0;
 }
 
 bool operator !=(const my_rat &a,const my_rat &b)
@@ -117,18 +142,29 @@ bool operator !=(const my_rat &a,const my_rat &b)
 	return !(a==b);
 }
 
+bool operator !=(const my_rat &a,const my_int &b)
+{
+	return !(a==b);
+}
+
 bool operator <(const my_rat &a,const my_rat &b)
 {
-	if(a.compare(b)<0)
-		return true;
-	return false;
+	return a.compare(b)<0;
+}
+
+bool operator <(const my_rat &a,const my_int &b)
+{
+	return a.compare(b)<0;
 }
 
 bool operator <=(const my_rat &a,const my_rat &b)
 {
-	if(a.compare(b)<=0)
-		return true;
-	return false;
+	return a.compare(b)<=0;
+}
+
+bool operator <=(const my_rat &a,const my_int &b)
+{
+	return a.compare(b)<=0;
 }
 
 bool operator >(const my_rat &a,const my_rat &b)
@@ -136,7 +172,17 @@ bool operator >(const my_rat &a,const my_rat &b)
 	return !(a<=b);
 }
 
+bool operator >(const my_rat &a,const my_int &b)
+{
+	return !(a<=b);
+}
+
 bool operator >=(const my_rat &a,const my_rat &b)
+{
+	return !(a<b);
+}
+
+bool operator >=(const my_rat &a,const my_int &b)
 {
 	return !(a<b);
 }
@@ -400,6 +446,23 @@ my_rat& my_rat::operator /=(int64_t rhs)
 my_rat& my_rat::operator /=(int rhs)
 {
 	return operator/=((int64_t)rhs);
+}
+
+my_rat& my_rat::operator /=(const my_int &rhs)
+{
+	if(rhs==0)
+		throw std::invalid_argument("divided by zero");
+
+	if(this->is_zero())
+		return *this;
+
+	q*=rhs;
+	if(q<0)
+	{
+		p*=-1;
+		q*=-1;
+	}
+	return *this;
 }
 
 my_rat& my_rat::operator /=(const my_rat &rhs)
