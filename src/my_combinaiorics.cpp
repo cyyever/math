@@ -7,6 +7,7 @@
 
 #include "my_combinaiorics.h"
 
+#include <stdexcept>
 #include <iostream>
 
 namespace my_math

@@ -7,6 +7,7 @@
 
 #include "my_number_theory.h"
 
+#include <stdexcept>
 #include <iostream>
 
 const uint64_t cached_prime_upper_limit=10000000;
