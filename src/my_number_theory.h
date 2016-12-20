@@ -7,12 +7,11 @@
 #ifndef MY_NUMBER_THEORY_H
 #define MY_NUMBER_THEORY_H
 
+#include "my_int.h"
 #include <cstdint>
 #include <vector>
-#include "my_int.h"
 
-namespace my_math
-{
+namespace my_math {
 
 /*
  *	功能：判定质数
@@ -40,6 +39,6 @@ std::vector<uint64_t> get_primes(uint64_t upper_limit);
  *	返回值：
  *		最大公约数
  */
-my_int gcd(const my_int &a,const my_int &b);
+my_int gcd(const my_int &a, const my_int &b);
 }
 #endif

@@ -10,15 +10,13 @@
 #include "my_int.h"
 #include "my_rat.h"
 
-namespace my_math
-{
+namespace my_math {
 
 uint64_t abs(int64_t num);
 
-my_int power(const my_int &base,uint64_t power);
-my_int power(const my_int &base,const my_int &power);
+my_int power(const my_int &base, uint64_t power);
+my_int power(const my_int &base, const my_int &power);
 my_int factorial(uint64_t n);
-my_rat log(const my_int &n,uint64_t base,size_t digit_num=0);
-
+my_rat log(const my_int &n, uint64_t base, size_t digit_num = 0);
 }
 #endif
