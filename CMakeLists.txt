@@ -9,7 +9,7 @@ file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp  ${CMAKE_CURRENT_SOURCE_D
 add_library(MyMathLib ${SOURCE})
 
 # test
-option(BUILD_TEST "Build test" ON)
+option(BUILD_TEST "Build test" OFF)
 if(BUILD_TEST)
   add_subdirectory(test)
 endif()
@@ -24,7 +24,7 @@ install(TARGETS MyMathLib EXPORT ${PROJECT_NAME}Targets
   )
 
 install(DIRECTORY src/ DESTINATION include/cyy/math
-  FILES_MATCHING PATTERN "*.hpp")
+  FILES_MATCHING PATTERN "*.h")
 
 # install cmake config file
 install(EXPORT ${PROJECT_NAME}Targets
