@@ -77,10 +77,10 @@ my_int::operator string() const {
   flag = 1;
   for (auto it = --my_digit_list.end();; it--) {
     if (flag) {
-      sprintf(tmp, "%" PRId64, *it);
+      sprintf_s(tmp,sizeof(tmp), "%" PRId64, *it);
       flag = 0;
     } else
-      sprintf(tmp, "%0*" PRId64, (int)my_digit_num, *it);
+      sprintf_s(tmp,sizeof(tmp), "%0*" PRId64, (int)my_digit_num, *it);
     int_str.append(tmp);
     if (it == my_digit_list.begin())
       break;
