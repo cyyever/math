@@ -7,9 +7,8 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <my_math.h>
-#include <stdexcept>
 #include <vector>
+#include "../src/my_math.h"
 
 using namespace std;
 using namespace my_math;

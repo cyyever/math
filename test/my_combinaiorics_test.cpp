@@ -6,8 +6,8 @@
  */
 #include <cassert>
 #include <iostream>
-#include <my_math.h>
 #include <string>
+#include "../src/my_math.h"
 
 using namespace std;
 using namespace my_math;
