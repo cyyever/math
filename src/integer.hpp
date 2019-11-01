@@ -6,25 +6,58 @@
 #pragma once
 
 #include <cinttypes>
-#include <list>
-#include <std::string>
-
-using std::list;
-using std::ostream;
-using std::std::string;
+#include <iostream>
+#include <limits>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <vector>
 
 namespace cyy::math {
 
   //整数表示成 (sign) (my_digit ... my_digit)*10^power，10^10进制
-  class integer {
+  class integer final {
   public:
-    integer();
-    integer(const std::string &int_str);
-    integer(uint64_t num);
-    integer(int64_t num);
-    integer(int num);
+    integer() { digits.push_back(0); }
+
+    template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+    integer(T num) {
+
+      if constexpr (std::is_unsigned<T>::value) {
+        do {
+          digits.push_back(num & base);
+          num >>= 32;
+        } while (num);
+        return;
+      }
+
+      bool add_one = false;
+      if (num < 0) {
+        non_negative = false;
+        if (num == std::numeric_limits<T>::min()) {
+          add_one = true;
+          num += 1;
+        }
+        num = -num;
+      }
+      do {
+        digits.push_back(num & base);
+        num >>= 32;
+      } while (num);
+      if (add_one) {
+        this->operator+=(1);
+      }
+    }
+
+    integer(std::string_view str);
+
     integer(const integer &) = default;
-    ~integer() = default;
+    integer &operator=(const integer &) = default;
+
+    integer(integer &&) noexcept = default;
+    integer &operator=(integer &&) noexcept = default;
+    ~integer() noexcept = default;
+
     operator std::string() const;
     operator bool() const { return !is_zero(); }
     bool diffrent_sign(const integer &rhs) const { return sign != rhs.sign; }
@@ -35,14 +68,13 @@ namespace cyy::math {
     bool is_zero() const { return digits.back() == 0; }
     bool is_abs_one() const { return digits.back() == 1 && digits.size() == 1; }
 
-    integer &operator=(const integer &) = default;
     integer &operator+=(const integer &rhs);
+    integer &operator++();   // prefix
+    integer operator++(int); // suffix
     integer operator-(const integer &rhs) const;
+    integer &operator--();   // prefix
+    integer operator--(int); // suffix
     integer &operator-=(const integer &rhs);
-    integer &operator++(); //前缀
-    integer &operator--();
-    integer operator++(int); //后缀
-    integer operator--(int);
     integer &operator*=(const integer &rhs);
     integer &operator/=(const integer &rhs);
     integer &operator%=(const integer &rhs);
@@ -57,8 +89,9 @@ namespace cyy::math {
 #endif
     static bool is_valid_int_str(const std::string &str);
 
-    std::vector<int32_t> digits;
-    bool non_negative;
+    std::vector<uint32_t> digits;
+    static const uint64_t base = static_cast<uint64_t>(1) << 32;
+    bool non_negative{true};
     uint8_t sign; // 1-正数 0-负数
 
     friend bool operator==(const integer &a, const integer &b);
@@ -101,5 +134,5 @@ namespace cyy::math {
   integer operator%(const integer &a, int b);
   integer operator%(const integer &a, const integer &b);
 
-  ostream &operator<<(ostream &os, const integer &a);
+  std::ostream &operator<<(std::ostream &os, const integer &a);
 } // namespace cyy::math
