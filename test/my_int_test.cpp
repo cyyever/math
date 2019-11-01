@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include "../src/my_math.h"
+#include "../src/interger.hpp"
 
 using namespace std;
 using namespace my_math;

@@ -10,16 +10,16 @@
 #include <iostream>
 #include <regex>
 
-#include "my_arithmetic.h"
+/* #include "my_arithmetic.h" */
 #include "my_int.h"
 
 using std::cout;
 using std::endl;
 
-namespace my_math {
+namespace cyy::math {
 
   my_int::my_int() : sign(1) {
-    my_digit_list.push_back(0);
+    digits.push_back(0);
     return;
   }
 
@@ -36,22 +36,22 @@ namespace my_math {
 
     i = int_str.size();
     while (i - first_digit_index >= my_digit_num) {
-      my_digit_list.push_back(
+      digits.push_back(
           stoll(int_str.substr(i - my_digit_num, my_digit_num)));
       i -= my_digit_num;
     }
     if (i - first_digit_index > 0)
-      my_digit_list.push_back(
+      digits.push_back(
           stoll(int_str.substr(first_digit_index, i - first_digit_index)));
     return;
   }
 
   my_int::my_int(uint64_t num) : sign(1) {
     if (num < my_base)
-      my_digit_list.push_back(num);
+      digits.push_back(num);
     else {
       while (num) {
-        my_digit_list.push_back(num % my_base);
+        digits.push_back(num % my_base);
         num /= my_base;
       }
     }
@@ -75,7 +75,7 @@ namespace my_math {
       int_str.push_back('-');
 
     flag = 1;
-    for (auto it = --my_digit_list.end();; it--) {
+    for (auto it = --digits.end();; it--) {
       auto tmp = std::to_string(*it);
       if (flag) {
         flag = 0;
@@ -83,7 +83,7 @@ namespace my_math {
         int_str.insert(int_str.end(), my_digit_num - tmp.size(), '0');
       }
       int_str.append(tmp);
-      if (it == my_digit_list.begin())
+      if (it == digits.begin())
         break;
     }
     return int_str;
@@ -105,14 +105,14 @@ namespace my_math {
     else if (sign > rhs.sign)
       return 1;
 
-    if (my_digit_list.size() < rhs.my_digit_list.size())
+    if (digits.size() < rhs.digits.size())
       res = -1;
-    else if (my_digit_list.size() > rhs.my_digit_list.size())
+    else if (digits.size() > rhs.digits.size())
       res = 1;
     else {
       res = 0;
-      auto it = --my_digit_list.end();
-      auto it2 = --rhs.my_digit_list.cend();
+      auto it = --digits.end();
+      auto it2 = --rhs.digits.cend();
       for (;; it--, it2--) {
         if (*it < *it2) {
           res = -1;
@@ -121,7 +121,7 @@ namespace my_math {
           res = 1;
           break;
         }
-        if (it == my_digit_list.begin())
+        if (it == digits.begin())
           break;
       }
     }
@@ -138,8 +138,8 @@ namespace my_math {
    * 		位数
    */
   uint64_t my_int::digit_num() const {
-    return my_digit_num * (my_digit_list.size() - 1) +
-           std::to_string(my_digit_list.back()).size();
+    return my_digit_num * (digits.size() - 1) +
+           std::to_string(digits.back()).size();
   }
 
   bool operator==(const my_int &a, const my_int &b) {
@@ -184,7 +184,7 @@ namespace my_math {
       return *this;
     }
     unsigned __int128 tmp, carry;
-    auto it = my_digit_list.begin();
+    auto it = digits.begin();
 
     tmp = (unsigned __int128)(*it) + rhs;
 
@@ -199,7 +199,7 @@ namespace my_math {
 
       it++;
 
-      while (it != my_digit_list.end()) {
+      while (it != digits.end()) {
         tmp = *it + carry;
         if (tmp >= my_base) {
           carry = 1;
@@ -219,10 +219,10 @@ namespace my_math {
 
       if (carry > 0) {
         if (carry < my_base)
-          my_digit_list.push_back(carry);
+          digits.push_back(carry);
         else {
           while (carry) {
-            my_digit_list.push_back(carry % my_base);
+            digits.push_back(carry % my_base);
             carry /= my_base;
           }
         }
@@ -248,9 +248,9 @@ namespace my_math {
     }
     uint8_t carry = 0;
 
-    auto it = my_digit_list.begin();
-    auto it2 = rhs.my_digit_list.cbegin();
-    for (; it != my_digit_list.end() && it2 != rhs.my_digit_list.cend();
+    auto it = digits.begin();
+    auto it2 = rhs.digits.cbegin();
+    for (; it != digits.end() && it2 != rhs.digits.cend();
          it++, it2++) {
       *it += *it2 + carry;
       if ((*it) >= my_base) {
@@ -259,7 +259,7 @@ namespace my_math {
       } else
         carry = 0;
     }
-    if (it2 != rhs.my_digit_list.cend()) {
+    if (it2 != rhs.digits.cend()) {
       do {
         int64_t my_digit = *it2 + carry;
 
@@ -268,10 +268,10 @@ namespace my_math {
           my_digit -= my_base;
         } else
           carry = 0;
-        my_digit_list.push_back(my_digit);
+        digits.push_back(my_digit);
         it2++;
-      } while (it2 != rhs.my_digit_list.cend());
-    } else if (carry == 1 && it != my_digit_list.end()) {
+      } while (it2 != rhs.digits.cend());
+    } else if (carry == 1 && it != digits.end()) {
       do {
         *it += 1;
         if ((*it) >= my_base)
@@ -281,11 +281,11 @@ namespace my_math {
           break;
         }
         it++;
-      } while (it != my_digit_list.end());
+      } while (it != digits.end());
     }
 
     if (carry == 1)
-      my_digit_list.push_back(1);
+      digits.push_back(1);
     return *this;
   }
 
@@ -308,7 +308,7 @@ namespace my_math {
     }
 
     __int128 tmp, carry;
-    auto it = my_digit_list.begin();
+    auto it = digits.begin();
 
     tmp = (__int128)(*it) - rhs;
 
@@ -327,7 +327,7 @@ namespace my_math {
 
       it++;
 
-      while (it != my_digit_list.end()) {
+      while (it != digits.end()) {
         tmp = *it - carry;
         if (tmp < 0) {
           carry = 1;
@@ -351,20 +351,20 @@ namespace my_math {
 
       if (carry > 0) {
         //这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
-        for (auto it = my_digit_list.begin(); it != my_digit_list.end(); it++)
+        for (auto it = digits.begin(); it != digits.end(); it++)
           *it = -(*it);
 
         if (carry < my_base)
-          my_digit_list.push_back(carry);
+          digits.push_back(carry);
         else {
           while (carry) {
-            my_digit_list.push_back(carry % my_base);
+            digits.push_back(carry % my_base);
             carry /= my_base;
           }
         }
 
         carry = 0;
-        for (auto it = my_digit_list.begin(); it != my_digit_list.end(); it++) {
+        for (auto it = digits.begin(); it != digits.end(); it++) {
           *it -= carry;
           if (*it < 0) {
             *it += my_base;
@@ -378,8 +378,8 @@ namespace my_math {
       *it = tmp;
 
     //去除前面的0
-    while (my_digit_list.back() == 0 && my_digit_list.size() > 1)
-      my_digit_list.pop_back();
+    while (digits.back() == 0 && digits.size() > 1)
+      digits.pop_back();
 
     //如果两个相等的负数相减，这边我们要调整符号为正
     if (is_zero())
@@ -413,9 +413,9 @@ namespace my_math {
 
     uint8_t carry = 0;
 
-    auto it = my_digit_list.begin();
-    auto it2 = rhs.my_digit_list.cbegin();
-    for (; it != my_digit_list.end() && it2 != rhs.my_digit_list.cend();
+    auto it = digits.begin();
+    auto it2 = rhs.digits.cbegin();
+    for (; it != digits.end() && it2 != rhs.digits.cend();
          it++, it2++) {
       *it -= (*it2 + carry);
       if ((*it) < 0) {
@@ -424,7 +424,7 @@ namespace my_math {
       } else
         carry = 0;
     }
-    if (it2 != rhs.my_digit_list.cend()) {
+    if (it2 != rhs.digits.cend()) {
       do {
         int64_t my_digit = -(*it2 + carry);
 
@@ -433,11 +433,11 @@ namespace my_math {
           carry = 1;
         } else
           carry = 0;
-        my_digit_list.push_back(my_digit);
+        digits.push_back(my_digit);
         it2++;
-      } while (it2 != rhs.my_digit_list.cend());
+      } while (it2 != rhs.digits.cend());
     } else if (carry == 1) {
-      for (; it != my_digit_list.end(); it++) {
+      for (; it != digits.end(); it++) {
         *it -= 1;
         if ((*it) < 0)
           *it += my_base;
@@ -449,10 +449,10 @@ namespace my_math {
     }
 
     if (carry == 1) {
-      my_digit_list.push_back(-1);
+      digits.push_back(-1);
       //这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
       carry = 0;
-      for (auto it = my_digit_list.begin(); it != my_digit_list.end(); it++) {
+      for (auto it = digits.begin(); it != digits.end(); it++) {
         *it = -(*it + carry);
         if (*it < 0) {
           *it += my_base;
@@ -464,8 +464,8 @@ namespace my_math {
     }
 
     //去除前面的0
-    while (my_digit_list.back() == 0 && my_digit_list.size() > 1)
-      my_digit_list.pop_back();
+    while (digits.back() == 0 && digits.size() > 1)
+      digits.pop_back();
 
     //如果两个相等的负数相减，这边我们要调整符号为正
     if (is_zero())
@@ -516,7 +516,7 @@ namespace my_math {
     }
 
     carry = 0;
-    for (auto it = my_digit_list.begin(); it != my_digit_list.end(); it++) {
+    for (auto it = digits.begin(); it != digits.end(); it++) {
       tmp_my_digit = (unsigned __int128)(*it) * rhs + carry;
       if (tmp_my_digit >= my_int::my_base) {
         *it = tmp_my_digit % my_int::my_base;
@@ -529,10 +529,10 @@ namespace my_math {
 
     while (carry) {
       if (carry >= my_int::my_base) {
-        my_digit_list.push_back(carry % my_int::my_base);
+        digits.push_back(carry % my_int::my_base);
         carry /= my_int::my_base;
       } else {
-        my_digit_list.push_back(carry);
+        digits.push_back(carry);
         carry = 0;
       }
     }
@@ -571,16 +571,16 @@ namespace my_math {
       *this = rhs;
       return *this;
     }
-    decltype(rhs.my_digit_list.size()) cnt = 0, i;
+    decltype(rhs.digits.size()) cnt = 0, i;
     uint8_t new_sign = !(sign ^ rhs.sign);
     my_int tmp_this = std::move(*this);
 
     *this = 0;
-    for (auto it = rhs.my_digit_list.cbegin(); it != rhs.my_digit_list.cend();
+    for (auto it = rhs.digits.cbegin(); it != rhs.digits.cend();
          it++, cnt++) {
       my_int tmp = tmp_this * (*it);
       for (i = 0; i < cnt; i++)
-        tmp.my_digit_list.push_front(0);
+        tmp.digits.push_front(0);
       operator+=(tmp);
     }
     sign = new_sign;
@@ -604,7 +604,7 @@ namespace my_math {
       return *this;
 
     carry = 0;
-    for (auto it = --my_digit_list.end();; it--) {
+    for (auto it = --digits.end();; it--) {
       tmp = *it;
       if (carry)
         tmp += carry * my_base;
@@ -616,13 +616,13 @@ namespace my_math {
         *it = 0;
         carry = tmp;
       }
-      if (it == my_digit_list.begin())
+      if (it == digits.begin())
         break;
     }
 
     //去除前面的0
-    while (my_digit_list.back() == 0 && my_digit_list.size() > 1)
-      my_digit_list.pop_back();
+    while (digits.back() == 0 && digits.size() > 1)
+      digits.pop_back();
 
     if (is_zero())
       sign = 1;
@@ -742,4 +742,4 @@ namespace my_math {
     else
       return false;
   }
-} // namespace my_math
+} // namespace cyy::math

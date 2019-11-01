@@ -4,7 +4,7 @@ project(MyMathLib LANGUAGES CXX)
 
 include(cmake/all.cmake)
 
-file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp  ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
+file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(MyMathLib ${SOURCE})
 
@@ -24,7 +24,7 @@ install(TARGETS MyMathLib EXPORT ${PROJECT_NAME}Targets
   )
 
 install(DIRECTORY src/ DESTINATION include/cyy/math
-  FILES_MATCHING PATTERN "*.h")
+  FILES_MATCHING PATTERN "*.hpp")
 
 # install cmake config file
 install(EXPORT ${PROJECT_NAME}Targets
