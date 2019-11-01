@@ -37,8 +37,6 @@ my_int power(const my_int &base, uint64_t power) {
   my_int tmp_base = base;
 
   while (power) {
-    std::cout<<"tmp_base is "<<tmp_base<<std::endl;
-    std::cout<<"power is "<<power<<std::endl;
     if (power & 1)
       res *= tmp_base;
     power >>= 1;
