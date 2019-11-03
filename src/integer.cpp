@@ -24,36 +24,28 @@ namespace cyy::math {
     if (!std::regex_match(str.begin(), str.end(), integer_regex)) {
       throw cyy::math::exception::no_integer(std::string(str));
     }
-
-    /*
-    thadsadsadsadsadsadsaow
-
-    decltype(int_str.size()) i, first_digit_index;
-    if (int_str[0] == '-') {
-      sign = 0;
-      first_digit_index = 1;
-    } else
-      first_digit_index = 0;
-
-    i = int_str.size();
-    while (i - first_digit_index >= my_digit_num) {
-      digits.push_back(stoll(int_str.substr(i - my_digit_num, my_digit_num)));
-      i -= my_digit_num;
+    if (str.starts_with('-')) {
+      non_negative = false;
     }
-    if (i - first_digit_index > 0)
-      digits.push_back(
-          stoll(int_str.substr(first_digit_index, i - first_digit_index)));
-    return;
-    */
-  }
+    str.remove_prefix(1);
 
-  void integer::assign_digits(const std::vector<int64_t> &new_digits) {
-    digits.resize(new_digits.size());
-    uint32_t carry = 0;
-    for (size_t i = 0; i < digits.size(); i++) {
-      digits[i] = new_digits[i];
+    uint64_t init_value = 0;
+    while (!str.empty()) {
+      auto next_value = init_value * 10 + (str[0] - '0');
+      if (next_value >= base) {
+        break;
+      }
+      init_value = next_value;
+      str.remove_prefix(1);
+    }
+    digits.push_back(init_value);
+    while (!str.empty()) {
+      operator*=(10);
+      operator+=(str[0] - '0');
+      str.remove_prefix(1);
     }
   }
+
   void integer::normalize() {
     while (digits.back() == 0 && digits.size() > 1) {
       digits.pop_back();
@@ -115,8 +107,7 @@ namespace cyy::math {
       return *this;
     }
     if (this == &rhs) {
-      // TODO *=2
-      return operator+=(*this);
+      return operator*=(2);
     }
 
     if (diffrent_sign(rhs)) //符号不同，转换成减法
@@ -230,23 +221,52 @@ namespace cyy::math {
     if (rhs == 1) {
       return *this;
     }
-    digits.push_back(0);
-    uint32_t carry = 0;
-    for (auto &digit : digits) {
-      uint64_t res = static_cast<uint64_t>(digit) * rhs + carry;
-      digit = res & base;
-      carry = res >> 32;
+
+    std::vector<uint64_t> result_digits(digits.size() + 1, 0);
+    for (size_t i = 0; i < digits.size(); i++) {
+      uint64_t result =
+          result_digits[i] + static_cast<uint64_t>(digits[i]) * rhs;
+      result_digits[i] = result & base;
+      result_digits[i + 1] = result >> 32;
+    }
+    digits.resize(result_digits.size());
+
+    for (size_t i = 0; i < digits.size(); i++) {
+      digits[i] = result_digits[i];
     }
     normalize();
     return *this;
   }
 
-  integer operator+(const integer &a, const integer &b) {
-    return integer(a) += b;
+  integer &integer::operator*=(const integer &rhs) {
+    if (rhs.is_zero()) {
+      *this = 0;
+      return *this;
+    }
+    if (rhs.is_abs_one()) {
+      non_negative = (non_negative == rhs.non_negative);
+      return *this;
+    }
+
+    std::vector<uint64_t> result_digits(
+        std::max(digits.size(), rhs.digits.size()) + 1, 0);
+    for (size_t i = 0; i < digits.size(); i++) {
+      for (size_t j = 0; j < rhs.digits.size(); j++) {
+        uint64_t result = result_digits[i + j] +
+                          static_cast<uint64_t>(digits[i]) * rhs.digits[j];
+        result_digits[i + j] = result & base;
+        result_digits[i + j + 1] = result >> 32;
+      }
+    }
+    digits.resize(result_digits.size());
+
+    for (size_t i = 0; i < digits.size(); i++) {
+      digits[i] = result_digits[i];
+    }
+    normalize();
+    return *this;
   }
-  integer operator-(const integer &a, const integer &b) {
-    return integer(a) -= b;
-  }
+
   integer &integer::operator++() {
     operator+=(1);
     return *this;

@@ -59,6 +59,7 @@ namespace cyy::math {
     ~integer() noexcept = default;
 
     operator std::string() const;
+    std::string to_string() const;
     operator bool() const { return !is_zero(); }
     bool diffrent_sign(const integer &rhs) const {
       return non_negative != rhs.non_negative;
@@ -78,19 +79,16 @@ namespace cyy::math {
     integer &operator-=(const integer &rhs);
     integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
-    integer &operator/=(const integer &rhs);
-    integer &operator%=(const integer &rhs);
+    /* integer &operator/=(const integer &rhs); */
+    /* integer &operator%=(const integer &rhs); */
 
-    friend integer operator+(const integer &a, const integer &b);
-    friend integer operator*(const integer &a, const integer &b);
-    friend integer operator/(const integer &a, const integer &b);
-    friend integer operator%(const integer &a, const integer &b);
+    /* friend integer operator/(const integer &a, const integer &b); */
+    /* friend integer operator%(const integer &a, const integer &b); */
 
     int compare(const integer &rhs) const;
 
   private:
     void normalize();
-    void assign_digits(const std::vector<int64_t> &new_digits);
 
   private:
     /* #ifdef NDEBUG */
@@ -132,27 +130,26 @@ namespace cyy::math {
   inline bool operator>=(const integer &a, const integer &b) {
     return !(a < b);
   }
-  integer operator-(const integer &a);
-  integer operator+(const integer &a, uint64_t b);
-  integer operator+(const integer &a, int64_t b);
-  integer operator+(const integer &a, int b);
-  integer operator+(const integer &a, const integer &b);
-  integer operator-(const integer &a, uint64_t b);
-  integer operator-(const integer &a, int64_t b);
-  integer operator-(const integer &a, int b);
-  integer operator-(const integer &a, const integer &b);
-  integer operator*(const integer &a, uint64_t b);
-  integer operator*(const integer &a, int64_t b);
-  integer operator*(const integer &a, int b);
-  integer operator*(const integer &a, const integer &b);
-  integer operator/(const integer &a, uint64_t b);
-  integer operator/(const integer &a, int64_t b);
-  integer operator/(const integer &a, int b);
-  integer operator/(const integer &a, const integer &b);
-  integer operator%(const integer &a, uint64_t b);
-  integer operator%(const integer &a, int64_t b);
-  integer operator%(const integer &a, int b);
-  integer operator%(const integer &a, const integer &b);
+  inline integer operator+(const integer &a, const integer &b) {
+    return integer(a) += b;
+  }
+  inline integer operator-(const integer &a, const integer &b) {
+    return integer(a) -= b;
+  }
+  inline integer operator*(const integer &a, const integer &b) {
+    return integer(a) *= b;
+  }
+  /* integer operator/(const integer &a, uint64_t b); */
+  /* integer operator/(const integer &a, int64_t b); */
+  /* integer operator/(const integer &a, int b); */
+  /* integer operator/(const integer &a, const integer &b); */
+  /* integer operator%(const integer &a, uint64_t b); */
+  /* integer operator%(const integer &a, int64_t b); */
+  /* integer operator%(const integer &a, int b); */
+  /* integer operator%(const integer &a, const integer &b); */
 
-  std::ostream &operator<<(std::ostream &os, const integer &a);
+  inline std::ostream &operator<<(std::ostream &os, const integer &a) {
+    os << static_cast<std::string>(a);
+    return os;
+  }
 } // namespace cyy::math
