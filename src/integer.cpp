@@ -252,137 +252,9 @@ namespace cyy::math {
   integer operator+(const integer &a, const integer &b) {
     return integer(a) += b;
   }
-#if 0
-
-
-
-
-  /*
-   *	功能：获取整数的位数
-   * 	参数：
-   * 		无
-   * 	返回值：
-   * 		位数
-   */
-  uint64_t integer::digit_num() const {
-    return my_digit_num * (digits.size() - 1) +
-           std::to_string(digits.back()).size();
-  }
-
-
-
-
-
-  integer &integer::operator-=(uint64_t rhs) {
-    if (sign == 0) //符号不同，转换成加法
-    {
-      sign = 1 - sign;
-      operator+=(rhs);
-      if (!is_zero())
-        sign = 1 - sign;
-      return *this;
-    }
-
-    __int128 tmp, carry;
-    auto it = digits.begin();
-
-    tmp = (__int128)(*it) - rhs;
-
-    if (tmp < 0) {
-      carry = 1;
-      tmp += my_base;
-      if (tmp < 0) {
-        carry += ((-tmp) / my_base);
-        tmp += (carry - 1) * my_base;
-        if (tmp < 0) {
-          carry++;
-          tmp += my_base;
-        }
-      }
-      *it = tmp;
-
-      it++;
-
-      while (it != digits.end()) {
-        tmp = *it - carry;
-        if (tmp < 0) {
-          carry = 1;
-          tmp += my_base;
-          if (tmp < 0) {
-            carry += ((-tmp) / my_base);
-            tmp += (carry - 1) * my_base;
-            if (tmp < 0) {
-              carry++;
-              tmp += my_base;
-            }
-          }
-          *it = tmp;
-        } else {
-          *it = tmp;
-          carry = 0;
-          break;
-        }
-        it++;
-      }
-
-      if (carry > 0) {
-        //这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
-        for (auto it = digits.begin(); it != digits.end(); it++)
-          *it = -(*it);
-
-        if (carry < my_base)
-          digits.push_back(carry);
-        else {
-          while (carry) {
-            digits.push_back(carry % my_base);
-            carry /= my_base;
-          }
-        }
-
-        carry = 0;
-        for (auto it = digits.begin(); it != digits.end(); it++) {
-          *it -= carry;
-          if (*it < 0) {
-            *it += my_base;
-            carry = 1;
-          } else
-            carry = 0;
-        }
-        sign = 1 - sign;
-      }
-    } else
-      *it = tmp;
-
-    //去除前面的0
-    while (digits.back() == 0 && digits.size() > 1)
-      digits.pop_back();
-
-    //如果两个相等的负数相减，这边我们要调整符号为正
-    if (is_zero())
-      sign = 1;
-    return *this;
-  }
-
-  integer &integer::operator-=(int64_t rhs) {
-    if (rhs >= 0)
-      return operator-=((uint64_t)rhs);
-    else
-      return operator+=(abs(rhs));
-  }
-
-  integer &integer::operator-=(int rhs) { return operator-=((int64_t)rhs); }
-
-
-  integer operator-(const integer &a, uint64_t b) { return integer(a) -= b; }
-
-  integer operator-(const integer &a, int64_t b) { return integer(a) -= b; }
-
-  integer operator-(const integer &a, int b) { return integer(a) -= b; }
-
   integer operator-(const integer &a, const integer &b) {
     return integer(a) -= b;
   }
-
   integer &integer::operator++() {
     operator+=(1);
     return *this;
@@ -404,6 +276,28 @@ namespace cyy::math {
     operator-=(1);
     return tmp;
   }
+#if 0
+
+
+
+
+  /*
+   *	功能：获取整数的位数
+   * 	参数：
+   * 		无
+   * 	返回值：
+   * 		位数
+   */
+  uint64_t integer::digit_num() const {
+    return my_digit_num * (digits.size() - 1) +
+           std::to_string(digits.back()).size();
+  }
+
+
+
+
+
+
 
   integer &integer::operator*=(uint64_t rhs) {
     int64_t carry;
