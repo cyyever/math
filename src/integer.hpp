@@ -76,24 +76,21 @@ namespace cyy::math {
     integer &operator--();   // prefix
     integer operator--(int); // suffix
     integer &operator-=(const integer &rhs);
+    integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
     integer &operator/=(const integer &rhs);
     integer &operator%=(const integer &rhs);
 
-    friend bool operator==(const integer &a, const integer &b);
-    friend bool operator!=(const integer &a, const integer &b);
-    friend bool operator<(const integer &a, const integer &b);
-    friend bool operator<=(const integer &a, const integer &b);
-    friend bool operator>(const integer &a, const integer &b);
-    friend bool operator>=(const integer &a, const integer &b);
     friend integer operator+(const integer &a, const integer &b);
     friend integer operator*(const integer &a, const integer &b);
     friend integer operator/(const integer &a, const integer &b);
     friend integer operator%(const integer &a, const integer &b);
 
-  private:
     int compare(const integer &rhs) const;
+
+  private:
     void normalize();
+    void assign_digits(const std::vector<int64_t> &new_digits);
 
   private:
     /* #ifdef NDEBUG */
@@ -112,12 +109,29 @@ namespace cyy::math {
     uint8_t sign; // 1-正数 0-负数
   };
 
-  bool operator==(const integer &a, const integer &b);
-  bool operator!=(const integer &a, const integer &b);
-  bool operator<(const integer &a, const integer &b);
-  bool operator<=(const integer &a, const integer &b);
-  bool operator>(const integer &a, const integer &b);
-  bool operator>=(const integer &a, const integer &b);
+  inline bool operator==(const integer &a, const integer &b) {
+    return a.compare(b) == 0;
+  }
+
+  inline bool operator!=(const integer &a, const integer &b) {
+    return !(a == b);
+  }
+
+  inline bool operator<(const integer &a, const integer &b) {
+    return a.compare(b) < 0;
+  }
+
+  inline bool operator<=(const integer &a, const integer &b) {
+    return a.compare(b) <= 0;
+  }
+
+  inline bool operator>(const integer &a, const integer &b) {
+    return !(a <= b);
+  }
+
+  inline bool operator>=(const integer &a, const integer &b) {
+    return !(a < b);
+  }
   integer operator-(const integer &a);
   integer operator+(const integer &a, uint64_t b);
   integer operator+(const integer &a, int64_t b);

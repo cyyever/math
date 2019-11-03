@@ -1,23 +1,7 @@
 /*!
- * \file integer.cpp
+ * \file integer.hpp
  *
- * \brief
- */
-/*!
- * \file integer.cpp
- *
- * \brief
- */
-/*!
- * \file integer.cpp
- *
- * \brief
- */
-/*
- *	程序名：integer.cpp
- *	作者：陈源源
- *	日期：2016-03-28
- *	功能：整数相关类和函数
+ * \brief integer related classes
  */
 
 #include <algorithm>
@@ -63,6 +47,12 @@ namespace cyy::math {
     */
   }
 
+  void integer::assign_digits(const std::vector<int64_t> &new_digits) {
+    digits.resize(new_digits.size());
+    for (size_t i = 0; i < digits.size(); i++) {
+      digits[i] = new_digits[i];
+    }
+  }
   void integer::normalize() {
     while (digits.back() == 0 && digits.size() > 1) {
       digits.pop_back();
@@ -223,6 +213,7 @@ namespace cyy::math {
         *it += static_cast<int64_t>(base);
       }
     }
+    assign_digits(diffrence);
     if (changed_sign) {
       non_negative = !non_negative;
     }
@@ -231,23 +222,23 @@ namespace cyy::math {
     return *this;
   }
 
-  bool operator==(const integer &a, const integer &b) {
-    return a.compare(b) == 0;
+  integer &integer::operator*=(uint32_t rhs) {
+    if (rhs == 0) {
+      *this = 0;
+      return *this;
+    }
+    if (rhs == 1) {
+      return *this;
+    }
+    std::vector<int64_t> result(digits.size());
+    for (size_t i = 0; i < digits.size(); i++) {
+      result[i] = static_cast<int64_t>(digits[i]) * static_cast<int64_t>(rhs);
+    }
+    assign_digits(result);
+    normalize();
+    return *this;
   }
 
-  bool operator!=(const integer &a, const integer &b) { return !(a == b); }
-
-  bool operator<(const integer &a, const integer &b) {
-    return a.compare(b) < 0;
-  }
-
-  bool operator<=(const integer &a, const integer &b) {
-    return a.compare(b) <= 0;
-  }
-
-  bool operator>(const integer &a, const integer &b) { return !(a <= b); }
-
-  bool operator>=(const integer &a, const integer &b) { return !(a < b); }
 
   integer operator+(const integer &a, const integer &b) {
     return integer(a) += b;
@@ -299,41 +290,6 @@ namespace cyy::math {
 
 
 
-  integer &integer::operator*=(uint64_t rhs) {
-    int64_t carry;
-    unsigned __int128 tmp_my_digit;
-
-    if (this->is_zero() || rhs == 1)
-      return *this;
-
-    if (rhs == 0) {
-      *this = 0;
-      return *this;
-    }
-
-    carry = 0;
-    for (auto it = digits.begin(); it != digits.end(); it++) {
-      tmp_my_digit = (unsigned __int128)(*it) * rhs + carry;
-      if (tmp_my_digit >= integer::my_base) {
-        *it = tmp_my_digit % integer::my_base;
-        carry = tmp_my_digit / integer::my_base;
-      } else {
-        *it = tmp_my_digit;
-        carry = 0;
-      }
-    }
-
-    while (carry) {
-      if (carry >= integer::my_base) {
-        digits.push_back(carry % integer::my_base);
-        carry /= integer::my_base;
-      } else {
-        digits.push_back(carry);
-        carry = 0;
-      }
-    }
-    return *this;
-  }
 
   integer &integer::operator*=(int64_t rhs) {
     if (rhs == -1) //这个常用，为了提高性能，特殊判定
@@ -547,19 +503,6 @@ namespace cyy::math {
         break;
     }
     return int_str;
-  }
-  /*
-   *	功能：检查传入的字符串是否整数，即是否匹配 ^[+-]?[1-9][0-9]*$
-   * 	参数：
-   *		str：要检查的字符串
-   * 	返回值：
-   *		true：是
-   *		false：不是
-   */
-  bool integer::is_valid_int_str(const string &str) {
-      return true;
-    else
-      return false;
   }
 #endif
 } // namespace cyy::math
