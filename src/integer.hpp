@@ -79,6 +79,7 @@ namespace cyy::math {
     integer &operator-=(const integer &rhs);
     integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
+    integer &operator/=(uint32_t rhs);
     /* integer &operator/=(const integer &rhs); */
     /* integer &operator%=(const integer &rhs); */
 
@@ -104,7 +105,6 @@ namespace cyy::math {
     std::vector<uint32_t> digits;
     static const uint64_t base = static_cast<uint64_t>(1) << 32;
     bool non_negative{true};
-    uint8_t sign; // 1-正数 0-负数
   };
 
   inline bool operator==(const integer &a, const integer &b) {

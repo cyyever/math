@@ -20,7 +20,6 @@ namespace cyy::math {
 
   integer::integer(std::string_view str) {
     static const std::regex integer_regex("^[+-]?(0|[1-9][0-9]*)$");
-    std::smatch m;
     if (!std::regex_match(str.begin(), str.end(), integer_regex)) {
       throw cyy::math::exception::no_integer(std::string(str));
     }
@@ -31,18 +30,18 @@ namespace cyy::math {
 
     uint64_t init_value = 0;
     while (!str.empty()) {
-      auto next_value = init_value * 10 + (str[0] - '0');
+      auto next_value = init_value * 10 + (str.back() - '0');
       if (next_value >= base) {
         break;
       }
       init_value = next_value;
-      str.remove_prefix(1);
+      str.remove_suffix(1);
     }
     digits.push_back(init_value);
     while (!str.empty()) {
       operator*=(10);
-      operator+=(str[0] - '0');
-      str.remove_prefix(1);
+      operator+=(str.back() - '0');
+      str.remove_suffix(1);
     }
   }
 
@@ -91,7 +90,7 @@ namespace cyy::math {
         }
       }
     }
-    if (sign == 0) //负数
+    if (!non_negative) //负数
       res = -res;
     return res;
   }
@@ -267,6 +266,26 @@ namespace cyy::math {
     return *this;
   }
 
+  integer &integer::operator/=(uint32_t rhs) {
+    if (rhs == 0) {
+      throw cyy::math::exception::divided_by_zero("");
+    }
+
+    if (this->is_zero() || rhs == 1)
+      return *this;
+
+    uint64_t res = 0;
+    for (auto it = digits.rbegin(); it != digits.rend(); it++) {
+      res = (res << 32) + *it;
+      auto remainder = res % rhs;
+      res /= rhs;
+      *it = res;
+      res = remainder;
+    }
+    normalize();
+    return *this;
+  }
+
   integer &integer::operator++() {
     operator+=(1);
     return *this;
@@ -369,39 +388,6 @@ namespace cyy::math {
     return integer(a) *= b;
   }
 
-  integer &integer::operator/=(uint64_t rhs) {
-    unsigned __int128 tmp, carry;
-    if (rhs == 0)
-      throw std::invalid_argument("divided by zero");
-
-    if (this->is_zero() || rhs == 1)
-      return *this;
-
-    carry = 0;
-    for (auto it = --digits.end();; it--) {
-      tmp = *it;
-      if (carry)
-        tmp += carry * my_base;
-
-      if (tmp >= rhs) {
-        *it = tmp / rhs;
-        carry = tmp % rhs;
-      } else {
-        *it = 0;
-        carry = tmp;
-      }
-      if (it == digits.begin())
-        break;
-    }
-
-    //去除前面的0
-    while (digits.back() == 0 && digits.size() > 1)
-      digits.pop_back();
-
-    if (is_zero())
-      sign = 1;
-    return *this;
-  }
 
   integer &integer::operator/=(int64_t rhs) {
     operator/=(abs(rhs));
@@ -506,23 +492,23 @@ namespace cyy::math {
 
   integer::operator string() const {
     string int_str;
-    uint8_t flag;
-    char tmp[my_digit_num + 1];
-    if (sign == 0)
+    int_str.reserve(digits.size()*8);
+    if(!non_negative) {
       int_str.push_back('-');
-
-    flag = 1;
-    for (auto it = --digits.end();; it--) {
-      auto tmp = std::to_string(*it);
-      if (flag) {
-        flag = 0;
-      } else {
-        int_str.insert(int_str.end(), my_digit_num - tmp.size(), '0');
-      }
-      int_str.append(tmp);
-      if (it == digits.begin())
-        break;
     }
+
+    /* flag = 1; */
+    /* for (auto it = --digits.end();; it--) { */
+    /*   auto tmp = std::to_string(*it); */
+    /*   if (flag) { */
+    /*     flag = 0; */
+    /*   } else { */
+    /*     int_str.insert(int_str.end(), my_digit_num - tmp.size(), '0'); */
+    /*   } */
+    /*   int_str.append(tmp); */
+    /*   if (it == digits.begin()) */
+    /*     break; */
+    /* } */
     return int_str;
   }
 #endif
