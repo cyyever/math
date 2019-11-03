@@ -49,6 +49,7 @@ namespace cyy::math {
 
   void integer::assign_digits(const std::vector<int64_t> &new_digits) {
     digits.resize(new_digits.size());
+    uint32_t carry = 0;
     for (size_t i = 0; i < digits.size(); i++) {
       digits[i] = new_digits[i];
     }
@@ -205,15 +206,14 @@ namespace cyy::math {
         num = -num;
       }
     }
-    auto it = diffrence.rbegin();
-    it++;
-    for (; it != diffrence.rend(); it++) {
-      if (*it < 0) {
-        *(it - 1)--;
-        *it += static_cast<int64_t>(base);
+    digits.resize(diffrence.size());
+    for (i = 0; i < diffrence.size(); i++) {
+      if (diffrence[i] < 0) {
+        diffrence[i + 1]--;
+        diffrence[i] += static_cast<int64_t>(base);
       }
+      digits[i] = diffrence[i];
     }
-    assign_digits(diffrence);
     if (changed_sign) {
       non_negative = !non_negative;
     }
@@ -230,15 +230,16 @@ namespace cyy::math {
     if (rhs == 1) {
       return *this;
     }
-    std::vector<int64_t> result(digits.size());
-    for (size_t i = 0; i < digits.size(); i++) {
-      result[i] = static_cast<int64_t>(digits[i]) * static_cast<int64_t>(rhs);
+    digits.push_back(0);
+    uint32_t carry = 0;
+    for (auto &digit : digits) {
+      uint64_t res = static_cast<uint64_t>(digit) * rhs + carry;
+      digit = res & base;
+      carry = res >> 32;
     }
-    assign_digits(result);
     normalize();
     return *this;
   }
-
 
   integer operator+(const integer &a, const integer &b) {
     return integer(a) += b;
