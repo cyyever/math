@@ -1,3 +1,18 @@
+/*!
+ * \file integer.cpp
+ *
+ * \brief
+ */
+/*!
+ * \file integer.cpp
+ *
+ * \brief
+ */
+/*!
+ * \file integer.cpp
+ *
+ * \brief
+ */
 /*
  *	程序名：integer.cpp
  *	作者：陈源源
@@ -47,9 +62,15 @@ namespace cyy::math {
     return;
     */
   }
-#if 0
 
-
+  void integer::normalize() {
+    while (digits.back() == 0 && digits.size() > 1) {
+      digits.pop_back();
+    }
+    if (is_zero()) {
+      non_negative = true;
+    }
+  }
 
   /*
    *	功能：比较和另一个整数的大小
@@ -61,21 +82,23 @@ namespace cyy::math {
    * 		<0：小于另一个整数
    */
   int integer::compare(const integer &rhs) const {
-    int res;
-    if (sign < rhs.sign)
-      return -1;
-    else if (sign > rhs.sign)
-      return 1;
+    if (non_negative != rhs.non_negative) {
+      if (non_negative && !rhs.non_negative)
+        return 1;
+      else
+        return -1;
+    }
 
+    int res;
     if (digits.size() < rhs.digits.size())
       res = -1;
     else if (digits.size() > rhs.digits.size())
       res = 1;
     else {
       res = 0;
-      auto it = --digits.end();
-      auto it2 = --rhs.digits.cend();
-      for (;; it--, it2--) {
+      auto it = digits.crbegin();
+      auto it2 = rhs.digits.crbegin();
+      for (; it != digits.crend() && it2 != rhs.digits.crend(); it++, it2++) {
         if (*it < *it2) {
           res = -1;
           break;
@@ -83,25 +106,129 @@ namespace cyy::math {
           res = 1;
           break;
         }
-        if (it == digits.begin())
-          break;
       }
     }
     if (sign == 0) //负数
       res = -res;
     return res;
   }
+  integer integer::operator-() const {
+    auto res = *this;
+    if (!res.is_zero())
+      res.non_negative = !res.non_negative;
+    return res;
+  }
 
-  /*
-   *	功能：获取整数的位数
-   * 	参数：
-   * 		无
-   * 	返回值：
-   * 		位数
-   */
-  uint64_t integer::digit_num() const {
-    return my_digit_num * (digits.size() - 1) +
-           std::to_string(digits.back()).size();
+  integer &integer::operator+=(const integer &rhs) {
+    if (rhs.is_zero()) {
+      return *this;
+    }
+    if (this == &rhs) {
+      // TODO *=2
+      return operator+=(*this);
+    }
+
+    if (diffrent_sign(rhs)) //符号不同，转换成减法
+    {
+      bool changed_sign = false;
+      if (!non_negative) {
+        non_negative = true;
+        changed_sign = true;
+      }
+      operator-=(rhs);
+      if (changed_sign) {
+        non_negative = false;
+      }
+      normalize();
+      return *this;
+    }
+    uint32_t carry = 0;
+
+    if (digits.size() < rhs.digits.size()) {
+      digits.insert(digits.end(), rhs.digits.size() - digits.size(), 0);
+    }
+    auto it = digits.begin();
+
+    for (auto it2 = rhs.digits.cbegin(); it2 != rhs.digits.cend();
+         it++, it2++) {
+      uint64_t sum = static_cast<uint64_t>(*it) + static_cast<uint64_t>(*it2) +
+                     static_cast<uint64_t>(carry);
+      *it = static_cast<uint32_t>(sum & base);
+      carry = static_cast<uint32_t>(sum >> 32);
+    }
+    if (carry) {
+      digits.push_back(carry);
+    }
+    return *this;
+  }
+
+  integer &integer::operator-=(const integer &rhs) {
+    if (rhs.is_zero()) {
+      return *this;
+    }
+    if (this == &rhs) {
+      *this = 0;
+      return *this;
+    }
+
+    //转换成加法
+    if (non_negative && !rhs.non_negative) {
+      non_negative = false;
+      operator+=(rhs);
+      non_negative = true;
+      normalize();
+      return *this;
+    }
+    if (!non_negative && rhs.non_negative) {
+      non_negative = true;
+      operator+=(rhs);
+      non_negative = false;
+      normalize();
+      return *this;
+    }
+    bool changed_sign = false;
+    if (!non_negative && !rhs.non_negative) {
+      non_negative = true;
+      changed_sign = true;
+    }
+
+    std::vector<int64_t> diffrence(std::max(digits.size(), rhs.digits.size()),
+                                   0);
+    size_t i = 0;
+    for (; i < std::min(digits.size(), rhs.digits.size()); i++) {
+      diffrence[i] =
+          static_cast<int64_t>(digits[i]) - static_cast<int64_t>(rhs.digits[i]);
+    }
+    for (; i < digits.size(); i++) {
+      diffrence[i] = static_cast<int64_t>(digits[i]);
+    }
+    for (; i < rhs.digits.size(); i++) {
+      diffrence[i] = -static_cast<int64_t>(rhs.digits[i]);
+    }
+    while (diffrence.back() == 0 && diffrence.size() > 1) {
+      diffrence.pop_back();
+    }
+    non_negative = true;
+    if (diffrence.back() < 0) {
+      non_negative = false;
+      for (auto &num : diffrence) {
+        num = -num;
+      }
+    }
+    auto it = diffrence.rbegin();
+    it++;
+    for (; it != diffrence.rend(); it++) {
+      if (*it < 0) {
+        *(it - 1)--;
+        *it += static_cast<int64_t>(base);
+      }
+    }
+    if (changed_sign) {
+      non_negative = !non_negative;
+    }
+
+    normalize();
+    return *this;
   }
 
   bool operator==(const integer &a, const integer &b) {
@@ -122,145 +249,29 @@ namespace cyy::math {
 
   bool operator>=(const integer &a, const integer &b) { return !(a < b); }
 
-  integer operator-(const integer &a) {
-    integer b = a;
-    if (!b.is_zero())
-      b.sign = 1 - b.sign;
-    return b;
-  }
-
-  integer &integer::operator+=(int64_t rhs) {
-    if (rhs >= 0)
-      return operator+=((uint64_t)rhs);
-    else
-      return operator-=(abs(rhs));
-  }
-
-  integer &integer::operator+=(int rhs) { return operator+=((int64_t)rhs); }
-
-  integer &integer::operator+=(uint64_t rhs) {
-    if (sign == 0) //符号不同，转换成减法
-    {
-      sign = 1 - sign;
-      operator-=(rhs);
-      if (!is_zero())
-        sign = 1 - sign;
-      return *this;
-    }
-    unsigned __int128 tmp, carry;
-    auto it = digits.begin();
-
-    tmp = (unsigned __int128)(*it) + rhs;
-
-    if (tmp >= my_base) {
-      carry = 1;
-      tmp -= my_base;
-      if (tmp >= my_base) {
-        carry += (tmp / my_base);
-        *it = tmp % my_base;
-      } else
-        *it = tmp;
-
-      it++;
-
-      while (it != digits.end()) {
-        tmp = *it + carry;
-        if (tmp >= my_base) {
-          carry = 1;
-          tmp -= my_base;
-          if (tmp >= my_base) {
-            carry += (tmp / my_base);
-            *it = tmp % my_base;
-          } else
-            *it = tmp;
-        } else {
-          *it = tmp;
-          carry = 0;
-          break;
-        }
-        it++;
-      }
-
-      if (carry > 0) {
-        if (carry < my_base)
-          digits.push_back(carry);
-        else {
-          while (carry) {
-            digits.push_back(carry % my_base);
-            carry /= my_base;
-          }
-        }
-      }
-    } else
-      *it = tmp;
-    return *this;
-  }
-
-  integer &integer::operator+=(const integer &rhs) {
-    if (this == &rhs) {
-      integer tmp_this = *this;
-      return operator+=(tmp_this);
-    }
-
-    if (sign != rhs.sign) //符号不同，转换成减法
-    {
-      sign = 1 - sign;
-      operator-=(rhs);
-      if (!is_zero())
-        sign = 1 - sign;
-      return *this;
-    }
-    uint8_t carry = 0;
-
-    auto it = digits.begin();
-    auto it2 = rhs.digits.cbegin();
-    for (; it != digits.end() && it2 != rhs.digits.cend(); it++, it2++) {
-      *it += *it2 + carry;
-      if ((*it) >= my_base) {
-        carry = 1;
-        *it -= my_base;
-      } else
-        carry = 0;
-    }
-    if (it2 != rhs.digits.cend()) {
-      do {
-        int64_t my_digit = *it2 + carry;
-
-        if (my_digit >= my_base) {
-          carry = 1;
-          my_digit -= my_base;
-        } else
-          carry = 0;
-        digits.push_back(my_digit);
-        it2++;
-      } while (it2 != rhs.digits.cend());
-    } else if (carry == 1 && it != digits.end()) {
-      do {
-        *it += 1;
-        if ((*it) >= my_base)
-          *it -= my_base;
-        else {
-          carry = 0;
-          break;
-        }
-        it++;
-      } while (it != digits.end());
-    }
-
-    if (carry == 1)
-      digits.push_back(1);
-    return *this;
-  }
-
-  integer operator+(const integer &a, uint64_t b) { return integer(a) += b; }
-
-  integer operator+(const integer &a, int64_t b) { return integer(a) += b; }
-
-  integer operator+(const integer &a, int b) { return integer(a) += b; }
-
   integer operator+(const integer &a, const integer &b) {
     return integer(a) += b;
   }
+#if 0
+
+
+
+
+  /*
+   *	功能：获取整数的位数
+   * 	参数：
+   * 		无
+   * 	返回值：
+   * 		位数
+   */
+  uint64_t integer::digit_num() const {
+    return my_digit_num * (digits.size() - 1) +
+           std::to_string(digits.back()).size();
+  }
+
+
+
+
 
   integer &integer::operator-=(uint64_t rhs) {
     if (sign == 0) //符号不同，转换成加法
@@ -361,81 +372,6 @@ namespace cyy::math {
 
   integer &integer::operator-=(int rhs) { return operator-=((int64_t)rhs); }
 
-  integer &integer::operator-=(const integer &rhs) {
-    if (this == &rhs) {
-      *this = 0;
-      return *this;
-    }
-
-    if (sign != rhs.sign) //符号不同，转换成加法
-    {
-      sign = 1 - sign;
-      operator+=(rhs);
-      if (!is_zero())
-        sign = 1 - sign;
-      return *this;
-    }
-
-    uint8_t carry = 0;
-
-    auto it = digits.begin();
-    auto it2 = rhs.digits.cbegin();
-    for (; it != digits.end() && it2 != rhs.digits.cend(); it++, it2++) {
-      *it -= (*it2 + carry);
-      if ((*it) < 0) {
-        *it += my_base;
-        carry = 1;
-      } else
-        carry = 0;
-    }
-    if (it2 != rhs.digits.cend()) {
-      do {
-        int64_t my_digit = -(*it2 + carry);
-
-        if (my_digit < 0) {
-          my_digit += my_base;
-          carry = 1;
-        } else
-          carry = 0;
-        digits.push_back(my_digit);
-        it2++;
-      } while (it2 != rhs.digits.cend());
-    } else if (carry == 1) {
-      for (; it != digits.end(); it++) {
-        *it -= 1;
-        if ((*it) < 0)
-          *it += my_base;
-        else {
-          carry = 0;
-          break;
-        }
-      }
-    }
-
-    if (carry == 1) {
-      digits.push_back(-1);
-      //这样的话前面几个my_digit是负数，我们重新翻转正负号并补位
-      carry = 0;
-      for (auto it = digits.begin(); it != digits.end(); it++) {
-        *it = -(*it + carry);
-        if (*it < 0) {
-          *it += my_base;
-          carry = 1;
-        } else
-          carry = 0;
-      }
-      sign = 1 - sign;
-    }
-
-    //去除前面的0
-    while (digits.back() == 0 && digits.size() > 1)
-      digits.pop_back();
-
-    //如果两个相等的负数相减，这边我们要调整符号为正
-    if (is_zero())
-      sign = 1;
-    return *this;
-  }
 
   integer operator-(const integer &a, uint64_t b) { return integer(a) -= b; }
 

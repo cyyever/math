@@ -26,7 +26,7 @@ namespace cyy::math {
       if constexpr (std::is_unsigned<T>::value) {
         do {
           digits.push_back(num & base);
-          num >>= 32;
+          num /= base;
         } while (num);
         return;
       }
@@ -42,7 +42,7 @@ namespace cyy::math {
       }
       do {
         digits.push_back(num & base);
-        num >>= 32;
+        num /= base;
       } while (num);
       if (add_one) {
         this->operator+=(1);
@@ -60,39 +60,25 @@ namespace cyy::math {
 
     operator std::string() const;
     operator bool() const { return !is_zero(); }
-    bool diffrent_sign(const integer &rhs) const { return sign != rhs.sign; }
-    int compare(const integer &rhs) const;
-    uint64_t digit_num() const;
+    bool diffrent_sign(const integer &rhs) const {
+      return non_negative != rhs.non_negative;
+    }
+    /* uint64_t digit_num() const; */
 
     bool is_odd() const { return digits.back() & 1; }
     bool is_zero() const { return digits.back() == 0; }
     bool is_abs_one() const { return digits.back() == 1 && digits.size() == 1; }
 
+    integer operator-() const;
     integer &operator+=(const integer &rhs);
     integer &operator++();   // prefix
     integer operator++(int); // suffix
-    integer operator-(const integer &rhs) const;
     integer &operator--();   // prefix
     integer operator--(int); // suffix
     integer &operator-=(const integer &rhs);
     integer &operator*=(const integer &rhs);
     integer &operator/=(const integer &rhs);
     integer &operator%=(const integer &rhs);
-
-  private:
-#ifdef NDEBUG
-    static const size_t my_digit_num = 18; //单个my_digit所包含的位数
-    static const int64_t my_base = 1000000000000000000LL; //单个my_digit的base
-#else
-    static const size_t my_digit_num = 1; //单个my_digit所包含的位数
-    static const int64_t my_base = 10;    //单个my_digit的base
-#endif
-    static bool is_valid_int_str(const std::string &str);
-
-    std::vector<uint32_t> digits;
-    static const uint64_t base = static_cast<uint64_t>(1) << 32;
-    bool non_negative{true};
-    uint8_t sign; // 1-正数 0-负数
 
     friend bool operator==(const integer &a, const integer &b);
     friend bool operator!=(const integer &a, const integer &b);
@@ -104,6 +90,26 @@ namespace cyy::math {
     friend integer operator*(const integer &a, const integer &b);
     friend integer operator/(const integer &a, const integer &b);
     friend integer operator%(const integer &a, const integer &b);
+
+  private:
+    int compare(const integer &rhs) const;
+    void normalize();
+
+  private:
+    /* #ifdef NDEBUG */
+    /*     static const size_t my_digit_num = 18; //单个my_digit所包含的位数 */
+    /*     static const int64_t my_base = 1000000000000000000LL;
+     * //单个my_digit的base */
+    /* #else */
+    /*     static const size_t my_digit_num = 1; //单个my_digit所包含的位数 */
+    /*     static const int64_t my_base = 10;    //单个my_digit的base */
+    /* #endif */
+    static bool is_valid_int_str(const std::string &str);
+
+    std::vector<uint32_t> digits;
+    static const uint64_t base = static_cast<uint64_t>(1) << 32;
+    bool non_negative{true};
+    uint8_t sign; // 1-正数 0-负数
   };
 
   bool operator==(const integer &a, const integer &b);
