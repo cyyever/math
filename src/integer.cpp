@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <range/v3/algorithm.hpp>
 #include <regex>
 
 /* #include "my_arithmetic.h" */
@@ -286,6 +287,25 @@ namespace cyy::math {
     return *this;
   }
 
+  uint32_t integer::operator%(uint32_t b) {
+    if (b == 0) {
+      throw cyy::math::exception::divided_by_zero("");
+    }
+
+    if (is_zero() || b == 1)
+      return 0;
+
+    uint64_t res = 0;
+
+    for (auto it = digits.rbegin(); it != digits.rend(); it++) {
+      res = ((res << 32) + *it) % b;
+    }
+    if (!non_negative) {
+      res = b - res;
+    }
+    return res;
+  }
+
   integer &integer::operator++() {
     operator+=(1);
     return *this;
@@ -306,6 +326,26 @@ namespace cyy::math {
     integer tmp = *this;
     operator-=(1);
     return tmp;
+  }
+  std::string integer::to_string() const {
+    std::string int_str;
+    int_str.reserve(digits.size() * 8);
+
+    auto tmp = *this;
+    tmp.non_negative = true;
+    while (!tmp.is_zero()) {
+      auto decimal_digit = tmp.operator%(10);
+      tmp /= 10;
+      int_str.push_back('0' + decimal_digit);
+    }
+    if (int_str.empty()) {
+      int_str.push_back('0');
+    }
+    if (!non_negative) {
+      int_str.push_back('-');
+    }
+    ranges::reverse(int_str);
+    return int_str;
   }
 #if 0
 
@@ -485,31 +525,5 @@ namespace cyy::math {
     return integer(a) %= b;
   }
 
-  ostream &operator<<(ostream &os, const integer &a) {
-    os << static_cast<string>(a);
-    return os;
-  }
-
-  integer::operator string() const {
-    string int_str;
-    int_str.reserve(digits.size()*8);
-    if(!non_negative) {
-      int_str.push_back('-');
-    }
-
-    /* flag = 1; */
-    /* for (auto it = --digits.end();; it--) { */
-    /*   auto tmp = std::to_string(*it); */
-    /*   if (flag) { */
-    /*     flag = 0; */
-    /*   } else { */
-    /*     int_str.insert(int_str.end(), my_digit_num - tmp.size(), '0'); */
-    /*   } */
-    /*   int_str.append(tmp); */
-    /*   if (it == digits.begin()) */
-    /*     break; */
-    /* } */
-    return int_str;
-  }
 #endif
 } // namespace cyy::math

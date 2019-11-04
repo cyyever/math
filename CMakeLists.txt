@@ -6,7 +6,11 @@ include(cmake/all.cmake)
 
 file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
+find_package(range-v3 REQUIRED)
+
 add_library(MyMathLib ${SOURCE})
+
+target_link_libraries(MyMathLib PUBLIC range-v3)
 
 # test
 option(BUILD_TEST "Build test" OFF)

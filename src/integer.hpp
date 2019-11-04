@@ -80,6 +80,7 @@ namespace cyy::math {
     integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
     integer &operator/=(uint32_t rhs);
+    uint32_t operator%(uint32_t b);
     /* integer &operator/=(const integer &rhs); */
     /* integer &operator%=(const integer &rhs); */
 
@@ -149,7 +150,7 @@ namespace cyy::math {
   /* integer operator%(const integer &a, const integer &b); */
 
   inline std::ostream &operator<<(std::ostream &os, const integer &a) {
-    os << static_cast<std::string>(a);
+    os << a.to_string();
     return os;
   }
 } // namespace cyy::math
