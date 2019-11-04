@@ -8,14 +8,12 @@
 #include <cstdlib>
 #include <iostream>
 #include <range/v3/algorithm.hpp>
+#include <range/v3/view.hpp>
 #include <regex>
 
 /* #include "my_arithmetic.h" */
 #include "exception.hpp"
 #include "integer.hpp"
-
-using std::cout;
-using std::endl;
 
 namespace cyy::math {
 
@@ -24,25 +22,18 @@ namespace cyy::math {
     if (!std::regex_match(str.begin(), str.end(), integer_regex)) {
       throw cyy::math::exception::no_integer(std::string(str));
     }
-    if (str.starts_with('-')) {
-      non_negative = false;
+    bool should_be_negative = str.starts_with('-');
+    if (should_be_negative) {
+      str.remove_prefix(1);
     }
-    str.remove_prefix(1);
 
-    uint64_t init_value = 0;
-    while (!str.empty()) {
-      auto next_value = init_value * 10 + (str.back() - '0');
-      if (next_value >= base) {
-        break;
-      }
-      init_value = next_value;
-      str.remove_suffix(1);
-    }
-    digits.push_back(init_value);
-    while (!str.empty()) {
+    digits.push_back(0);
+    for (auto c : str) {
       operator*=(10);
-      operator+=(str.back() - '0');
-      str.remove_suffix(1);
+      operator+=(c - '0');
+    }
+    if (should_be_negative && !is_zero()) {
+      non_negative = false;
     }
   }
 
@@ -124,23 +115,26 @@ namespace cyy::math {
       normalize();
       return *this;
     }
-    uint32_t carry = 0;
 
     if (digits.size() < rhs.digits.size()) {
-      digits.insert(digits.end(), rhs.digits.size() - digits.size(), 0);
+      digits.resize(rhs.digits.size() + 1, 0);
     }
-    auto it = digits.begin();
 
-    for (auto it2 = rhs.digits.cbegin(); it2 != rhs.digits.cend();
-         it++, it2++) {
-      uint64_t sum = static_cast<uint64_t>(*it) + static_cast<uint64_t>(*it2) +
-                     static_cast<uint64_t>(carry);
-      *it = static_cast<uint32_t>(sum & base);
-      carry = static_cast<uint32_t>(sum >> 32);
+    uint64_t sum = 0;
+    size_t i = 0;
+    for (; i < rhs.digits.size(); i++) {
+      sum += static_cast<uint64_t>(digits[i]) +
+             static_cast<uint64_t>(rhs.digits[i]);
+      digits[i] = static_cast<uint32_t>(sum & (base - 1));
+      sum >>= 32;
     }
-    if (carry) {
-      digits.push_back(carry);
+    while (sum) {
+      sum += static_cast<uint64_t>(digits[i]);
+      digits[i] = static_cast<uint32_t>(sum & (base - 1));
+      sum >>= 32;
+      i++;
     }
+    normalize();
     return *this;
   }
 
@@ -203,7 +197,7 @@ namespace cyy::math {
         diffrence[i + 1]--;
         diffrence[i] += static_cast<int64_t>(base);
       }
-      digits[i] = diffrence[i];
+      digits[i] = static_cast<uint32_t>(diffrence[i]);
     }
     if (changed_sign) {
       non_negative = !non_negative;
@@ -222,17 +216,14 @@ namespace cyy::math {
       return *this;
     }
 
-    std::vector<uint64_t> result_digits(digits.size() + 1, 0);
-    for (size_t i = 0; i < digits.size(); i++) {
-      uint64_t result =
-          result_digits[i] + static_cast<uint64_t>(digits[i]) * rhs;
-      result_digits[i] = result & base;
-      result_digits[i + 1] = result >> 32;
+    uint64_t result = 0;
+    for (auto &digit : digits) {
+      result += static_cast<uint64_t>(digit) * rhs;
+      digit = static_cast<uint32_t>(result & (base - 1));
+      result >>= 32;
     }
-    digits.resize(result_digits.size());
-
-    for (size_t i = 0; i < digits.size(); i++) {
-      digits[i] = result_digits[i];
+    if (result) {
+      digits.push_back(static_cast<uint32_t>(result));
     }
     normalize();
     return *this;
@@ -248,21 +239,21 @@ namespace cyy::math {
       return *this;
     }
 
-    std::vector<uint64_t> result_digits(
+    std::vector<uint32_t> result_digits(
         std::max(digits.size(), rhs.digits.size()) + 1, 0);
     for (size_t i = 0; i < digits.size(); i++) {
       for (size_t j = 0; j < rhs.digits.size(); j++) {
-        uint64_t result = result_digits[i + j] +
-                          static_cast<uint64_t>(digits[i]) * rhs.digits[j];
-        result_digits[i + j] = result & base;
-        result_digits[i + j + 1] = result >> 32;
+        uint64_t result = static_cast<uint64_t>(digits[i]) * rhs.digits[j];
+        auto k = i + j;
+        do {
+          result += result_digits[k];
+          result_digits[k] = static_cast<uint32_t>(result & (base - 1));
+          result >>= 32;
+          k++;
+        } while (result);
       }
     }
-    digits.resize(result_digits.size());
-
-    for (size_t i = 0; i < digits.size(); i++) {
-      digits[i] = result_digits[i];
-    }
+    digits = std::move(result_digits);
     normalize();
     return *this;
   }
@@ -276,12 +267,10 @@ namespace cyy::math {
       return *this;
 
     uint64_t res = 0;
-    for (auto it = digits.rbegin(); it != digits.rend(); it++) {
-      res = (res << 32) + *it;
-      auto remainder = res % rhs;
-      res /= rhs;
-      *it = res;
-      res = remainder;
+    for (auto &digit : ranges::reverse_view(digits)) {
+      res = (res << 32) + digit;
+      digit = static_cast<uint32_t>(res / rhs);
+      res %= rhs;
     }
     normalize();
     return *this;
@@ -297,13 +286,13 @@ namespace cyy::math {
 
     uint64_t res = 0;
 
-    for (auto it = digits.rbegin(); it != digits.rend(); it++) {
-      res = ((res << 32) + *it) % b;
+    for (auto digit : ranges::reverse_view(digits)) {
+      res = ((res << 32) + digit) % b;
     }
     if (!non_negative) {
       res = b - res;
     }
-    return res;
+    return static_cast<uint32_t>(res);
   }
 
   integer &integer::operator++() {
@@ -333,10 +322,10 @@ namespace cyy::math {
 
     auto tmp = *this;
     tmp.non_negative = true;
-    while (!tmp.is_zero()) {
+    while (tmp) {
       auto decimal_digit = tmp.operator%(10);
       tmp /= 10;
-      int_str.push_back('0' + decimal_digit);
+      int_str.push_back(static_cast<char>('0' + decimal_digit));
     }
     if (int_str.empty()) {
       int_str.push_back('0');
@@ -348,95 +337,6 @@ namespace cyy::math {
     return int_str;
   }
 #if 0
-
-
-
-
-  /*
-   *	功能：获取整数的位数
-   * 	参数：
-   * 		无
-   * 	返回值：
-   * 		位数
-   */
-  uint64_t integer::digit_num() const {
-    return my_digit_num * (digits.size() - 1) +
-           std::to_string(digits.back()).size();
-  }
-
-
-
-
-
-
-
-
-  integer &integer::operator*=(int64_t rhs) {
-    if (rhs == -1) //这个常用，为了提高性能，特殊判定
-    {
-      if (!this->is_zero())
-        sign = 1 - sign;
-    } else {
-      operator*=(abs(rhs));
-      if (rhs < 0 && !this->is_zero())
-        sign = 1 - sign;
-    }
-    return *this;
-  }
-
-  integer &integer::operator*=(int rhs) { return operator*=((int64_t)rhs); }
-
-  integer &integer::operator*=(const integer &rhs) {
-    if (this == &rhs) {
-      integer tmp_this = *this;
-      return operator*=(tmp_this);
-    }
-
-    if (this->is_zero())
-      return *this;
-    if (rhs.is_abs_one()) {
-      if (rhs.sign == 0)
-        sign = 1 - sign;
-      return *this;
-    }
-    if (rhs.is_zero()) {
-      *this = rhs;
-      return *this;
-    }
-    decltype(rhs.digits.size()) cnt = 0, i;
-    uint8_t new_sign = !(sign ^ rhs.sign);
-    integer tmp_this = std::move(*this);
-
-    *this = 0;
-    for (auto it = rhs.digits.cbegin(); it != rhs.digits.cend(); it++, cnt++) {
-      integer tmp = tmp_this * (*it);
-      for (i = 0; i < cnt; i++)
-        tmp.digits.push_front(0);
-      operator+=(tmp);
-    }
-    sign = new_sign;
-    return *this;
-  }
-
-  integer operator*(const integer &a, uint64_t b) { return integer(a) *= b; }
-
-  integer operator*(const integer &a, int64_t b) { return integer(a) *= b; }
-
-  integer operator*(const integer &a, int b) { return integer(a) *= b; }
-
-  integer operator*(const integer &a, const integer &b) {
-    return integer(a) *= b;
-  }
-
-
-  integer &integer::operator/=(int64_t rhs) {
-    operator/=(abs(rhs));
-    if (rhs < 0 && !this->is_zero())
-      sign = 1 - sign;
-    return *this;
-  }
-
-  integer &integer::operator/=(int rhs) { return operator/=((int64_t)rhs); }
 
   integer &integer::operator/=(const integer &rhs) {
     integer quotient, tmp, low_bound, high_bound;
@@ -486,43 +386,6 @@ namespace cyy::math {
     else
       sign = !(org_sign ^ rhs.sign);
     return *this;
-  }
-
-  integer operator/(const integer &a, uint64_t b) { return integer(a) /= b; }
-
-  integer operator/(const integer &a, int64_t b) { return integer(a) /= b; }
-
-  integer operator/(const integer &a, int b) { return integer(a) /= b; }
-
-  integer operator/(const integer &a, const integer &b) {
-    return integer(a) /= b;
-  }
-
-  integer &integer::operator%=(uint64_t rhs) {
-    *this = (*this) - ((*this) / rhs) * rhs;
-    return *this;
-  }
-
-  integer &integer::operator%=(int64_t rhs) {
-    *this = (*this) - ((*this) / rhs) * rhs;
-    return *this;
-  }
-
-  integer &integer::operator%=(int rhs) { return operator%=((int64_t)rhs); }
-
-  integer &integer::operator%=(const integer &rhs) {
-    *this = (*this) - ((*this) / rhs) * rhs;
-    return *this;
-  }
-
-  integer operator%(const integer &a, uint64_t b) { return integer(a) %= b; }
-
-  integer operator%(const integer &a, int64_t b) { return integer(a) %= b; }
-
-  integer operator%(const integer &a, int b) { return integer(a) %= b; }
-
-  integer operator%(const integer &a, const integer &b) {
-    return integer(a) %= b;
   }
 
 #endif

@@ -15,7 +15,6 @@
 
 namespace cyy::math {
 
-  //整数表示成 (sign) (my_digit ... my_digit)*10^power，10^10进制
   class integer final {
   public:
     integer() { digits.push_back(0); }
@@ -25,13 +24,14 @@ namespace cyy::math {
 
       if constexpr (std::is_unsigned<T>::value) {
         do {
-          digits.push_back(num & base);
+          digits.push_back(num & (base - 1));
           num /= base;
         } while (num);
         return;
       }
 
       bool add_one = false;
+      std::make_unsigned_t<T> unsigned_num = 0;
       if (num < 0) {
         non_negative = false;
         if (num == std::numeric_limits<T>::min()) {
@@ -40,12 +40,13 @@ namespace cyy::math {
         }
         num = -num;
       }
+      unsigned_num = static_cast<decltype(unsigned_num)>(num);
       do {
-        digits.push_back(num & base);
-        num /= base;
-      } while (num);
+        digits.push_back(unsigned_num & (base - 1));
+        unsigned_num /= base;
+      } while (unsigned_num);
       if (add_one) {
-        this->operator+=(1);
+        this->operator-=(1);
       }
     }
 
@@ -81,11 +82,6 @@ namespace cyy::math {
     integer &operator*=(const integer &rhs);
     integer &operator/=(uint32_t rhs);
     uint32_t operator%(uint32_t b);
-    /* integer &operator/=(const integer &rhs); */
-    /* integer &operator%=(const integer &rhs); */
-
-    /* friend integer operator/(const integer &a, const integer &b); */
-    /* friend integer operator%(const integer &a, const integer &b); */
 
     int compare(const integer &rhs) const;
 
@@ -93,16 +89,6 @@ namespace cyy::math {
     void normalize();
 
   private:
-    /* #ifdef NDEBUG */
-    /*     static const size_t my_digit_num = 18; //单个my_digit所包含的位数 */
-    /*     static const int64_t my_base = 1000000000000000000LL;
-     * //单个my_digit的base */
-    /* #else */
-    /*     static const size_t my_digit_num = 1; //单个my_digit所包含的位数 */
-    /*     static const int64_t my_base = 10;    //单个my_digit的base */
-    /* #endif */
-    static bool is_valid_int_str(const std::string &str);
-
     std::vector<uint32_t> digits;
     static const uint64_t base = static_cast<uint64_t>(1) << 32;
     bool non_negative{true};

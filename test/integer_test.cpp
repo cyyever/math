@@ -13,15 +13,11 @@ using namespace cyy::math;
 
 TEST_CASE("from_string") {
   SUBCASE("valid_string") {
-    std::vector<std::string> strs{"1",
-                                  "-1",
-                                  "0",
-                                  "-0",
-                                  to_string(UINT64_MAX).c_str(),
-                                  to_string(INT64_MIN).c_str()};
+    std::vector<std::string> strs{"1", "-1", "0", to_string(UINT64_MAX),
+                                  to_string(INT64_MIN)};
     for (auto const &str : strs) {
       auto a = integer(str);
-      CHECK_EQ(str,a.to_string());
+      CHECK_EQ(str, a.to_string());
     }
   }
 
