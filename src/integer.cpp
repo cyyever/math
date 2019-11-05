@@ -125,12 +125,12 @@ namespace cyy::math {
     for (; i < rhs.digits.size(); i++) {
       sum += static_cast<uint64_t>(digits[i]) +
              static_cast<uint64_t>(rhs.digits[i]);
-      digits[i] = static_cast<uint32_t>(sum & (base - 1));
+      digits[i] = static_cast<uint32_t>(sum & mask);
       sum >>= 32;
     }
     while (sum) {
       sum += static_cast<uint64_t>(digits[i]);
-      digits[i] = static_cast<uint32_t>(sum & (base - 1));
+      digits[i] = static_cast<uint32_t>(sum & mask);
       sum >>= 32;
       i++;
     }
@@ -219,7 +219,7 @@ namespace cyy::math {
     uint64_t result = 0;
     for (auto &digit : digits) {
       result += static_cast<uint64_t>(digit) * rhs;
-      digit = static_cast<uint32_t>(result & (base - 1));
+      digit = static_cast<uint32_t>(result & mask);
       result >>= 32;
     }
     if (result) {
@@ -247,7 +247,7 @@ namespace cyy::math {
         auto k = i + j;
         do {
           result += result_digits[k];
-          result_digits[k] = static_cast<uint32_t>(result & (base - 1));
+          result_digits[k] = static_cast<uint32_t>(result & mask);
           result >>= 32;
           k++;
         } while (result);

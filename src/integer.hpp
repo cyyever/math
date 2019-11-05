@@ -24,7 +24,7 @@ namespace cyy::math {
 
       if constexpr (std::is_unsigned<T>::value) {
         do {
-          digits.push_back(num & (base - 1));
+          digits.push_back(num & mask);
           num /= base;
         } while (num);
         return;
@@ -42,7 +42,7 @@ namespace cyy::math {
       }
       unsigned_num = static_cast<decltype(unsigned_num)>(num);
       do {
-        digits.push_back(unsigned_num & (base - 1));
+        digits.push_back(unsigned_num & mask);
         unsigned_num /= base;
       } while (unsigned_num);
       if (add_one) {
@@ -61,7 +61,6 @@ namespace cyy::math {
 
     operator std::string() const;
     std::string to_string() const;
-    /* operator bool() const { return !is_zero(); } */
     bool diffrent_sign(const integer &rhs) const {
       return non_negative != rhs.non_negative;
     }
@@ -90,7 +89,8 @@ namespace cyy::math {
 
   private:
     std::vector<uint32_t> digits;
-    static const uint64_t base = static_cast<uint64_t>(1) << 32;
+    static constexpr uint64_t base = static_cast<uint64_t>(1) << 32;
+    static constexpr uint64_t mask = base - 1;
     bool non_negative{true};
   };
 
