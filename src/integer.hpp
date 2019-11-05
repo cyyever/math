@@ -61,7 +61,7 @@ namespace cyy::math {
 
     operator std::string() const;
     std::string to_string() const;
-    operator bool() const { return !is_zero(); }
+    /* operator bool() const { return !is_zero(); } */
     bool diffrent_sign(const integer &rhs) const {
       return non_negative != rhs.non_negative;
     }

@@ -116,7 +116,7 @@ namespace cyy::math {
       return *this;
     }
 
-    if (digits.size() < rhs.digits.size()) {
+    if (digits.size() <= rhs.digits.size()) {
       digits.resize(rhs.digits.size() + 1, 0);
     }
 
@@ -322,7 +322,7 @@ namespace cyy::math {
 
     auto tmp = *this;
     tmp.non_negative = true;
-    while (tmp) {
+    while (!tmp.is_zero()) {
       auto decimal_digit = tmp.operator%(10);
       tmp /= 10;
       int_str.push_back(static_cast<char>('0' + decimal_digit));
