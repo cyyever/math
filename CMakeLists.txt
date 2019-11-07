@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
 project(MyMathLib LANGUAGES CXX)
 
@@ -11,6 +11,18 @@ find_package(range-v3 REQUIRED)
 add_library(MyMathLib ${SOURCE})
 
 target_link_libraries(MyMathLib PUBLIC range-v3)
+
+set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
+add_custom_command (OUTPUT ${DATA_DIR}/prime.txt
+  COMMAND ${CMAKE_COMMAND} -E tar x prime.tar.xz
+  COMMAND ${CMAKE_COMMAND} -E touch prime.txt
+  DEPENDS ${DATA_DIR}/prime.tar.xz
+  WORKING_DIRECTORY ${DATA_DIR})
+
+add_custom_target(decompress_data
+  DEPENDS ${DATA_DIR}/prime.txt
+  )
+add_dependencies(MyMathLib decompress_data)
 
 # test
 option(BUILD_TEST "Build test" OFF)
@@ -29,6 +41,8 @@ install(TARGETS MyMathLib EXPORT ${PROJECT_NAME}Targets
 
 install(DIRECTORY src/ DESTINATION include/cyy/math
   FILES_MATCHING PATTERN "*.hpp")
+
+install(FILES ${DATA_DIR}/prime.txt DESTINATION lib)
 
 # install cmake config file
 install(EXPORT ${PROJECT_NAME}Targets
