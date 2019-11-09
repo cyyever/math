@@ -7,20 +7,27 @@
 
 #include <cinttypes>
 #include <fstream>
+#include <range/v3/view.hpp>
 #include <vector>
 
 namespace cyy::math {
 
   class primes final {
   public:
-    primes();
+    primes() = default;
     primes(const primes &) = delete;
     primes &operator=(const primes &) = delete;
 
     primes(primes &&) noexcept = default;
     primes &operator=(primes &&) noexcept = default;
     ~primes() noexcept = default;
+
     uint64_t at(size_t index);
+    auto all() -> auto { return ranges::span(in_memory_primes); }
+
+  private:
+    void open_data_file();
+    void seek(size_t index);
 
   private:
     std::ifstream data_file;
