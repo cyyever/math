@@ -1,0 +1,2 @@
+#cmakedefine DATA_DIR "@DATA_DIR@"
+#cmakedefine INSTALLED_DATA_DIR "@INSTALLED_DATA_DIR@"

@@ -18,4 +18,16 @@ namespace cyy::math::exception {
   public:
     using invalid_argument::invalid_argument;
   };
+  class no_data_file : public std::runtime_error {
+  public:
+    using runtime_error::runtime_error;
+  };
+  class out_of_range : public std::logic_error {
+  public:
+    using logic_error::logic_error;
+  };
+  class internal_error : public std::runtime_error {
+  public:
+    using runtime_error::runtime_error;
+  };
 } // namespace cyy::math::exception

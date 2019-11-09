@@ -4,15 +4,20 @@ project(MyMathLib LANGUAGES CXX)
 
 include(cmake/all.cmake)
 
-file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-
 find_package(range-v3 REQUIRED)
+
+set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
+set(INSTALLED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+
+file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(MyMathLib ${SOURCE})
 
 target_link_libraries(MyMathLib PUBLIC range-v3)
 
-set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
+configure_file(src/config.hpp.in config.hpp)
+target_include_directories(MyMathLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 add_custom_command (OUTPUT ${DATA_DIR}/prime.txt
   COMMAND ${CMAKE_COMMAND} -E tar x prime.tar.xz
   COMMAND ${CMAKE_COMMAND} -E touch prime.txt
