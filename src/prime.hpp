@@ -23,10 +23,14 @@ namespace cyy::math {
     ~primes() noexcept = default;
 
     uint64_t at(size_t index);
-    auto all() -> auto { return ranges::span(in_memory_primes); }
+    auto all() -> auto {
+      seek(in_memory_primes.size());
+      return ranges::views::concat(ranges::span(in_memory_primes),
+                                   ranges::istream_view<uint64_t>(data_file));
+    }
 
   private:
-    void open_data_file();
+    void open();
     void seek(size_t index);
 
   private:
