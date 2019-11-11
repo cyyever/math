@@ -59,16 +59,14 @@ namespace cyy::math {
     integer &operator=(integer &&) noexcept = default;
     ~integer() noexcept = default;
 
-    operator std::string() const;
     std::string to_string() const;
     bool diffrent_sign(const integer &rhs) const {
       return non_negative != rhs.non_negative;
     }
-    /* uint64_t digit_num() const; */
 
-    bool is_odd() const { return digits.back() & 1; }
+    bool is_odd() const { return digits[0] & 1; }
     bool is_zero() const { return digits.back() == 0; }
-    bool is_abs_one() const { return digits.back() == 1 && digits.size() == 1; }
+    bool is_abs_one() const { return digits[0] == 1 && digits.size() == 1; }
 
     integer operator-() const;
     integer &operator+=(const integer &rhs);
@@ -81,6 +79,7 @@ namespace cyy::math {
     integer &operator*=(const integer &rhs);
     integer &operator/=(uint32_t rhs);
     uint32_t operator%(uint32_t b);
+    integer &multiply_2(uint32_t count);
 
     int compare(const integer &rhs) const;
 

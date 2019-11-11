@@ -98,7 +98,7 @@ namespace cyy::math {
       return *this;
     }
     if (this == &rhs) {
-      return operator*=(2);
+      return multiply_2(1);
     }
 
     if (diffrent_sign(rhs)) //符号不同，转换成减法
@@ -224,6 +224,23 @@ namespace cyy::math {
     }
     if (result) {
       digits.push_back(static_cast<uint32_t>(result));
+    }
+    normalize();
+    return *this;
+  }
+  integer &integer::multiply_2(uint32_t count) {
+    auto whole_block_num = count / 32;
+    auto remain_shift_num = count % 32;
+    if (remain_shift_num) {
+      digits.push_back(0);
+      for (auto it = digits.rbegin() + 1; it != digits.rend(); it++) {
+        uint64_t tmp = static_cast<uint64_t>(*it) << remain_shift_num;
+        *(it - 1) |= static_cast<uint32_t>(tmp >> 32);
+        *it = static_cast<uint32_t>(tmp & mask);
+      }
+    }
+    if (whole_block_num) {
+      digits.insert(digits.begin(), whole_block_num, 0);
     }
     normalize();
     return *this;

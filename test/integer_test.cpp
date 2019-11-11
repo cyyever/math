@@ -11,22 +11,22 @@
 using namespace std;
 using namespace cyy::math;
 
-/* TEST_CASE("from_string") { */
-/*   SUBCASE("valid_string") { */
-/*     std::vector<std::string> strs{"1", "-1", "0", to_string(UINT64_MAX), */
-/*                                   to_string(INT64_MIN)}; */
-/*     for (auto const &str : strs) { */
-/*       auto a = integer(str); */
-/*       CHECK_EQ(str, a.to_string()); */
-/*     } */
-/*   } */
+TEST_CASE("from_string") {
+  SUBCASE("valid_string") {
+    std::vector<std::string> strs{"1", "-1", "0", to_string(UINT64_MAX),
+                                  to_string(INT64_MIN)};
+    for (auto const &str : strs) {
+      auto a = integer(str);
+      CHECK_EQ(str, a.to_string());
+    }
+  }
 
-/*   SUBCASE("invalid_string") { */
-/*     for (auto const &str : {"aaa", "0123"}) { */
-/*       CHECK_THROWS(auto a = integer(str)); */
-/*     } */
-/*   } */
-/* } */
+  SUBCASE("invalid_string") {
+    for (auto const &str : {"aaa", "0123"}) {
+      CHECK_THROWS(auto a = integer(str));
+    }
+  }
+}
 TEST_CASE("+") {
   SUBCASE("signed") {
     for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
