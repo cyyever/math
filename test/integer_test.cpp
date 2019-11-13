@@ -82,10 +82,8 @@ TEST_CASE("*") {
   SUBCASE("unsigned") {
     for (auto a = static_cast<uint64_t>(UINT32_MAX) - 1;
          a < static_cast<uint64_t>(UINT32_MAX) + 1; a++) {
-      for (auto b = static_cast<uint64_t>(UINT32_MAX) - 1;
-           b < static_cast<uint64_t>(UINT32_MAX); b++) {
-        CHECK_EQ(integer(a) * integer(b), (a * b));
-      }
+      auto b = static_cast<uint64_t>(UINT32_MAX) - 1;
+      CHECK_EQ(integer(a) * integer(b), (a * b));
     }
   }
 }

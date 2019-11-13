@@ -32,7 +32,7 @@ namespace cyy::math {
       operator*=(10);
       operator+=(c - '0');
     }
-    if (should_be_negative && !is_zero()) {
+    if (should_be_negative && (*this) != 0) {
       non_negative = false;
     }
   }
@@ -41,7 +41,7 @@ namespace cyy::math {
     while (digits.back() == 0 && digits.size() > 1) {
       digits.pop_back();
     }
-    if (is_zero()) {
+    if (digits.back() == 0) {
       non_negative = true;
     }
   }
@@ -88,13 +88,13 @@ namespace cyy::math {
   }
   integer integer::operator-() const {
     auto res = *this;
-    if (!res.is_zero())
+    if (res != 0)
       res.non_negative = !res.non_negative;
     return res;
   }
 
   integer &integer::operator+=(const integer &rhs) {
-    if (rhs.is_zero()) {
+    if (rhs == 0) {
       return *this;
     }
     if (this == &rhs) {
@@ -139,7 +139,7 @@ namespace cyy::math {
   }
 
   integer &integer::operator-=(const integer &rhs) {
-    if (rhs.is_zero()) {
+    if (rhs == 0) {
       return *this;
     }
     if (this == &rhs) {
@@ -247,7 +247,7 @@ namespace cyy::math {
   }
 
   integer &integer::operator*=(const integer &rhs) {
-    if (rhs.is_zero()) {
+    if (rhs == 0) {
       *this = 0;
       return *this;
     }
@@ -281,7 +281,7 @@ namespace cyy::math {
       throw cyy::math::exception::divided_by_zero("");
     }
 
-    if (this->is_zero() || rhs == 1)
+    if (*this == 0 || rhs == 1)
       return *this;
 
     uint64_t res = 0;
@@ -299,7 +299,7 @@ namespace cyy::math {
       throw cyy::math::exception::divided_by_zero("");
     }
 
-    if (is_zero() || b == 1)
+    if (*this == 0 || b == 1)
       return 0;
 
     uint64_t res = 0;
@@ -340,7 +340,7 @@ namespace cyy::math {
 
     auto tmp = *this;
     tmp.non_negative = true;
-    while (!tmp.is_zero()) {
+    while (tmp != 0) {
       auto decimal_digit = tmp.operator%(10);
       tmp /= 10;
       int_str.push_back(static_cast<char>('0' + decimal_digit));
@@ -360,7 +360,7 @@ namespace cyy::math {
     integer quotient, tmp, low_bound, high_bound;
     uint8_t org_sign = sign;
     int compare_res = 0;
-    if (rhs.is_zero())
+    if (rhs==0)
       throw std::invalid_argument("divided by zero");
 
     if (this == &rhs) {
@@ -368,8 +368,6 @@ namespace cyy::math {
       return *this;
     }
 
-    if (this->is_zero())
-      return *this;
     if (rhs.is_abs_one()) {
       if (rhs.sign == 0)
         sign = 1 - sign;
@@ -399,7 +397,7 @@ namespace cyy::math {
 
     *this = std::move(quotient);
 
-    if (is_zero())
+    if (*this==0)
       sign = 1;
     else
       sign = !(org_sign ^ rhs.sign);

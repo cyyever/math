@@ -65,7 +65,6 @@ namespace cyy::math {
     }
 
     bool is_odd() const { return digits[0] & 1; }
-    bool is_zero() const { return digits.back() == 0; }
     bool is_abs_one() const { return digits[0] == 1 && digits.size() == 1; }
 
     integer operator-() const;
@@ -81,6 +80,13 @@ namespace cyy::math {
     uint32_t operator%(uint32_t b);
     integer &multiply_2(uint32_t count);
 
+    void change_sign() {
+      if (digits.back() == 0) {
+        non_negative = true;
+        return;
+      }
+      non_negative = !non_negative;
+    }
     int compare(const integer &rhs) const;
 
   private:
@@ -125,14 +131,6 @@ namespace cyy::math {
   inline integer operator*(const integer &a, const integer &b) {
     return integer(a) *= b;
   }
-  /* integer operator/(const integer &a, uint64_t b); */
-  /* integer operator/(const integer &a, int64_t b); */
-  /* integer operator/(const integer &a, int b); */
-  /* integer operator/(const integer &a, const integer &b); */
-  /* integer operator%(const integer &a, uint64_t b); */
-  /* integer operator%(const integer &a, int64_t b); */
-  /* integer operator%(const integer &a, int b); */
-  /* integer operator%(const integer &a, const integer &b); */
 
   inline std::ostream &operator<<(std::ostream &os, const integer &a) {
     os << a.to_string();
