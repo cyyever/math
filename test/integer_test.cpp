@@ -68,32 +68,29 @@ TEST_CASE("-") {
     }
   }
 }
+
+TEST_CASE("*") {
+  SUBCASE("signed") {
+    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+         a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
+      for (auto b = static_cast<int64_t>(INT32_MIN) - 1;
+           b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
+        CHECK_EQ(integer(a) * integer(b), (a * b));
+      }
+    }
+  }
+  SUBCASE("unsigned") {
+    for (auto a = static_cast<uint64_t>(UINT32_MAX) - 1;
+         a < static_cast<uint64_t>(UINT32_MAX) + 1; a++) {
+      for (auto b = static_cast<uint64_t>(UINT32_MAX) - 1;
+           b < static_cast<uint64_t>(UINT32_MAX); b++) {
+        CHECK_EQ(integer(a) * integer(b), (a * b));
+      }
+    }
+  }
+}
+
 /* int main(int argc, char **argv) { */
-/*   vector<string> invalid_interger_str = {"aaa", "0123"}; */
-/*   vector<string> valid_interger_str = {"1", */
-/*                                        "-1", */
-/*                                        "0", */
-/*                                        "-0", */
-/*                                        "123456789012345678901", */
-/*                                        "-12345678901234567890", */
-/*                                        to_string(UINT64_MAX), */
-/*                                        to_string(INT64_MIN)}; */
-
-/*   for (auto it = invalid_interger_str.begin(); it !=
- * invalid_interger_str.end(); */
-/*        it++) { */
-/*     try { */
-/*       integer a(*it); */
-/*     } catch (invalid_argument &e) { */
-/*     } */
-/*   } */
-
-/*   for (auto it = valid_interger_str.begin(); it !=
- * valid_interger_str.end(); */
-/*        it++) { */
-/*     integer a(*it); */
-/*     assert(a == *it); */
-/*   } */
 
 /*   assert(integer(0).digit_num() == 1); */
 /*   assert(integer(10).digit_num() == 2); */

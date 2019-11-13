@@ -271,6 +271,7 @@ namespace cyy::math {
       }
     }
     digits = std::move(result_digits);
+    non_negative = (non_negative == rhs.non_negative);
     normalize();
     return *this;
   }
