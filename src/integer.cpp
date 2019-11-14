@@ -257,7 +257,7 @@ namespace cyy::math {
     }
 
     std::vector<uint32_t> result_digits(
-        std::max(digits.size(), rhs.digits.size()) + 1, 0);
+		digits.size()+ rhs.digits.size() +1, 0);
     for (size_t i = 0; i < digits.size(); i++) {
       for (size_t j = 0; j < rhs.digits.size(); j++) {
         uint64_t result = static_cast<uint64_t>(digits[i]) * rhs.digits[j];
