@@ -28,10 +28,9 @@ namespace cyy::math {
           num /= base;
         } while (num);
         return;
-      }
+      } else {
 
       bool add_one = false;
-      std::make_unsigned_t<T> unsigned_num = 0;
       if (num < 0) {
         non_negative = false;
         if (num == std::numeric_limits<T>::min()) {
@@ -40,13 +39,15 @@ namespace cyy::math {
         }
         num = -num;
       }
+      std::make_unsigned_t<T> unsigned_num = 0;
       unsigned_num = static_cast<decltype(unsigned_num)>(num);
       do {
         digits.push_back(unsigned_num & mask);
-        unsigned_num /= base;
+        unsigned_num =static_cast<decltype(unsigned_num)>(unsigned_num/ base);
       } while (unsigned_num);
       if (add_one) {
         this->operator-=(1);
+      }
       }
     }
 

@@ -41,6 +41,9 @@ namespace cyy::math {
     const integer &denominator() const { return q; }
     /* bool is_abs_one() const { return *this != 0 && p == q; } */
     int compare(const rational &rhs) const;
+    rational reciprocal() const {
+      return rational(q,p);
+    }
 
   private:
   private:
