@@ -22,11 +22,13 @@ namespace cyy::math::exception {
   public:
     using runtime_error::runtime_error;
   };
+
   class out_of_range : public std::logic_error {
   public:
     using logic_error::logic_error;
   };
-  class internal_error : public std::runtime_error {
+
+  class invalid_type : public std::runtime_error {
   public:
     using runtime_error::runtime_error;
   };
