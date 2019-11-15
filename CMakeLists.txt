@@ -17,6 +17,7 @@ target_link_libraries(MyMathLib PUBLIC range-v3)
 
 configure_file(src/config.hpp.in config.hpp)
 target_include_directories(MyMathLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_definitions(MyMathLib PUBLIC RANGES_NO_STD_FORWARD_DECLARATIONS)
 
 add_custom_command (OUTPUT ${DATA_DIR}/prime.txt
   COMMAND ${CMAKE_COMMAND} -E tar x prime.tar.xz

@@ -26,7 +26,7 @@ namespace cyy::math {
     uint64_t at(size_t index);
     auto all() -> auto {
       seek(in_memory_primes.size());
-      return ranges::views::concat(ranges::span(in_memory_primes),
+      return ranges::views::concat(in_memory_primes,
                                    ranges::istream_view<uint64_t>(data_file));
     }
 
@@ -34,13 +34,21 @@ namespace cyy::math {
       if (num <= in_memory_primes.back()) {
         return ranges::binary_search(in_memory_primes, num);
       }
-
-      throw std::runtime_error("too large prime");
-
+      size_t low = in_memory_primes.size();
+      size_t high = prime_count;
+      while (low <= high) {
+        auto mid = (low + high) / 2;
+        auto mid_prime = at(mid);
+        if (num == mid_prime) {
+          return true;
+        }
+        if (num < mid_prime) {
+          high = mid - 1;
+        } else {
+          low = mid + 1;
+        }
+      }
       return false;
-      /* seek(in_memory_primes.size()); */
-      /* return ranges::binary_search(
-       * ranges::istream_view<uint64_t>(data_file),num); */
     }
 
   private:
