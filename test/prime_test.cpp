@@ -27,7 +27,8 @@ TEST_CASE("all") {
                                        67, 71, 73, 79, 83, 89, 97};
 
   size_t i = 0;
-  for (auto prime : primes().all()) {
+  auto prime_collection = primes();
+  for (auto prime : prime_collection.all()) {
     CHECK_EQ(prime, test_primes[i]);
     i++;
     if (i >= test_primes.size()) {
