@@ -78,7 +78,8 @@ namespace cyy::math {
     integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
     integer &operator/=(uint32_t rhs);
-    uint32_t operator%(uint32_t b);
+    /* integer &operator/=(const integer &rhs); */
+    int64_t operator%(uint32_t b);
     integer &multiply_2(uint32_t count);
 
     void change_sign() {

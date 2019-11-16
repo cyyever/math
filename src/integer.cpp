@@ -256,8 +256,8 @@ namespace cyy::math {
       return *this;
     }
 
-    std::vector<uint32_t> result_digits(
-		digits.size()+ rhs.digits.size() +1, 0);
+    std::vector<uint32_t> result_digits(digits.size() + rhs.digits.size() + 1,
+                                        0);
     for (size_t i = 0; i < digits.size(); i++) {
       for (size_t j = 0; j < rhs.digits.size(); j++) {
         uint64_t result = static_cast<uint64_t>(digits[i]) * rhs.digits[j];
@@ -294,7 +294,7 @@ namespace cyy::math {
     return *this;
   }
 
-  uint32_t integer::operator%(uint32_t b) {
+  int64_t integer::operator%(uint32_t b) {
     if (b == 0) {
       throw cyy::math::exception::divided_by_zero("");
     }
@@ -302,15 +302,15 @@ namespace cyy::math {
     if (*this == 0 || b == 1)
       return 0;
 
-    uint64_t res = 0;
+    int64_t res = 0;
 
     for (auto digit : ranges::reverse_view(digits)) {
       res = ((res << 32) + digit) % b;
     }
     if (!non_negative) {
-      res = b - res;
+      res = -res;
     }
-    return static_cast<uint32_t>(res);
+    return res;
   }
 
   integer &integer::operator++() {
