@@ -30,24 +30,25 @@ namespace cyy::math {
         return;
       } else {
 
-      bool add_one = false;
-      if (num < 0) {
-        non_negative = false;
-        if (num == std::numeric_limits<T>::min()) {
-          add_one = true;
-          num += 1;
+        bool add_one = false;
+        if (num < 0) {
+          non_negative = false;
+          if (num == std::numeric_limits<T>::min()) {
+            add_one = true;
+            num += 1;
+          }
+          num = -num;
         }
-        num = -num;
-      }
-      std::make_unsigned_t<T> unsigned_num = 0;
-      unsigned_num = static_cast<decltype(unsigned_num)>(num);
-      do {
-        digits.push_back(unsigned_num & mask);
-        unsigned_num =static_cast<decltype(unsigned_num)>(unsigned_num/ base);
-      } while (unsigned_num);
-      if (add_one) {
-        this->operator-=(1);
-      }
+        std::make_unsigned_t<T> unsigned_num = 0;
+        unsigned_num = static_cast<decltype(unsigned_num)>(num);
+        do {
+          digits.push_back(unsigned_num & mask);
+          unsigned_num =
+              static_cast<decltype(unsigned_num)>(unsigned_num / base);
+        } while (unsigned_num);
+        if (add_one) {
+          this->operator-=(1);
+        }
       }
     }
 

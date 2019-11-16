@@ -15,5 +15,5 @@ TEST_CASE("exponent") {
 TEST_CASE("factorial") {
   integer a = 2;
   for (uint32_t i = 2; i <= 50; i++, a *= i)
-    CHECK_EQ(factorial(i) , a);
+    CHECK_EQ(factorial(i), a);
 }
