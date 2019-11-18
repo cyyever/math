@@ -35,7 +35,7 @@ namespace cyy::math {
     rational &operator*=(const rational &rhs);
     rational &operator/=(const rational &rhs);
     void normalize();
-    /* rational &simplify(); */
+    rational &simplify();
 
     const integer &numerator() const { return p; }
     const integer &denominator() const { return q; }

@@ -10,6 +10,7 @@
 
 #include "exception.hpp"
 #include "rational.hpp"
+#include "number_theory.hpp"
 
 namespace cyy::math {
 
@@ -96,12 +97,13 @@ namespace cyy::math {
       q.change_sign();
     }
   }
-  /* rational &rational::simplify() { */
-  /*   integer gcd_int = gcd(p, q); */
-  /*   p /= gcd_int; */
-  /*   q /= gcd_int; */
-  /*   return *this; */
-  /* } */
+
+  rational &rational::simplify() {
+    auto gcd_int = gcd(p, q);
+    p /= gcd_int;
+    q /= gcd_int;
+    return *this;
+  }
 
   std::string rational::to_string() const {
     if (p == 0) {

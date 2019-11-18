@@ -294,6 +294,10 @@ namespace cyy::math {
     return *this;
   }
 
+  integer integer::operator%(const integer &b) {
+    auto res = (*this) / b;
+    return *this - res * b;
+  }
   int64_t integer::operator%(uint32_t b) {
     if (b == 0) {
       throw cyy::math::exception::divided_by_zero("");
@@ -342,7 +346,7 @@ namespace cyy::math {
     tmp.non_negative = true;
     while (tmp != 0) {
       auto decimal_digit = tmp.operator%(10);
-      tmp /= 10;
+      tmp /= static_cast<uint32_t>(10);
       int_str.push_back(static_cast<char>('0' + decimal_digit));
     }
     if (int_str.empty()) {
@@ -354,37 +358,28 @@ namespace cyy::math {
     ranges::reverse(int_str);
     return int_str;
   }
-#if 0
 
   integer &integer::operator/=(const integer &rhs) {
-    integer quotient, tmp, low_bound, high_bound;
-    uint8_t org_sign = sign;
-    int compare_res = 0;
-    if (rhs==0)
-      throw std::invalid_argument("divided by zero");
+    if (rhs == 0)
+      throw exception::divided_by_zero("divide");
 
-    if (this == &rhs) {
-      *this = 1;
-      return *this;
-    }
-
-    if (rhs.is_abs_one()) {
-      if (rhs.sign == 0)
-        sign = 1 - sign;
-      return *this;
+    if (rhs.digits.size() == 1) {
+      non_negative = !diffrent_sign(rhs);
+      return operator/=(rhs.digits[0]);
     }
 
     //通过二分法找出来，注意这边我们转成正数
-    sign = 1;
+    integer quotient, tmp, low_bound, high_bound;
     high_bound = *this;
+    high_bound.non_negative = true;
 
     while (low_bound <= high_bound) {
-      integer res = (high_bound + low_bound) / 2;
+      integer res = (high_bound + low_bound) / static_cast<uint32_t>(2);
       tmp = res * rhs;
-      if (rhs.sign == 0)
-        tmp.sign = 1 - tmp.sign;
+      if (!rhs.non_negative)
+        tmp.non_negative = !tmp.non_negative;
 
-      compare_res = compare(tmp);
+      auto compare_res = compare(tmp);
       if (compare_res >= 0)
         quotient = std::move(res);
       if (compare_res == 0)
@@ -395,14 +390,11 @@ namespace cyy::math {
         high_bound = res - 1;
     }
 
+    auto org_sign = non_negative;
     *this = std::move(quotient);
-
-    if (*this==0)
-      sign = 1;
-    else
-      sign = !(org_sign ^ rhs.sign);
+    non_negative = org_sign && rhs.non_negative;
+    normalize();
     return *this;
   }
 
-#endif
 } // namespace cyy::math
