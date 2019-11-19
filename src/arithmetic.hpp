@@ -67,5 +67,6 @@ namespace cyy::math {
     }
     return res;
   }
-  /* my_rat log(const my_int &n, uint64_t base, size_t digit_num = 0); */
+
+  rational ln(const rational &a);
 } // namespace cyy::math
