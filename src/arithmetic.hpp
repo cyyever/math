@@ -1,6 +1,11 @@
 /*!
  * \file arithmetic.hpp
  *
+ * \brief
+ */
+/*!
+ * \file arithmetic.hpp
+ *
  * \brief 算术相关的函数
  */
 #pragma once
@@ -48,6 +53,19 @@ namespace cyy::math {
       return res;
     }
   }
-  integer factorial(uint32_t n);
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T> &&
+                                                    std::is_unsigned_v<T>>>
+  integer factorial(T n) {
+    if (n <= 1) {
+      return 1;
+    }
+    integer res = 2;
+    T i = 3;
+    while (i <= n) {
+      res *= integer(i);
+      i++;
+    }
+    return res;
+  }
   /* my_rat log(const my_int &n, uint64_t base, size_t digit_num = 0); */
 } // namespace cyy::math

@@ -8,22 +8,6 @@
 namespace cyy::math {
 
   /*
-   *	功能：计算n的阶乘
-   * 	参数：
-   *		n：参数
-   * 	返回值：
-   * 		阶乘
-   */
-  integer factorial(uint32_t n) {
-    integer res = 1;
-    while (n >= 2) {
-      res *= n;
-      n--;
-    }
-    return res;
-  }
-
-  /*
    *	功能：计算基于base的对数
    * 	参数：
    *		n：整数

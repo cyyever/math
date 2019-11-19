@@ -9,8 +9,8 @@
 #include <iostream>
 
 #include "exception.hpp"
-#include "rational.hpp"
 #include "number_theory.hpp"
+#include "rational.hpp"
 
 namespace cyy::math {
 
