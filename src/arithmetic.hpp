@@ -1,11 +1,6 @@
 /*!
  * \file arithmetic.hpp
  *
- * \brief
- */
-/*!
- * \file arithmetic.hpp
- *
  * \brief 算术相关的函数
  */
 #pragma once
@@ -17,8 +12,12 @@
 #include "rational.hpp"
 namespace cyy::math {
 
-  template <typename BASE_T, typename POWER_T,
-            typename = std::enable_if_t<std::is_integral_v<POWER_T>>>
+  template <
+      typename BASE_T, typename POWER_T,
+      typename = std::enable_if_t<
+          (std::is_same_v<BASE_T, integer> ||
+           std::is_same_v<BASE_T, rational>)&&std::is_integral_v<POWER_T> &&
+          std::is_integral_v<POWER_T>>>
   BASE_T exponent(BASE_T base, POWER_T power) {
     if constexpr (std::is_unsigned<POWER_T>::value) {
       BASE_T res = 1;
@@ -53,6 +52,7 @@ namespace cyy::math {
       return res;
     }
   }
+
   template <typename T, typename = std::enable_if_t<std::is_integral_v<T> &&
                                                     std::is_unsigned_v<T>>>
   integer factorial(T n) {
