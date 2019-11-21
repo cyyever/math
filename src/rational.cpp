@@ -29,13 +29,13 @@ namespace cyy::math {
   }
 
   /*
-   *	¹¦ÄÜ£º±È½ÏºÍÁíÒ»¸öÓÐÀíÊýµÄ´óÐ¡
-   * 	²ÎÊý£º
-   *		rhs£ºÁíÒ»¸öÓÐÀíÊý
-   * 	·µ»ØÖµ£º
-   * 		>0£º´óÓÚÁíÒ»¸öÓÐÀíÊý
-   * 		0£ºÁ½¸öÓÐÀíÊýÏàµÈ
-   * 		<0£ºÐ¡ÓÚÁíÒ»¸öÓÐÀíÊý
+   *	åŠŸèƒ½ï¼šæ¯”è¾ƒå’Œå¦ä¸€ä¸ªæœ‰ç†æ•°çš„å¤§å°
+   * 	å‚æ•°ï¼š
+   *		rhsï¼šå¦ä¸€ä¸ªæœ‰ç†æ•°
+   * 	è¿”å›žå€¼ï¼š
+   * 		>0ï¼šå¤§äºŽå¦ä¸€ä¸ªæœ‰ç†æ•°
+   * 		0ï¼šä¸¤ä¸ªæœ‰ç†æ•°ç›¸ç­‰
+   * 		<0ï¼šå°äºŽå¦ä¸€ä¸ªæœ‰ç†æ•°
    */
   int rational::compare(const rational &rhs) const {
     return (p * rhs.q).compare(q * rhs.p);

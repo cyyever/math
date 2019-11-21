@@ -1,7 +1,7 @@
 /*!
  * \file arithmetic.cpp
  *
- * \brief ËãÊõÏà¹ØµÄº¯Êı
+ * \brief ç®—æœ¯ç›¸å…³çš„å‡½æ•°
  */
 
 #include "arithmetic.hpp"
