@@ -1,11 +1,6 @@
 /*!
  * \file arithmetic.hpp
  *
- * \brief
- */
-/*!
- * \file arithmetic.hpp
- *
  * \brief 算术相关的函数
  */
 #pragma once
@@ -69,4 +64,5 @@ namespace cyy::math {
   }
 
   rational ln(const rational &a);
+  /* rational log(const integer &n, uint64_t base, size_t digit_num); */
 } // namespace cyy::math

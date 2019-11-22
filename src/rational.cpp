@@ -10,6 +10,7 @@
 
 #include "exception.hpp"
 #include "number_theory.hpp"
+#include "prime.hpp"
 #include "rational.hpp"
 
 namespace cyy::math {
@@ -29,13 +30,13 @@ namespace cyy::math {
   }
 
   /*
-   *	¹¦ÄÜ£º±È½ÏºÍÁíÒ»¸öÓÐÀíÊýµÄ´óÐ¡
-   * 	²ÎÊý£º
-   *		rhs£ºÁíÒ»¸öÓÐÀíÊý
-   * 	·µ»ØÖµ£º
-   * 		>0£º´óÓÚÁíÒ»¸öÓÐÀíÊý
-   * 		0£ºÁ½¸öÓÐÀíÊýÏàµÈ
-   * 		<0£ºÐ¡ÓÚÁíÒ»¸öÓÐÀíÊý
+   *	åŠŸèƒ½ï¼šæ¯”è¾ƒå’Œå¦ä¸€ä¸ªæœ‰ç†æ•°çš„å¤§å°
+   * 	å‚æ•°ï¼š
+   *		rhsï¼šå¦ä¸€ä¸ªæœ‰ç†æ•°
+   * 	è¿”å›žå€¼ï¼š
+   * 		>0ï¼šå¤§äºŽå¦ä¸€ä¸ªæœ‰ç†æ•°
+   * 		0ï¼šä¸¤ä¸ªæœ‰ç†æ•°ç›¸ç­‰
+   * 		<0ï¼šå°äºŽå¦ä¸€ä¸ªæœ‰ç†æ•°
    */
   int rational::compare(const rational &rhs) const {
     return (p * rhs.q).compare(q * rhs.p);
@@ -99,6 +100,15 @@ namespace cyy::math {
   }
 
   rational &rational::simplify() {
+    auto prime_c = primes();
+
+    for (auto prime : prime_c.till(100)) {
+      while (p % prime == 0 && q % prime == 0) {
+        p /= prime;
+        q /= prime;
+      }
+    }
+    return *this;
     auto gcd_int = gcd(p, q);
     p /= gcd_int;
     q /= gcd_int;

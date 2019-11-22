@@ -20,7 +20,6 @@ namespace cyy::math {
    */
   integer gcd(const integer &a, const integer &b) {
     integer p, q, tmp, m;
-    int cmp_res;
 
     if (a == 0 && b == 0)
       throw std::invalid_argument("a and b are zero");
