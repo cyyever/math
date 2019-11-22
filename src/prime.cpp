@@ -16,7 +16,7 @@
 
 namespace cyy::math {
 
-  uint64_t primes::at(size_t index) {
+  uint64_t primes::at(size_t index) const {
     if (index < in_memory_primes.size()) {
       return in_memory_primes[index];
     }
@@ -27,9 +27,10 @@ namespace cyy::math {
     seek(index);
     uint64_t prime;
     data_file >> prime;
+    file_index++;
     return prime;
   }
-  void primes::open() {
+  void primes::open() const {
     if (data_file.is_open()) {
       return;
     }
@@ -42,9 +43,12 @@ namespace cyy::math {
     }
     data_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   }
-  void primes::seek(size_t index) {
+  void primes::seek(size_t index) const {
     open();
-    data_file.seekg(static_cast<std::ifstream::pos_type>(index * line_width));
+    if (file_index != index) {
+      data_file.seekg(static_cast<std::ifstream::pos_type>(index * line_width));
+    }
+    file_index = index;
   }
   std::vector<uint64_t> primes::in_memory_primes{
 
