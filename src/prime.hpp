@@ -73,14 +73,6 @@ namespace cyy::math {
       inline iterator operator-(difference_type rhs) const {
         return iterator(ptr, index - rhs);
       }
-      /* friend inline iterator operator+(difference_type lhs, */
-      /*                                  const iterator &rhs) { */
-      /*   return iterator(lhs + rhs.index); */
-      /* } */
-      /* friend inline iterator operator-(difference_type lhs, */
-      /*                                  const iterator &rhs) { */
-      /*   return iterator(lhs - rhs.index); */
-      /* } */
 
       inline bool operator==(const iterator &rhs) const {
         return index == rhs.index;
@@ -113,20 +105,16 @@ namespace cyy::math {
     iterator cend() const noexcept { return iterator(this, prime_count); }
 
     uint64_t at(size_t index) const;
-    /* auto all() -> auto { */
-    /*   seek(in_memory_primes.size()); */
-    /*   return ranges::views::concat(in_memory_primes, */
-    /*                                ranges::istream_view<uint64_t>(data_file));
-     */
-    /* } */
     auto till(uint64_t upper_bound) -> auto {
       if (upper_bound > max_prime) {
         throw exception::out_of_range("more than max prime");
       }
       seek(in_memory_primes.size());
-      return ranges::views::take_while(
-          /* ranges::views::all(*this), [upper_bound](auto i) { return i <= upper_bound; }); */
-          *this, [upper_bound](auto i) { return i <= upper_bound; });
+
+      return ranges::views::concat(in_memory_primes,
+                                   ranges::istream_view<uint64_t>(data_file)) |
+             ranges::views::take_while(
+                 [upper_bound](auto i) { return i <= upper_bound; });
     }
 
     bool has(uint64_t num) {
