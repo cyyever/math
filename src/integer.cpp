@@ -11,7 +11,6 @@
 #include <range/v3/view.hpp>
 #include <regex>
 
-/* #include "my_arithmetic.h" */
 #include "exception.hpp"
 #include "integer.hpp"
 
@@ -47,13 +46,13 @@ namespace cyy::math {
   }
 
   /*
-   *	¹¦ÄÜ£º±È½ÏºÍÁíÒ»¸öÕûÊýµÄ´óÐ¡
-   * 	²ÎÊý£º
-   *		rhs£ºÁíÒ»¸öÕûÊý
-   * 	·µ»ØÖµ£º
-   * 		>0£º´óÓÚÁíÒ»¸öÕûÊý
-   * 		0£ºÁ½¸öÕûÊýÏàµÈ
-   * 		<0£ºÐ¡ÓÚÁíÒ»¸öÕûÊý
+   *	åŠŸèƒ½ï¼šæ¯”è¾ƒå’Œå¦ä¸€ä¸ªæ•´æ•°çš„å¤§å°
+   * 	å‚æ•°ï¼š
+   *		rhsï¼šå¦ä¸€ä¸ªæ•´æ•°
+   * 	è¿”å›žå€¼ï¼š
+   * 		>0ï¼šå¤§äºŽå¦ä¸€ä¸ªæ•´æ•°
+   * 		0ï¼šä¸¤ä¸ªæ•´æ•°ç›¸ç­‰
+   * 		<0ï¼šå°äºŽå¦ä¸€ä¸ªæ•´æ•°
    */
   int integer::compare(const integer &rhs) const {
     if (non_negative != rhs.non_negative) {
@@ -82,7 +81,7 @@ namespace cyy::math {
         }
       }
     }
-    if (!non_negative) //¸ºÊý
+    if (!non_negative) //è´Ÿæ•°
       res = -res;
     return res;
   }
@@ -101,7 +100,7 @@ namespace cyy::math {
       return multiply_2(1);
     }
 
-    if (diffrent_sign(rhs)) //·ûºÅ²»Í¬£¬×ª»»³É¼õ·¨
+    if (diffrent_sign(rhs)) //ç¬¦å·ä¸åŒï¼Œè½¬æ¢æˆå‡æ³•
     {
       bool changed_sign = false;
       if (!non_negative) {
@@ -147,7 +146,7 @@ namespace cyy::math {
       return *this;
     }
 
-    //×ª»»³É¼Ó·¨
+    //è½¬æ¢æˆåŠ æ³•
     if (non_negative && !rhs.non_negative) {
       non_negative = false;
       operator+=(rhs);
@@ -368,7 +367,7 @@ namespace cyy::math {
       return operator/=(rhs.digits[0]);
     }
 
-    //Í¨¹ý¶þ·Ö·¨ÕÒ³öÀ´£¬×¢ÒâÕâ±ßÎÒÃÇ×ª³ÉÕýÊý
+    //é€šè¿‡äºŒåˆ†æ³•æ‰¾å‡ºæ¥ï¼Œæ³¨æ„è¿™è¾¹æˆ‘ä»¬è½¬æˆæ­£æ•°
     integer quotient, tmp, low_bound, high_bound;
     high_bound = *this;
     high_bound.non_negative = true;

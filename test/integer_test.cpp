@@ -29,18 +29,18 @@ TEST_CASE("from_string") {
 }
 TEST_CASE("+") {
   SUBCASE("signed") {
-    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+    for ( int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
-      for (auto b = static_cast<int64_t>(INT32_MIN) - 1;
+      for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
         CHECK_EQ(integer(a) + integer(b), (a + b));
       }
     }
   }
   SUBCASE("unsigned") {
-    for (auto a = static_cast<uint64_t>(UINT32_MAX) - 1;
+    for (uint64_t a = static_cast<uint64_t>(UINT32_MAX) - 1;
          a < static_cast<uint64_t>(UINT32_MAX) + 1; a++) {
-      for (auto b = static_cast<uint64_t>(UINT32_MAX) - 1;
+      for (uint64_t b = static_cast<uint64_t>(UINT32_MAX) - 1;
            b < static_cast<uint64_t>(UINT32_MAX) + 1; b++) {
         CHECK_EQ(integer(a) + integer(b), (a + b));
       }
@@ -50,18 +50,18 @@ TEST_CASE("+") {
 
 TEST_CASE("-") {
   SUBCASE("signed") {
-    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+    for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
-      for (auto b = static_cast<int64_t>(INT32_MIN) - 1;
+      for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
         CHECK_EQ(integer(a) - integer(b), (a - b));
       }
     }
   }
   SUBCASE("unsigned") {
-    for (auto a = static_cast<int64_t>(UINT32_MAX) - 1;
+    for (int64_t a = static_cast<int64_t>(UINT32_MAX) - 1;
          a < static_cast<int64_t>(UINT32_MAX) + 1; a++) {
-      for (auto b = static_cast<int64_t>(UINT32_MAX) - 1;
+      for (int64_t b = static_cast<int64_t>(UINT32_MAX) - 1;
            b < static_cast<int64_t>(UINT32_MAX) + 1; b++) {
         CHECK_EQ(integer(a) - integer(b), (a - b));
       }
@@ -71,18 +71,18 @@ TEST_CASE("-") {
 
 TEST_CASE("*") {
   SUBCASE("signed") {
-    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+    for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
-      for (auto b = static_cast<int64_t>(INT32_MIN) - 1;
+      for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
         CHECK_EQ(integer(a) * integer(b), (a * b));
       }
     }
   }
   SUBCASE("unsigned") {
-    for (auto a = static_cast<uint64_t>(UINT32_MAX) - 1;
+    for (uint64_t a = static_cast<uint64_t>(UINT32_MAX) - 1;
          a < static_cast<uint64_t>(UINT32_MAX) + 1; a++) {
-      auto b = static_cast<uint64_t>(UINT32_MAX) - 1;
+      uint64_t b = static_cast<uint64_t>(UINT32_MAX) - 1;
       CHECK_EQ(integer(a) * integer(b), (a * b));
     }
   }
@@ -90,14 +90,14 @@ TEST_CASE("*") {
 
 TEST_CASE("/") {
   SUBCASE("signed") {
-    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+    for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
       CHECK_EQ(integer(a) /= static_cast<uint32_t>(10),
                a / static_cast<uint32_t>(10));
     }
   }
   SUBCASE("unsigned") {
-    for (auto a = static_cast<int64_t>(UINT32_MAX) - 1;
+    for (int64_t a = static_cast<int64_t>(UINT32_MAX) - 1;
          a < static_cast<int64_t>(UINT32_MAX) + 1; a++) {
       CHECK_EQ(integer(a) /= static_cast<uint32_t>(10),
                a / static_cast<uint32_t>(10));
@@ -107,14 +107,14 @@ TEST_CASE("/") {
 
 TEST_CASE("%") {
   SUBCASE("signed") {
-    for (auto a = static_cast<int64_t>(INT32_MIN) - 1;
+    for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
       CHECK_EQ(integer(a) % static_cast<uint32_t>(10),
                a % static_cast<uint32_t>(10));
     }
   }
   SUBCASE("unsigned") {
-    for (auto a = static_cast<int64_t>(UINT32_MAX) - 1;
+    for (int64_t a = static_cast<int64_t>(UINT32_MAX) - 1;
          a < static_cast<int64_t>(UINT32_MAX) + 1; a++) {
       CHECK_EQ(integer(a) % static_cast<uint32_t>(10),
                a % static_cast<uint32_t>(10));

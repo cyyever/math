@@ -34,10 +34,10 @@ namespace cyy::math {
       return;
     }
     data_file.open(std::filesystem::path(INSTALLED_DATA_DIR) / "prime.txt");
-    if (!data_file) {
+    if (!data_file.is_open()) {
       data_file.open(std::filesystem::path(DATA_DIR) / "prime.txt");
     }
-    if (!data_file) {
+    if (!data_file.is_open()) {
       throw cyy::math::exception::no_data_file("prime.txt");
     }
     data_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
