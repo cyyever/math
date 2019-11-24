@@ -34,6 +34,7 @@ namespace cyy::math {
     rational &operator-=(const rational &rhs);
     rational &operator*=(const rational &rhs);
     rational &operator/=(const rational &rhs);
+    rational &operator/=(const integer &rhs);
     void normalize();
     rational &simplify();
 
@@ -82,6 +83,9 @@ namespace cyy::math {
     return rational(a) *= b;
   }
   inline rational operator/(const rational &a, const rational &b) {
+    return rational(a) /= b;
+  }
+  inline rational operator/(const rational &a, const integer &b) {
     return rational(a) /= b;
   }
 

@@ -92,6 +92,15 @@ namespace cyy::math {
     return *this;
   }
 
+  rational &rational::operator/=(const integer &rhs) {
+    if (rhs == 0)
+      throw exception::divided_by_zero("denominator");
+
+    q *= rhs;
+    normalize();
+    return *this;
+  }
+
   void rational::normalize() {
     if (q < 0) {
       p.change_sign();

@@ -7,6 +7,7 @@
 #include "arithmetic.hpp"
 #include "exception.hpp"
 namespace cyy::math {
+  /*
   rational ln(const rational &a) {
     if (a <= 0) {
       throw exception::out_of_range("a<0");
@@ -25,9 +26,9 @@ namespace cyy::math {
       res += (tmp + x.reciprocal()) / 2;
     }
     res *= delta;
-    res.simplify();
     return res;
   }
+*/
 
   /*
    *	功能：计算基于base的对数
