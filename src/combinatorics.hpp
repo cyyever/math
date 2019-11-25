@@ -15,7 +15,7 @@
 namespace cyy::math {
 
   /*
-   *	功能：生成伯努利系数C(n,k)
+   *	功能：生成系数C(n,k)
    *	参数：
    *		n,k：参数
    *	返回值：
@@ -30,40 +30,41 @@ namespace cyy::math {
    *	返回值：
    *		第一个组合
    */
-  inline auto combination(uint64_t n, uint64_t k) {
+  inline auto all_combinations(uint64_t n, uint64_t k) {
     if (k > n)
       throw exception::out_of_range("k>n");
-    auto res = std::make_shared<std::vector<bool>>();
-
+    if (k == 0)
+      throw exception::out_of_range("k is 0");
+    auto res = std::make_shared<std::vector<uint64_t>>();
     return ranges::views::generate([=]() {
              if (res->empty()) {
-               res->resize(n, false);
+               res->resize(k);
                for (uint64_t i = 0; i < k; i++)
-                 (*res)[i] = true;
+                 (*res)[i] = i + 1;
                return *res;
              }
-             std::vector<bool>::size_type i, j, cnt;
-             uint8_t find_false;
-             cnt = 0;
-             find_false = 0;
-             i = n - 1;
-             while (true) {
-               if ((*res)[i] == true) {
+             bool find_false = false;
+             uint64_t a = n;
+             uint64_t cnt = 0;
+             while (!res->empty()) {
+               if (find_false) {
+                 auto tmp = res->back();
+                 res->pop_back();
                  cnt++;
-                 (*res)[i] = false;
-                 if (find_false) {
-                   i++;
-                   for (j = 0; j < cnt; j++)
-                     (*res)[i + j] = true;
-                   return *res;
+                 for (uint64_t j = 0; j < cnt; j++) {
+                   res->push_back(tmp + j + 1);
                  }
-               } else
-                 find_false = 1;
-               if (i == 0)
-                 break;
-               i--;
+                 return *res;
+               }
+               if (res->back() == a) {
+                 res->pop_back();
+                 a--;
+                 cnt++;
+                 continue;
+               } else {
+                 find_false = true;
+               }
              }
-             res->resize(0);
              return *res;
            }) |
            ranges::views::take_while([](auto const &v) { return !v.empty(); });

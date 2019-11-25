@@ -8,11 +8,23 @@
 #include <doctest/doctest.h>
 
 #include "../src/combinatorics.hpp"
-using namespace std;
-using namespace cyy::math;
 
-TEST_CASE("binomial_coefficient") {
-  assert(binomial_coefficient(100, 50) == integer("100891344545564193334812497256"));
-  assert(binomial_coefficient(5, 2) ==
-         integer("10"));
+/* TEST_CASE("binomial_coefficient") { */
+/*   assert(binomial_coefficient(100, 50) == */
+/*          integer("100891344545564193334812497256")); */
+/*   assert(binomial_coefficient(5, 2) == integer("10")); */
+/* } */
+TEST_CASE("all_combinations") {
+  auto combination_seq = cyy::math::all_combinations(3, 2);
+  auto it = combination_seq.begin();
+  REQUIRE(it != combination_seq.end());
+  REQUIRE_EQ(*it, std::vector<uint64_t>{1, 2});
+  it++;
+  REQUIRE(it != combination_seq.end());
+  REQUIRE_EQ(*it, std::vector<uint64_t>{1, 3});
+  it++;
+  REQUIRE(it != combination_seq.end());
+  REQUIRE_EQ(*it, std::vector<uint64_t>{2, 3});
+  it++;
+  REQUIRE(it == combination_seq.end());
 }
