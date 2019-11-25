@@ -367,32 +367,50 @@ namespace cyy::math {
       return operator/=(rhs.digits[0]);
     }
 
-    //通过二分法找出来，注意这边我们转成正数
-    integer quotient, tmp, low_bound, high_bound;
-    high_bound = *this;
-    high_bound.non_negative = true;
+    bool real_non_negative = (non_negative && rhs.non_negative) ||
+                             (!non_negative && !rhs.non_negative);
 
-    while (low_bound <= high_bound) {
-      integer res = (high_bound + low_bound) / static_cast<uint32_t>(2);
-      tmp = res * rhs;
-      if (!rhs.non_negative)
-        tmp.non_negative = !tmp.non_negative;
+    auto divisor = rhs;
+    non_negative = true;
+    divisor.non_negative = true;
 
-      auto compare_res = compare(tmp);
-      if (compare_res >= 0)
-        quotient = std::move(res);
-      if (compare_res == 0)
-        break;
-      else if (compare_res > 0)
-        low_bound = res + 1;
-      else
-        high_bound = res - 1;
+    integer res;
+    while (*this >= divisor) {
+      auto zero_digit_num = digits.size() - divisor.digits.size();
+      auto divisor_top_digit = divisor.digits.back();
+      divisor_top_digit++;
+      if (divisor_top_digit == 0) {
+        if (zero_digit_num == 0) {
+          break;
+        }
+        divisor_top_digit = 1;
+        zero_digit_num--;
+      }
+      auto top_digit = digits.back() / divisor_top_digit;
+      if (top_digit == 0) {
+        if (zero_digit_num == 0) {
+          break;
+        }
+        zero_digit_num--;
+        top_digit =
+            static_cast<uint32_t>((static_cast<uint64_t>(digits.back()) << 32) /
+                                  static_cast<uint64_t>(divisor_top_digit));
+      }
+      assert(top_digit != 0);
+      auto tmp = divisor * top_digit;
+      tmp.digits.insert(tmp.digits.begin(), zero_digit_num, 0);
+      operator-=(tmp);
+      integer partial_res;
+      partial_res.digits.resize(zero_digit_num + 1);
+      partial_res.digits.back() = top_digit;
+      res += partial_res;
     }
-
-    auto org_sign = non_negative;
-    *this = std::move(quotient);
-    non_negative = org_sign && rhs.non_negative;
-    normalize();
+    while (*this >= divisor) {
+      operator-=(divisor);
+      ++res;
+    }
+    *this = std::move(res);
+    non_negative = real_non_negative;
     return *this;
   }
 
