@@ -26,6 +26,22 @@ TEST_CASE("all") {
   }
 }
 
+TEST_CASE("from") {
+  std::vector<uint64_t> test_primes = {11, 13, 17, 19, 23, 29, 31,
+                                       37, 41, 43, 47, 53, 59, 61,
+                                       67, 71, 73, 79, 83, 89, 97};
+
+  auto prime_c = primes();
+  size_t i = 0;
+  for (auto prime : prime_c.from(10)) {
+    CHECK_EQ(prime, test_primes[i]);
+    i++;
+    if (i >= test_primes.size()) {
+      break;
+    }
+  }
+}
+
 TEST_CASE("till") {
   std::vector<uint64_t> test_primes = {2,  3,  5,  7,  11, 13, 17, 19, 23,
                                        29, 31, 37, 41, 43, 47, 53, 59, 61,

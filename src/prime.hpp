@@ -116,6 +116,17 @@ namespace cyy::math {
              ranges::views::take_while(
                  [upper_bound](auto i) { return i <= upper_bound; });
     }
+    auto from(uint64_t lower_bound) -> auto {
+      if (lower_bound > max_prime) {
+        throw exception::out_of_range("more than max prime");
+      }
+      seek(in_memory_primes.size());
+
+      return ranges::views::concat(in_memory_primes,
+                                   ranges::istream_view<uint64_t>(data_file)) |
+             ranges::views::drop_while(
+                 [lower_bound](auto i) { return i <= lower_bound; });
+    }
 
     bool has(uint64_t num) {
       if (num > max_prime) {
