@@ -29,7 +29,7 @@ TEST_CASE("from_string") {
 }
 TEST_CASE("+") {
   SUBCASE("signed") {
-    for ( int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
+    for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
       for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {

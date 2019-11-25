@@ -25,7 +25,7 @@ namespace cyy::math {
       if constexpr (std::is_unsigned<T>::value) {
         do {
           digits.push_back(num & mask);
-          num =num/ base;
+          num = num / base;
         } while (num);
         return;
       } else {
