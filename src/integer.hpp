@@ -136,6 +136,9 @@ namespace cyy::math {
   inline integer operator*(const integer &a, const integer &b) {
     return integer(a) *= b;
   }
+  inline integer operator*(const integer &a, uint32_t b) {
+    return integer(a) *= b;
+  }
   inline integer operator/(const integer &a, uint32_t b) {
     return integer(a) /= b;
   }

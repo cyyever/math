@@ -40,7 +40,7 @@ namespace cyy::math {
 
     const integer &numerator() const { return p; }
     const integer &denominator() const { return q; }
-    /* bool is_abs_one() const { return *this != 0 && p == q; } */
+    integer round_zero() const { return p / q; }
     int compare(const rational &rhs) const;
     rational reciprocal() const { return rational(q, p); }
 
