@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 #include <regex>
@@ -337,6 +336,7 @@ namespace cyy::math {
     operator-=(1);
     return tmp;
   }
+
   std::string integer::to_string() const {
     std::string int_str;
     int_str.reserve(digits.size() * 8);

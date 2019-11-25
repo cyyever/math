@@ -45,7 +45,6 @@ namespace cyy::math {
     rational reciprocal() const { return rational(q, p); }
 
   private:
-  private:
     integer p; //分子，有理数的符号由它体现
     integer q; //分母，恒为正数
   };
@@ -89,4 +88,8 @@ namespace cyy::math {
     return rational(a) /= b;
   }
 
+  inline std::ostream &operator<<(std::ostream &os, const rational &a) {
+    os << a.to_string();
+    return os;
+  }
 } // namespace cyy::math

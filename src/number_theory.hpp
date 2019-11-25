@@ -7,8 +7,6 @@
 #pragma once
 
 #include "integer.hpp"
-#include <cstdint>
-#include <vector>
 
 namespace cyy::math {
 
