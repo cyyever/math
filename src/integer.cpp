@@ -370,14 +370,19 @@ namespace cyy::math {
     bool real_non_negative = (non_negative && rhs.non_negative) ||
                              (!non_negative && !rhs.non_negative);
 
-    auto divisor = rhs;
-    non_negative = true;
-    divisor.non_negative = true;
+    auto divisor = &rhs;
+    integer non_negative_rhs;
+    if (!rhs.non_negative) {
+      non_negative_rhs = rhs;
+      non_negative_rhs.non_negative = true;
+      divisor = &non_negative_rhs;
+    }
 
+    non_negative = true;
     integer res;
-    while (*this >= divisor) {
-      auto zero_digit_num = digits.size() - divisor.digits.size();
-      auto divisor_top_digit = divisor.digits.back();
+    while (*this >= *divisor) {
+      auto zero_digit_num = digits.size() - divisor->digits.size();
+      auto divisor_top_digit = divisor->digits.back();
       divisor_top_digit++;
       if (divisor_top_digit == 0) {
         if (zero_digit_num == 0) {
@@ -397,7 +402,7 @@ namespace cyy::math {
                                   static_cast<uint64_t>(divisor_top_digit));
       }
       assert(top_digit != 0);
-      auto tmp = divisor * top_digit;
+      auto tmp = (*divisor) * top_digit;
       tmp.digits.insert(tmp.digits.begin(), zero_digit_num, 0);
       operator-=(tmp);
       integer partial_res;
@@ -405,8 +410,8 @@ namespace cyy::math {
       partial_res.digits.back() = top_digit;
       res += partial_res;
     }
-    while (*this >= divisor) {
-      operator-=(divisor);
+    while (*this >= *divisor) {
+      operator-=(*divisor);
       ++res;
     }
     *this = std::move(res);
