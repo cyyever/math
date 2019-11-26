@@ -28,11 +28,11 @@ namespace cyy::math {
 
     class iterator {
     public:
-      using iterator_category=std::random_access_iterator_tag;
-      using value_type=uint64_t;
-      using difference_type=ptrdiff_t;
-      using pointer =value_type*;
-      using reference         = const value_type&;
+      using iterator_category = std::random_access_iterator_tag;
+      using value_type = uint64_t;
+      using difference_type = ptrdiff_t;
+      using pointer = value_type *;
+      using reference = const value_type &;
 
       iterator(const primes *ptr_, size_t index_) : ptr(ptr_), index(index_) {}
       iterator(const iterator &) = default;

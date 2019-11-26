@@ -5,8 +5,8 @@
  */
 
 #include <algorithm>
-#include <cstdlib>
 #include <cassert>
+#include <cstdlib>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 #include <regex>

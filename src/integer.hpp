@@ -21,7 +21,7 @@ namespace cyy::math {
 
     template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
     integer(T num) {
-        bool add_one = false;
+      bool add_one = false;
       if constexpr (!std::is_unsigned<T>::value) {
         if (num < 0) {
           non_negative = false;
@@ -32,19 +32,19 @@ namespace cyy::math {
           num = -num;
         }
       }
-       auto  unsigned_num = static_cast<std::make_unsigned_t<T>>(num);
-       if(unsigned_num<base) {
-          digits.push_back(static_cast<uint32_t>(unsigned_num));
-       } else {
+      auto unsigned_num = static_cast<std::make_unsigned_t<T>>(num);
+      if (unsigned_num < base) {
+        digits.push_back(static_cast<uint32_t>(unsigned_num));
+      } else {
         do {
           digits.push_back(unsigned_num & mask);
           unsigned_num =
               static_cast<decltype(unsigned_num)>(unsigned_num / base);
         } while (unsigned_num);
-       }
-        if (add_one) {
-          this->operator-=(1);
-        }
+      }
+      if (add_one) {
+        this->operator-=(1);
+      }
     }
 
     integer(std::string_view str);
@@ -94,7 +94,8 @@ namespace cyy::math {
 
   private:
     std::vector<uint32_t> digits;
-    static constexpr uint64_t base = static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())+1;
+    static constexpr uint64_t base =
+        static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()) + 1;
     static constexpr uint64_t mask = base - 1;
     bool non_negative{true};
   };
