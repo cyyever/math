@@ -75,11 +75,12 @@ namespace cyy::math {
     integer &operator-=(const integer &rhs);
     integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
+    integer operator/(integer rhs) const;
     integer &operator/=(uint32_t rhs);
     integer &operator/=(const integer &rhs);
-    integer &operator%=(const integer &rhs);
     int64_t operator%(uint32_t b);
-    integer operator%(const integer &rhs);
+    integer operator%(integer rhs) const;
+    integer &operator%=(const integer &rhs);
     integer &multiply_2(uint32_t count);
 
     void change_sign() {
@@ -127,24 +128,11 @@ namespace cyy::math {
   inline bool operator>=(const integer &a, const integer &b) {
     return !(a < b);
   }
-  inline integer operator+(const integer &a, const integer &b) {
-    return integer(a) += b;
-  }
-  inline integer operator-(const integer &a, const integer &b) {
-    return integer(a) -= b;
-  }
-  inline integer operator*(const integer &a, const integer &b) {
-    return integer(a) *= b;
-  }
-  inline integer operator*(const integer &a, uint32_t b) {
-    return integer(a) *= b;
-  }
-  inline integer operator/(const integer &a, uint32_t b) {
-    return integer(a) /= b;
-  }
-  inline integer operator/(const integer &a, const integer &b) {
-    return integer(a) /= b;
-  }
+  inline integer operator+(integer a, const integer &b) { return a += b; }
+  inline integer operator-(integer a, const integer &b) { return a -= b; }
+  inline integer operator*(integer a, const integer &b) { return a *= b; }
+  inline integer operator*(integer a, uint32_t b) { return a *= b; }
+  inline integer operator/(integer a, uint32_t b) { return a /= b; }
 
   inline std::ostream &operator<<(std::ostream &os, const integer &a) {
     os << a.to_string();

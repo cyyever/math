@@ -293,10 +293,6 @@ namespace cyy::math {
     return *this;
   }
 
-  integer integer::operator%(const integer &b) {
-    auto res = (*this) / b;
-    return *this - res * b;
-  }
   int64_t integer::operator%(uint32_t b) {
     if (b == 0) {
       throw cyy::math::exception::divided_by_zero("");
@@ -316,6 +312,8 @@ namespace cyy::math {
     return res;
   }
 
+  integer integer::operator/(integer rhs) const { return div(rhs).first; }
+  integer integer::operator%(integer rhs) const { return div(rhs).second; }
   integer &integer::operator++() {
     operator+=(1);
     return *this;

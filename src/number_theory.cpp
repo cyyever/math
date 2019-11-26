@@ -14,31 +14,32 @@ namespace cyy::math {
   /*
    *	功能：计算两个整数的最大公约数
    *	参数：
-   *		a，b：整数
+   *		p，q：整数
    *	返回值：
    *		最大公约数
    */
-  integer gcd(const integer &a, const integer &b) {
-    integer p, q, tmp, m;
+  integer gcd(integer p, integer q) {
+    integer tmp, m;
 
-    if (a == 0 && b == 0)
+    if (p == 0 && q == 0)
       throw std::invalid_argument("a and b are zero");
-    p = a;
     p.set_non_negative();
-    q = b;
     q.set_non_negative();
 
     if (p < q) {
       std::swap(p, q);
     }
+    if (q == 0) {
+      return p;
+    }
     //用欧几里得算法找到最大公约数
 
-    while (1) {
-      m = p % q;
-      if (m == 0)
+    while (true) {
+      auto remainder = p % q;
+      if (remainder == 0)
         break;
       p = std::move(q);
-      q = m;
+      q = std::move(remainder);
     }
     return q;
   }

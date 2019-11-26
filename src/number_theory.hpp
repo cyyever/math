@@ -13,9 +13,9 @@ namespace cyy::math {
   /*
    *	功能：计算两个整数的最大公约数
    *	参数：
-   *		a，b：整数
+   *		p，q：整数
    *	返回值：
    *		最大公约数
    */
-  integer gcd(const integer &a, const integer &b);
+  integer gcd(integer p, integer q);
 } // namespace cyy::math
