@@ -17,6 +17,8 @@ TEST_CASE("factorial") {
   for (uint32_t i = 2; i <= 50; i++, a *= i)
     CHECK_EQ(factorial(i), a);
 }
+/*
 TEST_CASE("ln") {
   std::cout<<ln(2).to_string();
 }
+*/

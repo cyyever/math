@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <range/v3/algorithm.hpp>
@@ -25,9 +26,14 @@ namespace cyy::math {
     primes &operator=(primes &&) noexcept = default;
     ~primes() noexcept = default;
 
-    class iterator
-        : public std::iterator<std::random_access_iterator_tag, uint64_t> {
+    class iterator {
     public:
+      using iterator_category=std::random_access_iterator_tag;
+      using value_type=uint64_t;
+      using difference_type=ptrdiff_t;
+      using pointer =value_type*;
+      using reference         = const value_type&;
+
       iterator(const primes *ptr_, size_t index_) : ptr(ptr_), index(index_) {}
       iterator(const iterator &) = default;
       iterator &operator=(const iterator &) = default;

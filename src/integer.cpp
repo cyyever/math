@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cassert>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 #include <regex>
