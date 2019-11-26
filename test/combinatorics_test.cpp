@@ -12,7 +12,6 @@
 TEST_CASE("binomial_coefficient") {
   CHECK_EQ(cyy::math::binomial_coefficient(100, 50),
            cyy::math::integer("100891344545564193334812497256"));
-  /* assert(binomial_coefficient(5, 2) == integer("10")); */
 }
 TEST_CASE("all_combinations") {
   auto combination_seq = cyy::math::all_combinations(3, 2);

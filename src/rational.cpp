@@ -109,22 +109,10 @@ namespace cyy::math {
   }
 
   rational &rational::simplify() {
-    auto prime_c = primes();
-
-    for (auto prime : prime_c.till(100)) {
-      while (p % static_cast<uint32_t>(prime) == 0 &&
-             q % static_cast<uint32_t>(prime) == 0) {
-        p /= static_cast<uint32_t>(prime);
-        q /= static_cast<uint32_t>(prime);
-      }
-    }
-    return *this;
-    /*
     auto gcd_int = gcd(p, q);
     p /= gcd_int;
     q /= gcd_int;
     return *this;
-    */
   }
 
   std::string rational::to_string() const {
