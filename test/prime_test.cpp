@@ -58,8 +58,10 @@ TEST_CASE("till") {
   }
 }
 
+#if !defined(_GLIBCXX_DEBUG)
 TEST_CASE("has") {
-  CHECK(primes().has(982451653));
   CHECK(primes().has(2));
   CHECK(!primes().has(10));
+  CHECK(primes().has(982451653));
 }
+#endif

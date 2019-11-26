@@ -22,8 +22,8 @@ namespace cyy::math {
     primes(const primes &) = delete;
     primes &operator=(const primes &) = delete;
 
-    primes(primes &&) noexcept = default;
-    primes &operator=(primes &&) noexcept = default;
+    primes(primes &&) = default;
+    primes &operator=(primes &&) = default;
     ~primes() noexcept = default;
 
     class iterator {
