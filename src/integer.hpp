@@ -11,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace cyy::math {
@@ -76,6 +77,7 @@ namespace cyy::math {
     integer &operator*=(const integer &rhs);
     integer &operator/=(uint32_t rhs);
     integer &operator/=(const integer &rhs);
+    integer &operator%=(const integer &rhs);
     int64_t operator%(uint32_t b);
     integer operator%(const integer &rhs);
     integer &multiply_2(uint32_t count);
@@ -88,6 +90,8 @@ namespace cyy::math {
       non_negative = !non_negative;
     }
     int compare(const integer &rhs) const;
+
+    std::pair<integer, integer> div(integer divisor) const;
 
   private:
     void normalize();

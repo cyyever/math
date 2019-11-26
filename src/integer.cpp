@@ -360,30 +360,27 @@ namespace cyy::math {
   }
 
   integer &integer::operator/=(const integer &rhs) {
-    if (rhs == 0)
+    *this = div(rhs).first;
+    return *this;
+  }
+  integer &integer::operator%=(const integer &rhs) {
+    *this = div(rhs).second;
+    return *this;
+  }
+
+  std::pair<integer, integer> integer::div(integer divisor) const {
+    if (divisor == 0)
       throw exception::divided_by_zero("divide");
 
-    if (rhs.digits.size() == 1) {
-      non_negative = !diffrent_sign(rhs);
-      return operator/=(rhs.digits[0]);
-    }
+    auto remainder = *this;
+    bool real_divisor_non_negative = divisor.non_negative;
+    remainder.non_negative = true;
+    divisor.non_negative = true;
 
-    bool real_non_negative = (non_negative && rhs.non_negative) ||
-                             (!non_negative && !rhs.non_negative);
-
-    auto divisor = &rhs;
-    integer non_negative_rhs;
-    if (!rhs.non_negative) {
-      non_negative_rhs = rhs;
-      non_negative_rhs.non_negative = true;
-      divisor = &non_negative_rhs;
-    }
-
-    non_negative = true;
     integer res;
-    while (*this >= *divisor) {
-      auto zero_digit_num = digits.size() - divisor->digits.size();
-      auto divisor_top_digit = divisor->digits.back();
+    while (remainder >= divisor) {
+      auto zero_digit_num = remainder.digits.size() - divisor.digits.size();
+      auto divisor_top_digit = divisor.digits.back();
       divisor_top_digit++;
       if (divisor_top_digit == 0) {
         if (zero_digit_num == 0) {
@@ -392,32 +389,32 @@ namespace cyy::math {
         divisor_top_digit = 1;
         zero_digit_num--;
       }
-      auto top_digit = digits.back() / divisor_top_digit;
+      auto top_digit = remainder.digits.back() / divisor_top_digit;
       if (top_digit == 0) {
         if (zero_digit_num == 0) {
           break;
         }
         zero_digit_num--;
-        top_digit =
-            static_cast<uint32_t>((static_cast<uint64_t>(digits.back()) << 32) /
-                                  static_cast<uint64_t>(divisor_top_digit));
+        top_digit = static_cast<uint32_t>(
+            (static_cast<uint64_t>(remainder.digits.back()) << 32) /
+            static_cast<uint64_t>(divisor_top_digit));
       }
       assert(top_digit != 0);
-      auto tmp = (*divisor) * top_digit;
+      auto tmp = divisor * top_digit;
       tmp.digits.insert(tmp.digits.begin(), zero_digit_num, 0);
-      operator-=(tmp);
+      remainder -= tmp;
       integer partial_res;
       partial_res.digits.resize(zero_digit_num + 1);
       partial_res.digits.back() = top_digit;
       res += partial_res;
     }
-    while (*this >= *divisor) {
-      operator-=(*divisor);
+    while (remainder >= divisor) {
+      remainder -= divisor;
       ++res;
     }
-    *this = std::move(res);
-    non_negative = real_non_negative;
-    return *this;
+    res.non_negative = (non_negative == real_divisor_non_negative);
+    remainder.non_negative = non_negative;
+    return {std::move(res), std::move(remainder)};
   }
 
 } // namespace cyy::math
