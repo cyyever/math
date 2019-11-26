@@ -28,6 +28,21 @@ namespace cyy::math {
       q.change_sign();
     }
   }
+  rational::rational(std::string_view str) {
+    static const std::regex rational_regex(
+        "^[+-]?(0|[1-9][0-9]*)(/(0|[1-9][0-9]*))?$");
+    if (!std::regex_match(str.begin(), str.end(), rational_regex)) {
+      throw cyy::math::exception::no_rational(std::string(str));
+    }
+    auto pos = str.find('/');
+    if (pos == std::string_view::npos) {
+      p = str;
+      q = 1;
+      return;
+    }
+    p = str.substr(0, pos);
+    q = str.substr(pos + 1);
+  }
 
   /*
    *	功能：比较和另一个有理数的大小
@@ -117,6 +132,9 @@ namespace cyy::math {
 
   std::string rational::to_string() const {
     if (p == 0) {
+      return "0";
+    }
+    if (q == 1) {
       return p.to_string();
     }
     return p.to_string() + "/" + q.to_string();

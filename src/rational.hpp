@@ -19,6 +19,7 @@ namespace cyy::math {
     template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
     rational(T num) : rational(integer(num), integer(1)) {}
     rational(integer numerator, integer denominator);
+    rational(std::string_view str);
 
     rational(integer a) : p(std::move(a)), q(1) {}
     rational(const rational &) = default;

@@ -10,6 +10,12 @@
 using namespace std;
 using namespace cyy::math;
 
+TEST_CASE("from_string") {
+  for (auto const &str : {"1/2", "-1/2", "5"}) {
+    auto a = rational(str);
+    CHECK_EQ(str, a.to_string());
+  }
+}
 TEST_CASE("simplify") {
   CHECK_EQ(rational(-3, 7).simplify(), rational(-3, 7));
   CHECK_EQ(rational(-14, 77).simplify(), rational(-2, 11));
