@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "exception.hpp"
+#include "integer.hpp"
 namespace cyy::math {
 
   class primes final {
@@ -134,9 +135,19 @@ namespace cyy::math {
                  [lower_bound](auto i) { return i <= lower_bound; });
     }
 
-    bool has(uint64_t num) {
+    bool has(uint64_t num) const {
       if (num > max_prime) {
-        throw exception::out_of_range("more than max prime");
+        if (num <= cyy::math::integer(max_prime) * max_prime) {
+          for(const auto p:*this) {
+            if(num%p==0) {
+              return false;
+            }
+          }
+          return true;
+
+        } else {
+          throw exception::out_of_range("more than max prime");
+        }
       }
       return std::binary_search(begin(), end(), num);
     }
