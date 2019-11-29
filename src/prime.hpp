@@ -132,16 +132,16 @@ namespace cyy::math {
       return ranges::views::concat(in_memory_primes,
                                    ranges::istream_view<uint64_t>(data_file)) |
              ranges::views::drop_while(
-                 [lower_bound](auto i) { return i <= lower_bound; });
+                 [lower_bound](auto i) { return i < lower_bound; });
     }
 
     bool has(uint64_t num) const {
       if (num > max_prime) {
-        for(const auto p:*this) {
-          if(num%p==0) {
+        for (const auto p : *this) {
+          if (num % p == 0) {
             return false;
           }
-          if (cyy::math::integer(p) *p>num) {
+          if (cyy::math::integer(p) * p > num) {
             return true;
           }
         }
