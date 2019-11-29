@@ -73,7 +73,6 @@ namespace cyy::math {
     integer &operator--();   // prefix
     integer operator--(int); // suffix
     integer &operator-=(const integer &rhs);
-    integer &operator*=(uint32_t rhs);
     integer &operator*=(const integer &rhs);
     integer operator/(integer rhs) const;
     integer &operator/=(uint32_t rhs);
@@ -131,7 +130,6 @@ namespace cyy::math {
   inline integer operator+(integer a, const integer &b) { return a += b; }
   inline integer operator-(integer a, const integer &b) { return a -= b; }
   inline integer operator*(integer a, const integer &b) { return a *= b; }
-  inline integer operator*(integer a, uint32_t b) { return a *= b; }
   inline integer operator/(integer a, uint32_t b) { return a /= b; }
 
   inline std::ostream &operator<<(std::ostream &os, const integer &a) {

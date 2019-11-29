@@ -137,17 +137,15 @@ namespace cyy::math {
 
     bool has(uint64_t num) const {
       if (num > max_prime) {
-        if (num <= cyy::math::integer(max_prime) * max_prime) {
-          for(const auto p:*this) {
-            if(num%p==0) {
-              return false;
-            }
+        for(const auto p:*this) {
+          if(num%p==0) {
+            return false;
           }
-          return true;
-
-        } else {
-          throw exception::out_of_range("more than max prime");
+          if (cyy::math::integer(p) *p>num) {
+            return true;
+          }
         }
+        throw exception::out_of_range("more than max prime");
       }
       return std::binary_search(begin(), end(), num);
     }

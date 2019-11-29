@@ -206,27 +206,6 @@ namespace cyy::math {
     return *this;
   }
 
-  integer &integer::operator*=(uint32_t rhs) {
-    if (rhs == 0) {
-      *this = 0;
-      return *this;
-    }
-    if (rhs == 1) {
-      return *this;
-    }
-
-    uint64_t result = 0;
-    for (auto &digit : digits) {
-      result += static_cast<uint64_t>(digit) * rhs;
-      digit = static_cast<uint32_t>(result & mask);
-      result >>= 32;
-    }
-    if (result) {
-      digits.push_back(static_cast<uint32_t>(result));
-    }
-    normalize();
-    return *this;
-  }
   integer &integer::multiply_2(uint32_t count) {
     auto whole_block_num = count / 32;
     auto remain_shift_num = count % 32;
