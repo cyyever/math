@@ -18,6 +18,10 @@ namespace cyy::math::exception {
     using invalid_argument::invalid_argument;
   };
 
+  class invalid_mathematical_object : public std::invalid_argument {
+  public:
+    using invalid_argument::invalid_argument;
+  };
   class divided_by_zero : public std::invalid_argument {
   public:
     using invalid_argument::invalid_argument;
@@ -35,5 +39,9 @@ namespace cyy::math::exception {
   class invalid_type : public std::runtime_error {
   public:
     using runtime_error::runtime_error;
+  };
+  class no_same_set : public std::invalid_argument {
+  public:
+    using invalid_argument::invalid_argument;
   };
 } // namespace cyy::math::exception

@@ -38,6 +38,9 @@ namespace cyy::math::la {
     }
 
     auto operator+=(const vector_view<element_type> &rhs) -> auto & {
+      if (!same_dimension(rhs)) {
+        throw exception::no_same_set("different dimension");
+      }
       for (size_t i = 0; i < n; i++) {
         at(i) += rhs.at(i);
       }
@@ -45,11 +48,18 @@ namespace cyy::math::la {
     }
 
     element_type dot(const vector_view<element_type> &rhs) {
+      if (!same_dimension(rhs)) {
+        throw exception::no_same_set("different dimension");
+      }
       element_type res = 0;
       for (size_t i = 0; i < n; i++) {
         res += at(i) * rhs.at(i);
       }
       return res;
+    }
+
+    bool same_dimension(const vector_view<element_type> &rhs) const {
+      return n == rhs.n;
     }
 
   private:
