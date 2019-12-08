@@ -30,7 +30,6 @@ namespace cyy::math::la {
 
     element_type &at(size_t index) const { return data[index * stride]; }
 
-    template <typename element_type>
     auto operator*=(const element_type &scale) -> auto & {
       for (size_t i = 0; i < n; i++) {
         at(i) *= scale;
@@ -43,6 +42,14 @@ namespace cyy::math::la {
         at(i) += rhs.at(i);
       }
       return *this;
+    }
+
+    element_type dot(const vector_view<element_type> &rhs) {
+      element_type res = 0;
+      for (size_t i = 0; i < n; i++) {
+        res += at(i) * rhs.at(i);
+      }
+      return res;
     }
 
   private:
