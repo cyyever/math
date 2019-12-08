@@ -4,9 +4,7 @@
  * \brief
  */
 
-#include <algorithm>
-#include <cstdlib>
-#include <iostream>
+#include <regex>
 
 #include "exception.hpp"
 #include "number_theory.hpp"

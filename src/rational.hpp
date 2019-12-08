@@ -5,7 +5,6 @@
  */
 #pragma once
 
-#include <cinttypes>
 #include <string>
 
 #include "integer.hpp"

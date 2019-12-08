@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <cinttypes>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <string>

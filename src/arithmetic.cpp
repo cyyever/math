@@ -5,7 +5,6 @@
  */
 
 #include "arithmetic.hpp"
-#include "exception.hpp"
 namespace cyy::math {
   /*
   rational ln(const rational &a) {

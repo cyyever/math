@@ -4,11 +4,8 @@
  * \brief 包含组合学相关函数
  */
 
-#include <iostream>
-#include <stdexcept>
-
-#include "arithmetic.hpp"
 #include "combinatorics.hpp"
+#include "arithmetic.hpp"
 #include "exception.hpp"
 namespace cyy::math {
 

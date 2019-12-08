@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <cinttypes>
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <range/v3/algorithm.hpp>
@@ -44,11 +44,11 @@ namespace cyy::math {
       ~iterator() noexcept = default;
 
       inline iterator &operator+=(difference_type rhs) {
-        index += rhs;
+        index = static_cast<size_t>(static_cast<difference_type>(index) + rhs);
         return *this;
       }
       inline iterator &operator-=(difference_type rhs) {
-        index -= rhs;
+        index = static_cast<size_t>(static_cast<difference_type>(index) - rhs);
         return *this;
       }
       inline uint64_t operator*() const { return ptr->at(index); }
