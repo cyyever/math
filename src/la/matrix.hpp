@@ -33,7 +33,7 @@ namespace cyy::math::la {
       if (row_stride < cols) {
         throw std::invalid_argument("row_stride<cols");
       }
-
+      row_vectors.reserve(rows);
       for (size_t i = 0; i < rows; i++) {
         row_vectors.emplace_back(data, rows, stride);
         data += row_stride;

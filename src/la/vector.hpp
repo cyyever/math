@@ -15,13 +15,13 @@ namespace cyy::math::la {
   class vector_view final {
   public:
     using element_type = T;
-    vector_view(T *_data, size_t _n, size_t _stride = 1)
-        : data(_data), n(_n), stride(_stride) {
+    vector_view(T *data_, size_t dimension_, size_t stride_ = 1)
+        : data(data_), dimension(dimension_), stride(stride_) {
       if (!data) {
         throw std::invalid_argument("data is nullptr");
       }
-      if (n == 0) {
-        throw std::invalid_argument("n is 0");
+      if (dimension == 0) {
+        throw std::invalid_argument("dimension is 0");
       }
       if (stride == 0) {
         throw std::invalid_argument("stride is 0");
@@ -31,7 +31,7 @@ namespace cyy::math::la {
     element_type &at(size_t index) const { return data[index * stride]; }
 
     auto operator*=(const element_type &scale) -> auto & {
-      for (size_t i = 0; i < n; i++) {
+      for (size_t i = 0; i < dimension; i++) {
         at(i) *= scale;
       }
       return *this;
@@ -41,7 +41,7 @@ namespace cyy::math::la {
       if (!same_dimension(rhs)) {
         throw exception::no_same_set("different dimension");
       }
-      for (size_t i = 0; i < n; i++) {
+      for (size_t i = 0; i < dimension; i++) {
         at(i) += rhs.at(i);
       }
       return *this;
@@ -52,19 +52,21 @@ namespace cyy::math::la {
         throw exception::no_same_set("different dimension");
       }
       element_type res = 0;
-      for (size_t i = 0; i < n; i++) {
+      for (size_t i = 0; i < dimension; i++) {
         res += at(i) * rhs.at(i);
       }
       return res;
     }
 
     bool same_dimension(const vector_view<element_type> &rhs) const {
-      return n == rhs.n;
+      return dimension == rhs.dimension;
     }
+
+    size_t get_dimension() const { return dimension; }
 
   private:
     T *data{nullptr};
-    size_t n{0};
+    size_t dimension{0};
     size_t stride{1};
   };
 } // namespace cyy::math::la
