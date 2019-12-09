@@ -28,11 +28,17 @@ namespace cyy::math::la {
       }
     }
 
+    vector_view(const vector_view &) = default;
+    vector_view &operator=(const vector_view &) = default;
+
+    vector_view(vector_view &&) noexcept = default;
+    vector_view &operator=(vector_view &&) noexcept = default;
+    ~vector_view() noexcept = default;
     element_type &at(size_t index) const { return data[index * stride]; }
 
-    auto operator*=(const element_type &scale) -> auto & {
+    auto operator*=(const element_type &scalar) -> auto & {
       for (size_t i = 0; i < dimension; i++) {
-        at(i) *= scale;
+        at(i) *= scalar;
       }
       return *this;
     }
