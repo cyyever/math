@@ -63,20 +63,47 @@ namespace cyy::math::la {
       row_vectors.at(to_index) += row_vectors.at(from_index) * scalar;
     }
 
-  private:
+  public:
     size_t row_num;
     size_t col_num;
     std::vector<::cyy::math::la::vector_view<T>> row_vectors;
   };
 
-  template <typename T,
-            typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>
-  class square_matrix_view : public matrix_view<T> {
+  template <typename T> class square_matrix_view : public matrix_view<T> {
   public:
     square_matrix_view(T *data, size_t row_num_, size_t stride = 1,
                        size_t row_stride = 0)
         : matrix_view(data, row_num_, row_num_, stride, row_stride) {}
 
+    T determinant() const {
+      T result = 1;
+
+      auto determinant_vectors = row_vectors;
+      for (size_t i = 0; i < row_num; i++) {
+        auto it = std::find_if(determinant_vectors.begin() + i,
+                               determinant_vectors.end(),
+                               [](const auto &e) { return e != 0; });
+        if (it == determinant_vectors.end()) {
+          return 0;
+        }
+
+        if (std::distance(determinant_vectors.begin() + i, it) % 2 == 1) {
+          result = -result;
+        }
+        std::swap(determinant_vectors[i], *it);
+        auto &pivot = determinant_vectors[i][i];
+
+        result *= pivot;
+        for (size_t j = i + 1; j < row_num; j++) {
+          if (determinant_vectors[j][i] == 0) {
+            continue;
+          }
+          add_rows_with_scale(i, -determinant_vectors[j][i] / pivot, j);
+        }
+      }
+
+      return result;
+    }
   };
 
 } // namespace cyy::math::la
