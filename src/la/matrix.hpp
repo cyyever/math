@@ -12,7 +12,7 @@ namespace cyy::math::la {
 
   template <typename T,
             typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>
-  class matrix_view final {
+  class matrix_view {
   public:
     using element_type = T;
 
@@ -63,11 +63,20 @@ namespace cyy::math::la {
       row_vectors.at(to_index) += row_vectors.at(from_index) * scalar;
     }
 
-    bool is_invertible() const { return row_num == col_num; }
-
   private:
     size_t row_num;
     size_t col_num;
     std::vector<::cyy::math::la::vector_view<T>> row_vectors;
   };
+
+  template <typename T,
+            typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>
+  class square_matrix_view : public matrix_view<T> {
+  public:
+    square_matrix_view(T *data, size_t row_num_, size_t stride = 1,
+                       size_t row_stride = 0)
+        : matrix_view(data, row_num_, row_num_, stride, row_stride) {}
+
+  };
+
 } // namespace cyy::math::la
