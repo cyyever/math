@@ -12,3 +12,9 @@ TEST_CASE("init") {
   std::vector<int> m{1, 2, 3, 4};
   cyy::math::la::matrix_view v(m.data(), 2, 2);
 }
+
+TEST_CASE("determinant") {
+  std::vector<int> m{1, 2, 3, 4};
+  cyy::math::la::square_matrix_view v(m.data(), 2, 2);
+  CHECK_EQ(v.determinant(), -2);
+}

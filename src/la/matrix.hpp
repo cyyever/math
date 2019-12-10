@@ -63,7 +63,7 @@ namespace cyy::math::la {
       row_vectors.at(to_index) += row_vectors.at(from_index) * scalar;
     }
 
-  public:
+  protected:
     size_t row_num;
     size_t col_num;
     std::vector<::cyy::math::la::vector_view<T>> row_vectors;
@@ -73,16 +73,16 @@ namespace cyy::math::la {
   public:
     square_matrix_view(T *data, size_t row_num_, size_t stride = 1,
                        size_t row_stride = 0)
-        : matrix_view(data, row_num_, row_num_, stride, row_stride) {}
+        : matrix_view<T>(data, row_num_, row_num_, stride, row_stride) {}
 
     T determinant() const {
       T result = 1;
 
-      auto determinant_vectors = row_vectors;
-      for (size_t i = 0; i < row_num; i++) {
+      auto determinant_vectors = this->row_vectors;
+      for (size_t i = 0; i < this->row_num; i++) {
         auto it = std::find_if(determinant_vectors.begin() + i,
                                determinant_vectors.end(),
-                               [](const auto &e) { return e != 0; });
+                               [i](auto const &e) { return e.at(i) != 0; });
         if (it == determinant_vectors.end()) {
           return 0;
         }
@@ -94,7 +94,7 @@ namespace cyy::math::la {
         auto &pivot = determinant_vectors[i][i];
 
         result *= pivot;
-        for (size_t j = i + 1; j < row_num; j++) {
+        for (size_t j = i + 1; j < this->row_num; j++) {
           if (determinant_vectors[j][i] == 0) {
             continue;
           }
