@@ -58,6 +58,10 @@ namespace cyy::math::la {
     void add_rows(size_t from_index, size_t to_index) {
       row_vectors.at(to_index) += row_vectors.at(from_index);
     }
+    void add_rows_with_scale(size_t from_index, const element_type &scalar,
+                             size_t to_index) {
+      row_vectors.at(to_index) += row_vectors.at(from_index) * scalar;
+    }
 
     bool is_invertible() const { return row_num == col_num; }
 
