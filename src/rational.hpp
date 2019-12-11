@@ -30,6 +30,7 @@ namespace cyy::math {
 
     std::string to_string() const;
 
+    rational operator-() const;
     rational &operator+=(const rational &rhs);
     rational &operator-=(const rational &rhs);
     rational &operator*=(const rational &rhs);

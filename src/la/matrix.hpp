@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <range/v3/view.hpp>
 #include <optional>
+#include <range/v3/view.hpp>
 
 #include "vector.hpp"
 namespace cyy::math::la {
@@ -61,7 +61,19 @@ namespace cyy::math::la {
     }
     void add_rows_with_scale(size_t from_index, const element_type &scalar,
                              size_t to_index) {
-      row_vectors.at(to_index) += row_vectors.at(from_index) * scalar;
+      auto &to_vector = row_vectors.at(to_index);
+      auto &from_vector = row_vectors.at(from_index);
+      for (size_t i = 0; i < col_num; i++) {
+        to_vector[i] += from_vector[i] * scalar;
+      }
+    }
+
+    auto to_matrix() const {
+      std::vector<std::vector<T>> result;
+      for (auto const &row : row_vectors) {
+        result.emplace_back(row.to_vector());
+      }
+      return result;
     }
 
   protected:
@@ -76,36 +88,41 @@ namespace cyy::math::la {
                        size_t row_stride = 0)
         : matrix_view<T>(data, row_num_, row_num_, stride, row_stride) {}
 
-    T determinant() const {
+    T determinant() {
       T result = 1;
 
-      auto determinant_vectors = this->row_vectors;
       for (size_t i = 0; i < this->row_num; i++) {
-        auto it = std::find_if(determinant_vectors.begin() + i,
-                               determinant_vectors.end(),
-                               [i](auto const &e) { return e.at(i) != 0; });
-        if (it == determinant_vectors.end()) {
-          return 0;
-        }
+        if (this->row_vectors[i][i] == 0) {
+          auto it = std::find_if(this->row_vectors.begin() + i,
+                                 this->row_vectors.end(),
+                                 [i](auto const &e) { return e.at(i) != 0; });
+          if (it == this->row_vectors.end()) {
+            return 0;
+          }
 
-        if (std::distance(determinant_vectors.begin() + i, it) % 2 == 1) {
-          result = -result;
+          size_t j = std::distance(this->row_vectors.begin(), it);
+          if ((j - i) % 2 == 1) {
+            result = -result;
+          }
+          this->swap_row(i, j);
         }
-        std::swap(determinant_vectors[i], *it);
-        const auto &pivot = determinant_vectors[i].at(i);
+        const auto &pivot = this->row_vectors[i].at(i);
 
+        std::cout << "pivot=" << pivot << std::endl;
         result *= pivot;
         for (size_t j = i + 1; j < this->row_num; j++) {
-          if (determinant_vectors[j][i] == 0) {
+          if (this->row_vectors[j][i] == 0) {
             continue;
           }
-          add_rows_with_scale(i, -determinant_vectors[j][i] / pivot, j);
+
+          this->add_rows_with_scale(i, -this->row_vectors[j][i] / pivot, j);
         }
       }
 
       return result;
     }
 
+    /*
     std::optional<std::vector<std::vector<T>>> invert() const {
       std::vector<std::vector<T>> result;
       for (auto const &row : this->row_vectors) {
@@ -139,6 +156,7 @@ namespace cyy::math::la {
       }
       return result;
     }
+  */
   };
 
 } // namespace cyy::math::la

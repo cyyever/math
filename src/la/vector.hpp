@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <vector>
+
 #include "../exception.hpp"
 #include "../numerical_type.hpp"
 
@@ -35,10 +37,13 @@ namespace cyy::math::la {
     vector_view &operator=(vector_view &&) noexcept = default;
     ~vector_view() noexcept = default;
     element_type &at(size_t index) const { return data[index * stride]; }
+    element_type &operator[](size_t index) const {
+      return data[index * stride];
+    }
 
     auto operator*=(const element_type &scalar) -> auto & {
       for (size_t i = 0; i < dimension; i++) {
-        at(i) *= scalar;
+        operator[](i) *= scalar;
       }
       return *this;
     }
@@ -48,7 +53,7 @@ namespace cyy::math::la {
         throw exception::no_same_set("different dimension");
       }
       for (size_t i = 0; i < dimension; i++) {
-        at(i) += rhs.at(i);
+        operator[](i) += rhs.operator[](i);
       }
       return *this;
     }
@@ -59,7 +64,7 @@ namespace cyy::math::la {
       }
       element_type res = 0;
       for (size_t i = 0; i < dimension; i++) {
-        res += at(i) * rhs.at(i);
+        res += operator[](i) * rhs.operator[](i);
       }
       return res;
     }
@@ -69,6 +74,14 @@ namespace cyy::math::la {
     }
 
     size_t get_dimension() const { return dimension; }
+
+    std::vector<element_type> to_vector() const {
+      std::vector<element_type> result(dimension);
+      for (size_t i = 0; i < dimension; i++) {
+        result[i] = operator[](i);
+      }
+      return result;
+    }
 
   private:
     T *data{nullptr};

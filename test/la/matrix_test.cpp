@@ -7,6 +7,7 @@
 #include <doctest/doctest.h>
 
 #include "src/la/matrix.hpp"
+#include "src/rational.hpp"
 
 TEST_CASE("init") {
   std::vector<int> m{1, 2, 3, 4};
@@ -14,7 +15,7 @@ TEST_CASE("init") {
 }
 
 TEST_CASE("determinant") {
-  std::vector<int> m{1, 2, 3, 4};
+  std::vector<cyy::math::rational> m{1, 2, 3, 4};
   cyy::math::la::square_matrix_view v(m.data(), 2, 2);
   CHECK_EQ(v.determinant(), -2);
 }

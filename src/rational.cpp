@@ -55,6 +55,12 @@ namespace cyy::math {
     return (p * rhs.q).compare(q * rhs.p);
   }
 
+  rational rational::operator-() const {
+    if (p == 0) {
+      return *this;
+    }
+    return {-p, q};
+  }
   rational &rational::operator+=(const rational &rhs) {
     if (this == &rhs) {
       p *= 2;
