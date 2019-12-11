@@ -9,7 +9,7 @@ find_package(range-v3 REQUIRED)
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(INSTALLED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/la/*.cpp)
 
 add_library(MyMathLib ${SOURCE})
 
@@ -31,7 +31,7 @@ add_custom_target(decompress_data
 add_dependencies(MyMathLib decompress_data)
 
 # test
-option(BUILD_TEST "Build test" OFF)
+option(BUILD_TEST "Build test" ON)
 if(BUILD_TEST)
   add_subdirectory(test)
 endif()
