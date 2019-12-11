@@ -102,14 +102,14 @@ namespace cyy::math {
 
     if (diffrent_sign(rhs)) //符号不同，转换成减法
     {
-      bool changed_sign = false;
       if (!non_negative) {
         non_negative = true;
-        changed_sign = true;
-      }
-      operator-=(rhs);
-      if (changed_sign) {
+        operator-=(rhs);
         non_negative = false;
+      } else {
+        auto tmp = rhs;
+        tmp.change_sign();
+        operator-=(tmp);
       }
       normalize();
       return *this;
@@ -147,17 +147,10 @@ namespace cyy::math {
     }
 
     //转换成加法
-    if (non_negative && !rhs.non_negative) {
-      non_negative = false;
+    if (diffrent_sign(rhs)) {
+      non_negative = !non_negative;
       operator+=(rhs);
-      non_negative = true;
-      normalize();
-      return *this;
-    }
-    if (!non_negative && rhs.non_negative) {
-      non_negative = true;
-      operator+=(rhs);
-      non_negative = false;
+      non_negative = !non_negative;
       normalize();
       return *this;
     }

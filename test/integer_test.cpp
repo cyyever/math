@@ -33,7 +33,12 @@ TEST_CASE("+") {
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
       for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
-        CHECK_EQ(integer(a) + integer(b), (a + b));
+        CHECK_EQ(integer(a) + integer(b), a + b);
+      }
+    }
+    for (int64_t a = -1; a < 1; a++) {
+      for (int64_t b = -1; b < 1; b++) {
+        CHECK_EQ(integer(a) + integer(b), a + b);
       }
     }
   }
@@ -54,7 +59,13 @@ TEST_CASE("-") {
          a < static_cast<int64_t>(INT32_MIN) + 1; a++) {
       for (int64_t b = static_cast<int64_t>(INT32_MIN) - 1;
            b < static_cast<int64_t>(INT32_MIN) + 1; b++) {
-        CHECK_EQ(integer(a) - integer(b), (a - b));
+        CHECK_EQ(integer(a) - integer(b), a - b);
+      }
+    }
+
+    for (int64_t a = -1; a < 1; a++) {
+      for (int64_t b = -1; b < 1; b++) {
+        CHECK_EQ(integer(a) - integer(b), a - b);
       }
     }
   }

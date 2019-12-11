@@ -37,7 +37,7 @@ namespace cyy::math::la {
       }
       row_vectors.reserve(row_num);
       for (size_t i = 0; i < row_num; i++) {
-        row_vectors.emplace_back(data, row_num, stride);
+        row_vectors.emplace_back(data, col_num, stride);
         data += row_stride;
       }
     }
@@ -100,7 +100,7 @@ namespace cyy::math::la {
             return 0;
           }
 
-          size_t j = std::distance(this->row_vectors.begin(), it);
+          auto j = std::distance(this->row_vectors.begin(), it);
           if ((j - i) % 2 == 1) {
             result = -result;
           }
@@ -108,7 +108,6 @@ namespace cyy::math::la {
         }
         const auto &pivot = this->row_vectors[i].at(i);
 
-        std::cout << "pivot=" << pivot << std::endl;
         result *= pivot;
         for (size_t j = i + 1; j < this->row_num; j++) {
           if (this->row_vectors[j][i] == 0) {
