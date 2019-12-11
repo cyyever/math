@@ -121,9 +121,9 @@ namespace cyy::math::la {
       return result;
     }
 
-    /*
     std::optional<std::vector<std::vector<T>>> invert() const {
-      std::vector<std::vector<T>> result;
+      auto result = this->to_matrix();
+
       for (auto const &row : this->row_vectors) {
         result.emplace_back(row);
       }
@@ -134,28 +134,31 @@ namespace cyy::math::la {
         result[i].insert(result[i].end(), this->row_num - i - 1, 0);
       }
       for (size_t i = 0; i < this->row_num; i++) {
-        auto it = std::find_if(result.begin() + i, result.end(),
-                               [i](auto const &e) { return e.at(i) != 0; });
-        if (it == result.end()) {
-          return {};
-        }
+        if (result[i][i] == 0) {
+          auto it = std::find_if(result.begin() + i, result.end(),
+                                 [i](auto const &e) { return e.at(i) != 0; });
+          if (it == result.end()) {
+            return {};
+          }
 
-        std::swap(result[i], *it);
+          std::swap(result[i], *it);
+        }
         auto &pivot = result[i][i];
         if (pivot != 1) {
-          multiply_row(i, 1 / pivot);
+          vector_view(result[i]) *= 1 / pivot;
         }
 
         for (size_t j = 0; j < this->row_num; j++) {
           if (j == i || result[j][i] == 0) {
             continue;
           }
-          this->add_rows_with_scale(i, -result[j][i], j);
+          for (size_t k = 0; k < this->row_num * 2; k++) {
+            result[j][k] -= result[i][k] * pivot;
+          }
         }
       }
       return result;
     }
-  */
   };
 
 } // namespace cyy::math::la

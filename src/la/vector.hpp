@@ -30,6 +30,8 @@ namespace cyy::math::la {
       }
     }
 
+    vector_view(const ::std::vector<element_type> &vect)
+        : vector_view(vect.data(), vect.size()) {}
     vector_view(const vector_view &) = default;
     vector_view &operator=(const vector_view &) = default;
 
