@@ -22,7 +22,10 @@ TEST_CASE("determinant") {
 TEST_CASE("invert") {
   std::vector<cyy::math::rational> m{1, 2, 3, 4};
   cyy::math::la::square_matrix_view v(m.data(), 2);
-  std::vector<cyy::math::rational> m2{cyy::math::rational(-2),cyy::math::rational( 1), cyy::math::rational(3,2), cyy::math::rational(-1,2)};
+  std::vector<cyy::math::rational> m2{
+      cyy::math::rational(-2), cyy::math::rational(1),
+      cyy::math::rational(3, 2), cyy::math::rational(-1, 2)};
   cyy::math::la::square_matrix_view v2(m2.data(), 2);
-  CHECK_EQ(v.invert(), v2);
+  CHECK(v.invert());
+  CHECK_EQ(v.invert().value(), v2);
 }

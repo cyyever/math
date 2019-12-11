@@ -49,6 +49,22 @@ namespace cyy::math::la {
     matrix_view &operator=(matrix_view &&) noexcept = default;
     ~matrix_view() noexcept = default;
 
+    bool same_dimension(const matrix_view<element_type> &rhs) const {
+      return row_num == rhs.row_num && col_num == rhs.col_num;
+    }
+    bool operator==(const matrix_view<element_type> &rhs) const {
+      if (!same_dimension(rhs)) {
+        return false;
+      }
+
+      for (size_t i = 0; i < row_num; i++) {
+        if (row_vectors[i] != rhs.row_vectors[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
     void swap_row(size_t i, size_t j) {
       std::swap(row_vectors.at(i), row_vectors.at(j));
     }

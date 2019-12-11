@@ -30,7 +30,7 @@ namespace cyy::math::la {
       }
     }
 
-    vector_view(const ::std::vector<element_type> &vect)
+    vector_view(::std::vector<element_type> &vect)
         : vector_view(vect.data(), vect.size()) {}
     vector_view(const vector_view &) = default;
     vector_view &operator=(const vector_view &) = default;
@@ -43,6 +43,19 @@ namespace cyy::math::la {
       return data[index * stride];
     }
 
+    bool operator==(const vector_view<element_type> &rhs) const {
+      if (!same_dimension(rhs)) {
+        return false;
+      }
+      for (size_t i = 0; i < dimension; i++) {
+
+        if (operator[](i) != rhs.operator[](i)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
     auto operator*=(const element_type &scalar) -> auto & {
       for (size_t i = 0; i < dimension; i++) {
         operator[](i) *= scalar;
