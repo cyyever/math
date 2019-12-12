@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <sstream>
 #include <vector>
 
 #include "../exception.hpp"
@@ -56,6 +57,9 @@ namespace cyy::math::la {
 
       return true;
     }
+    bool operator!=(const vector_view<element_type> &rhs) const {
+      return !operator==(rhs);
+    }
     auto operator*=(const element_type &scalar) -> auto & {
       for (size_t i = 0; i < dimension; i++) {
         operator[](i) *= scalar;
@@ -69,6 +73,17 @@ namespace cyy::math::la {
       }
       for (size_t i = 0; i < dimension; i++) {
         operator[](i) += rhs.operator[](i);
+      }
+      return *this;
+    }
+
+    auto scaled_sum(const vector_view<element_type> &rhs,
+                    const element_type &scalar) -> auto & {
+      if (!same_dimension(rhs)) {
+        throw exception::no_same_set("different dimension");
+      }
+      for (size_t i = 0; i < dimension; i++) {
+        operator[](i) += rhs.operator[](i) * scalar;
       }
       return *this;
     }
@@ -96,6 +111,15 @@ namespace cyy::math::la {
         result[i] = operator[](i);
       }
       return result;
+    }
+
+    std::string to_string() const {
+      std::stringstream s;
+      for (size_t i = 0; i < dimension; i++) {
+        s << operator[](i);
+        s << ' ';
+      }
+      return s.str();
     }
 
   private:

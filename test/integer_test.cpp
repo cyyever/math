@@ -27,6 +27,15 @@ TEST_CASE("from_string") {
     }
   }
 }
+
+TEST_CASE("compare") {
+  for (int64_t a = -1; a < 2; a++) {
+    for (int64_t b = -1; b < 2; b++) {
+      CHECK_EQ(integer(a) < integer(b), a < b);
+    }
+  }
+}
+
 TEST_CASE("+") {
   SUBCASE("signed") {
     for (int64_t a = static_cast<int64_t>(INT32_MIN) - 1;
@@ -36,8 +45,8 @@ TEST_CASE("+") {
         CHECK_EQ(integer(a) + integer(b), a + b);
       }
     }
-    for (int64_t a = -1; a < 1; a++) {
-      for (int64_t b = -1; b < 1; b++) {
+    for (int64_t a = -1; a < 2; a++) {
+      for (int64_t b = -1; b < 2; b++) {
         CHECK_EQ(integer(a) + integer(b), a + b);
       }
     }
@@ -63,8 +72,8 @@ TEST_CASE("-") {
       }
     }
 
-    for (int64_t a = -1; a < 1; a++) {
-      for (int64_t b = -1; b < 1; b++) {
+    for (int64_t a = -1; a < 2; a++) {
+      for (int64_t b = -1; b < 2; b++) {
         CHECK_EQ(integer(a) - integer(b), a - b);
       }
     }

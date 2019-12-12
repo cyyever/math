@@ -17,9 +17,10 @@ namespace cyy::math::la {
   public:
     using element_type = T;
 
-    matrix_view(element_type *data, size_t row_num_, size_t col_num_,
-                size_t stride = 1, size_t row_stride = 0)
-        : row_num(row_num_), col_num(col_num_) {
+    matrix_view(element_type *data_, size_t row_num_, size_t col_num_,
+                size_t stride_ = 1, size_t row_stride_ = 0)
+        : data(data_), row_num(row_num_), col_num(col_num_), stride(stride_),
+          row_stride(row_stride_) {
       if (!data) {
         throw std::invalid_argument("data is nullptr");
       }
@@ -31,9 +32,6 @@ namespace cyy::math::la {
       }
       if (row_stride == 0) {
         row_stride = col_num;
-      }
-      if (row_stride < col_num) {
-        throw std::invalid_argument("row_stride<col_num");
       }
       row_vectors.reserve(row_num);
       for (size_t i = 0; i < row_num; i++) {
@@ -48,6 +46,10 @@ namespace cyy::math::la {
     matrix_view(matrix_view &&) noexcept = default;
     matrix_view &operator=(matrix_view &&) noexcept = default;
     ~matrix_view() noexcept = default;
+
+    matrix_view transpose() const {
+      return {data, col_num, row_num, row_stride, stride};
+    }
 
     bool same_dimension(const matrix_view<element_type> &rhs) const {
       return row_num == rhs.row_num && col_num == rhs.col_num;
@@ -77,11 +79,7 @@ namespace cyy::math::la {
     }
     void add_rows_with_scale(size_t from_index, const element_type &scalar,
                              size_t to_index) {
-      auto &to_vector = row_vectors.at(to_index);
-      auto &from_vector = row_vectors.at(from_index);
-      for (size_t i = 0; i < col_num; i++) {
-        to_vector[i] += from_vector[i] * scalar;
-      }
+      row_vectors.at(to_index).scaled_sum(row_vectors.at(from_index), scalar);
     }
 
     auto to_matrix() const {
@@ -91,18 +89,29 @@ namespace cyy::math::la {
       }
       return result;
     }
+    std::string to_string() const {
+      std::stringstream s;
+      for (auto const &v : row_vectors) {
+        s << v.to_string();
+        s << std::endl;
+      }
+      return s.str();
+    }
 
   protected:
+    element_type *data{};
     size_t row_num;
     size_t col_num;
+    size_t stride;
+    size_t row_stride;
     std::vector<::cyy::math::la::vector_view<T>> row_vectors;
   };
 
   template <typename T> class square_matrix_view : public matrix_view<T> {
   public:
-    square_matrix_view(T *data, size_t row_num_, size_t stride = 1,
-                       size_t row_stride = 0)
-        : matrix_view<T>(data, row_num_, row_num_, stride, row_stride) {}
+    square_matrix_view(T *data_, size_t row_num_, size_t stride_ = 1,
+                       size_t row_stride_ = 0)
+        : matrix_view<T>(data_, row_num_, row_num_, stride_, row_stride_) {}
 
     T determinant() {
       T result = 1;
@@ -139,11 +148,6 @@ namespace cyy::math::la {
 
     std::optional<std::vector<std::vector<T>>> invert() const {
       auto result = this->to_matrix();
-
-      for (auto const &row : this->row_vectors) {
-        result.emplace_back(row);
-      }
-
       for (size_t i = 0; i < this->row_num; i++) {
         result[i].insert(result[i].end(), i, 0);
         result[i].push_back(1);

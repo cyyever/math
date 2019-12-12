@@ -50,7 +50,10 @@ namespace cyy::math {
     }
     file_index = index;
   }
+
+#ifdef _MSC_VER
 #pragma warning(disable : 6262)
+#endif
   std::vector<uint64_t> primes::in_memory_primes{
       2,      3,      5,      7,      11,     13,     17,     19,     23,
       29,     31,     37,     41,     43,     47,     53,     59,     61,
