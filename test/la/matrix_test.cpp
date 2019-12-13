@@ -5,7 +5,6 @@
  */
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-#include <iostream>
 
 #include "src/la/matrix.hpp"
 #include "src/rational.hpp"
@@ -30,6 +29,6 @@ TEST_CASE("invert") {
       cyy::math::rational(-2), cyy::math::rational(1),
       cyy::math::rational(3, 2), cyy::math::rational(-1, 2)};
   cyy::math::la::square_matrix_view v2(m2.data(), 2);
-  /* CHECK(v.invert()); */
-  /* CHECK_EQ(v.invert().value(), v2); */
+  REQUIRE(v.invert());
+  CHECK_EQ(v.invert().value(), v2.to_matrix());
 }

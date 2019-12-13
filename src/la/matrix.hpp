@@ -151,7 +151,7 @@ namespace cyy::math::la {
       for (size_t i = 0; i < this->row_num; i++) {
         result[i].insert(result[i].end(), i, 0);
         result[i].push_back(1);
-        result[i].insert(result[i].end(), this->row_num - i - 1, 0);
+        result[i].insert(result[i].end(), this->row_num - 1 - i, 0);
       }
       for (size_t i = 0; i < this->row_num; i++) {
         if (result[i][i] == 0) {
@@ -172,13 +172,27 @@ namespace cyy::math::la {
           if (j == i || result[j][i] == 0) {
             continue;
           }
-          for (size_t k = 0; k < this->row_num * 2; k++) {
-            result[j][k] -= result[i][k] * pivot;
-          }
+          vector_view(result[j]).scaled_sum(vector_view(result[i]),
+                                            -result[j][i]);
         }
+      }
+      for (auto &vec : result) {
+        vec.erase(vec.begin(), vec.begin() + this->row_num);
       }
       return result;
     }
   };
+
+  template <typename T,
+            typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>
+  std::vector<std::vector<T>> get_identity_matrix(size_t N) {
+
+    std::vector<std::vector<T>> result;
+    for (size_t i = 0; i < N; i++) {
+      result[i].resize(N, 0);
+      result[i][i] = 1;
+    }
+    return result;
+  }
 
 } // namespace cyy::math::la
