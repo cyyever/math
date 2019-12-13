@@ -35,8 +35,8 @@ namespace cyy::math::la {
       }
       row_vectors.reserve(row_num);
       for (size_t i = 0; i < row_num; i++) {
-        row_vectors.emplace_back(data, col_num, stride);
-        data += row_stride;
+        row_vectors.emplace_back(data_, col_num, stride);
+        data_ += row_stride;
       }
     }
 
@@ -48,7 +48,7 @@ namespace cyy::math::la {
     ~matrix_view() noexcept = default;
 
     matrix_view transpose() const {
-      return {data, col_num, row_num, row_stride, stride};
+      return matrix_view(data, col_num, row_num, row_stride, stride);
     }
 
     bool same_dimension(const matrix_view<element_type> &rhs) const {
