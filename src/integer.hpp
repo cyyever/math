@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <range/v3/view.hpp>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -94,6 +95,15 @@ namespace cyy::math {
     std::pair<integer, integer> div(integer divisor) const;
 
   private:
+    struct const_view {
+      explicit const_view(const integer &n)
+          : non_negative(n.non_negative), digits(n.digits.data(),n.digits.size()) {}
+      bool non_negative;
+      ranges::v3::span<const uint32_t> digits;
+    };
+
+  private:
+    integer &operator+=(const_view rhs);
     void normalize();
 
   private:

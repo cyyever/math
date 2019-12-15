@@ -114,7 +114,10 @@ namespace cyy::math {
       normalize();
       return *this;
     }
+    return operator+=(const_view(rhs));
+  }
 
+  integer &integer::operator+=(const_view rhs) {
     if (digits.size() <= rhs.digits.size()) {
       digits.resize(rhs.digits.size() + 1, 0);
     }
