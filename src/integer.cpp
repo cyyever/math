@@ -93,13 +93,6 @@ namespace cyy::math {
   }
 
   integer &integer::operator+=(const integer &rhs) {
-    if (rhs == 0) {
-      return *this;
-    }
-    if (this == &rhs) {
-      return multiply_2(1);
-    }
-
     if (diffrent_sign(rhs)) //符号不同，转换成减法
     {
       if (!non_negative) {
@@ -107,9 +100,9 @@ namespace cyy::math {
         operator-=(rhs);
         non_negative = false;
       } else {
-        auto tmp = rhs;
-        tmp.change_sign();
-        operator-=(tmp);
+        auto v = const_view(rhs);
+        v.change_sign();
+        operator-=(v);
       }
       normalize();
       return *this;
@@ -157,16 +150,20 @@ namespace cyy::math {
       normalize();
       return *this;
     }
+    return operator-=(const_view(rhs));
+  }
+  integer &integer::operator-=(const_view rhs) {
     bool changed_sign = false;
     if (!non_negative && !rhs.non_negative) {
       non_negative = true;
       changed_sign = true;
     }
 
-    std::vector<int64_t> diffrence(std::max(digits.size(), rhs.digits.size()),
-                                   0);
+    std::vector<int64_t> diffrence(
+        std::max(digits.size(), static_cast<size_t>(rhs.digits.size())), 0);
     size_t i = 0;
-    for (; i < std::min(digits.size(), rhs.digits.size()); i++) {
+    for (; i < std::min(digits.size(), static_cast<size_t>(rhs.digits.size()));
+         i++) {
       diffrence[i] =
           static_cast<int64_t>(digits[i]) - static_cast<int64_t>(rhs.digits[i]);
     }
@@ -287,8 +284,12 @@ namespace cyy::math {
     return res;
   }
 
-  integer integer::operator/(integer rhs) const { return div(rhs).first; }
-  integer integer::operator%(integer rhs) const { return div(rhs).second; }
+  integer integer::operator/(const integer &rhs) const {
+    return div(rhs).first;
+  }
+  integer integer::operator%(const integer &rhs) const {
+    return div(rhs).second;
+  }
   integer &integer::operator++() {
     operator+=(1);
     return *this;

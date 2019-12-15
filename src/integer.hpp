@@ -75,11 +75,11 @@ namespace cyy::math {
     integer operator--(int); // suffix
     integer &operator-=(const integer &rhs);
     integer &operator*=(const integer &rhs);
-    integer operator/(integer rhs) const;
+    integer operator/(const integer &rhs) const;
     integer &operator/=(uint32_t rhs);
     integer &operator/=(const integer &rhs);
     int64_t operator%(uint32_t b);
-    integer operator%(integer rhs) const;
+    integer operator%(const integer &rhs) const;
     integer &operator%=(const integer &rhs);
     integer &multiply_2(uint32_t count);
 
@@ -97,13 +97,22 @@ namespace cyy::math {
   private:
     struct const_view {
       explicit const_view(const integer &n)
-          : non_negative(n.non_negative), digits(n.digits.data(),n.digits.size()) {}
+          : non_negative(n.non_negative),
+            digits(n.digits.data(), n.digits.size()) {}
       bool non_negative;
-      ranges::v3::span<const uint32_t> digits;
+      ranges::span<const uint32_t> digits;
+      void change_sign() {
+        if (digits.back() == 0) {
+          non_negative = true;
+          return;
+        }
+        non_negative = !non_negative;
+      }
     };
 
   private:
     integer &operator+=(const_view rhs);
+    integer &operator-=(const_view rhs);
     void normalize();
 
   private:
