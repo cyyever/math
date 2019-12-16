@@ -117,7 +117,7 @@ namespace cyy::math {
 
     uint64_t sum = 0;
     size_t i = 0;
-    for (; i < rhs.digits.size(); i++) {
+    for (; i <  static_cast<size_t>(rhs.digits.size()); i++) {
       sum += static_cast<uint64_t>(digits[i]) +
              static_cast<uint64_t>(rhs.digits[i]);
       digits[i] = static_cast<uint32_t>(sum & mask);
