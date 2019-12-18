@@ -134,13 +134,34 @@ namespace cyy::math {
     return *this;
   }
 
-  std::string rational::to_string() const {
-    if (p == 0) {
-      return "0";
-    }
+  std::string rational::to_string(const rational &abs_error) const {
     if (q == 1) {
       return p.to_string();
     }
-    return p.to_string() + "/" + q.to_string();
+    if (abs_error <= 0) {
+      throw ::cyy::math::exception::out_of_range("abs_error <=0");
+    }
+
+    auto new_p = p;
+    std::string res;
+    if (new_p < 0) {
+      new_p.change_sign();
+      res.push_back('-');
+    }
+
+    auto [quotient, remainder] = new_p.div(q);
+    res += quotient.to_string();
+    rational cur_abs_error = 1;
+    if (abs_error < cur_abs_error) {
+      res.push_back('.');
+    }
+
+    while (abs_error < cur_abs_error) {
+      remainder *= 10;
+      std::tie(quotient, remainder) = remainder.div(q);
+      res += quotient.to_string();
+      cur_abs_error /= cyy::math::integer(10);
+    }
+    return res;
   }
 } // namespace cyy::math

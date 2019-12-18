@@ -6,11 +6,11 @@
 
 #include "irrational.hpp"
 
-namespace cyy::math {
+namespace cyy::math::irrational {
 
   cyy::math::rational get_e(const cyy::math::rational &err) {
     integer n = 1;
-    cyy::math::rational sum = 1;
+    cyy::math::rational sum = 2;
     integer m = 1;
 
     while (1 / m >= err) {
@@ -21,4 +21,4 @@ namespace cyy::math {
     }
     return sum;
   }
-} // namespace cyy::math
+} // namespace cyy::math::irrational

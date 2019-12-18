@@ -4,7 +4,6 @@
  *	日期：2016-04-04
  *	功能：测试数论相关函数
  */
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include "../src/number_theory.hpp"

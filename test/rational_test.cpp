@@ -3,7 +3,6 @@
  *
  * \brief 测试rational类
  */
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include "../src/rational.hpp"
@@ -100,4 +99,3 @@ TEST_CASE("*") {
     }
   }
 }
-

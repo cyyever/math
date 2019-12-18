@@ -4,7 +4,6 @@
  *	日期：2016-03-28
  *	功能：测试integer类
  */
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include "../src/integer.hpp"

@@ -28,7 +28,7 @@ namespace cyy::math {
     rational &operator=(rational &&) noexcept = default;
     ~rational() noexcept = default;
 
-    std::string to_string() const;
+    std::string to_string(const rational &abs_error = rational(1, 1000)) const;
 
     rational operator-() const;
     rational &operator+=(const rational &rhs);
