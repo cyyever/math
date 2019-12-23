@@ -9,12 +9,16 @@
 using namespace std;
 using namespace cyy::math;
 
-TEST_CASE("from_string") {
-  for (auto const &str : {"1/2", "-1/2", "5"}) {
-    auto a = rational(str);
-    CHECK_EQ(str, a.to_string());
-  }
+TEST_CASE("string") {
+  CHECK_EQ(rational("-0").to_string(), "0");
+  CHECK_EQ(rational("-1").to_string(), "-1");
+  CHECK_EQ(rational("1").to_string(), "1");
+  CHECK_EQ(rational("0").to_string(), "0");
+  CHECK_EQ(rational("-1/2").to_string(), "-0.5");
+  CHECK_EQ(rational("1/3").to_string(rational(1, 100)), "0.33");
+  CHECK_EQ(rational("1/3").to_string(rational(1, 1000)), "0.333");
 }
+
 TEST_CASE("simplify") {
   CHECK_EQ(rational(-3, 7).simplify(), rational(-3, 7));
   CHECK_EQ(rational(-14, 77).simplify(), rational(-2, 11));

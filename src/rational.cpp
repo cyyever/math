@@ -151,7 +151,7 @@ namespace cyy::math {
 
     auto [quotient, remainder] = new_p.div(q);
     res += quotient.to_string();
-    rational cur_abs_error = 1;
+    rational cur_abs_error(remainder, q);
     if (abs_error < cur_abs_error) {
       res.push_back('.');
     }
@@ -160,7 +160,8 @@ namespace cyy::math {
       remainder *= 10;
       std::tie(quotient, remainder) = remainder.div(q);
       res += quotient.to_string();
-      cur_abs_error /= cyy::math::integer(10);
+      cur_abs_error.p = remainder;
+      cur_abs_error.q *= 10;
     }
     return res;
   }
