@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <range/v3/view.hpp>
+#include <span>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -100,7 +101,7 @@ namespace cyy::math {
           : non_negative(n.non_negative),
             digits(n.digits.data(), n.digits.size()) {}
       bool non_negative;
-      ranges::span<const uint32_t> digits;
+      std::span<const uint32_t> digits;
       void change_sign() {
         if (digits.back() == 0) {
           non_negative = true;
