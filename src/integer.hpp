@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
-#include <range/v3/view.hpp>
+#include <ranges>
 #include <span>
 #include <string>
 #include <string_view>

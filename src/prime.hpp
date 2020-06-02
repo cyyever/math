@@ -80,24 +80,11 @@ namespace cyy::math {
       inline iterator operator-(difference_type rhs) const {
         return iterator(ptr, index - rhs);
       }
-
-      inline bool operator==(const iterator &rhs) const {
+      inline auto operator==(const iterator &rhs) const noexcept {
         return index == rhs.index;
       }
-      inline bool operator!=(const iterator &rhs) const {
-        return index != rhs.index;
-      }
-      inline bool operator>(const iterator &rhs) const {
-        return index > rhs.index;
-      }
-      inline bool operator<(const iterator &rhs) const {
-        return index < rhs.index;
-      }
-      inline bool operator>=(const iterator &rhs) const {
-        return index >= rhs.index;
-      }
-      inline bool operator<=(const iterator &rhs) const {
-        return index <= rhs.index;
+      inline auto operator<=>(const iterator &rhs) const noexcept {
+        return index <=> rhs.index;
       }
 
     private:

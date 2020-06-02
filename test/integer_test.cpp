@@ -22,7 +22,7 @@ TEST_CASE("from_string") {
 
   SUBCASE("invalid_string") {
     for (auto const &str : {"aaa", "0123"}) {
-      CHECK_THROWS(auto a = integer(str));
+      CHECK_THROWS(integer(str));
     }
   }
 }

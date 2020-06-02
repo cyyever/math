@@ -7,8 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
+#include <ranges>
 #include <regex>
 
 #include "exception.hpp"
@@ -256,7 +255,7 @@ namespace cyy::math {
       return *this;
 
     uint64_t res = 0;
-    for (auto &digit : ranges::reverse_view(digits)) {
+    for (auto &digit : std::ranges::reverse_view(digits)) {
       res = (res << 32) + digit;
       digit = static_cast<uint32_t>(res / rhs);
       res %= rhs;
@@ -275,7 +274,7 @@ namespace cyy::math {
 
     int64_t res = 0;
 
-    for (auto digit : ranges::reverse_view(digits)) {
+    for (auto digit : std::ranges::reverse_view(digits)) {
       res = ((res << 32) + digit) % b;
     }
     if (!non_negative) {
@@ -329,7 +328,7 @@ namespace cyy::math {
     if (!non_negative) {
       int_str.push_back('-');
     }
-    ranges::reverse(int_str);
+    std::ranges::reverse(int_str);
     return int_str;
   }
 

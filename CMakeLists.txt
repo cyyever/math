@@ -31,10 +31,7 @@ add_custom_target(decompress_data DEPENDS ${DATA_DIR}/prime.txt)
 add_dependencies(MyMathLib decompress_data)
 
 # test
-option(BUILD_TEST "Build test" ON)
-if(BUILD_TEST)
-  add_subdirectory(test)
-endif()
+add_subdirectory(test)
 
 # install lib
 install(
@@ -57,5 +54,4 @@ install(FILES ${DATA_DIR}/prime.txt DESTINATION lib)
 # install cmake config file
 install(
   EXPORT ${PROJECT_NAME}Targets
-  FILE ${PROJECT_NAME}Config.cmake
   DESTINATION lib/cmake/${PROJECT_NAME})

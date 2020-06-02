@@ -3,8 +3,8 @@
  *
  * \brief 测试rational类
  */
-#include <doctest/doctest.h>
 #include <cmath>
+#include <doctest/doctest.h>
 
 #include "../src/irrational.hpp"
 using namespace std;
