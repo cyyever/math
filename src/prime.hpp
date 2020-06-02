@@ -29,7 +29,6 @@ namespace cyy::math {
 
     class iterator {
     public:
-      using iterator_category = std::random_access_iterator_tag;
       using value_type = uint64_t;
       using difference_type = ptrdiff_t;
       using pointer = value_type *;
@@ -83,9 +82,9 @@ namespace cyy::math {
       inline auto operator==(const iterator &rhs) const noexcept {
         return index == rhs.index;
       }
-      inline auto operator<=>(const iterator &rhs) const noexcept {
-        return index <=> rhs.index;
-      }
+      /* inline auto operator<=>(const iterator &rhs) const noexcept { */
+      /*   return index <=> rhs.index; */
+      /* } */
 
     private:
       const primes *ptr{nullptr};
