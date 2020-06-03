@@ -4,7 +4,9 @@
  * \brief
  */
 
+#include <compare>
 #include <regex>
+#include <sstream>
 
 #include "exception.hpp"
 #include "number_theory.hpp"
@@ -42,17 +44,9 @@ namespace cyy::math {
     q = str.substr(pos + 1);
   }
 
-  /*
-   *	功能：比较和另一个有理数的大小
-   * 	参数：
-   *		rhs：另一个有理数
-   * 	返回值：
-   * 		>0：大于另一个有理数
-   * 		0：两个有理数相等
-   * 		<0：小于另一个有理数
-   */
-  int rational::compare(const rational &rhs) const {
-    return (p * rhs.q).compare(q * rhs.p);
+  std::strong_ordering
+  rational::operator<=>(const rational &rhs) const noexcept {
+    return (p * rhs.q) <=> (q * rhs.p);
   }
 
   rational rational::operator-() const {

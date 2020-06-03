@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <compare>
 #include <cstdlib>
 #include <ranges>
 #include <regex>
@@ -44,21 +45,12 @@ namespace cyy::math {
     }
   }
 
-  /*
-   *	功能：比较和另一个整数的大小
-   * 	参数：
-   *		rhs：另一个整数
-   * 	返回值：
-   * 		>0：大于另一个整数
-   * 		0：两个整数相等
-   * 		<0：小于另一个整数
-   */
-  int integer::compare(const integer &rhs) const {
+  std::strong_ordering integer::operator<=>(const integer &rhs) const noexcept {
     if (non_negative != rhs.non_negative) {
       if (non_negative && !rhs.non_negative)
-        return 1;
+        return std::strong_ordering::greater;
       else
-        return -1;
+        return std::strong_ordering::less;
     }
 
     int res;
@@ -82,7 +74,12 @@ namespace cyy::math {
     }
     if (!non_negative) //负数
       res = -res;
-    return res;
+    if (res > 0) {
+      return std::strong_ordering::greater;
+    } else if (res == 0) {
+      return std::strong_ordering::equal;
+    }
+    return std::strong_ordering::less;
   }
   integer integer::operator-() const {
     auto res = *this;

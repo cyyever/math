@@ -80,11 +80,8 @@ namespace cyy::math {
         return iterator(ptr, index - rhs);
       }
       inline auto operator==(const iterator &rhs) const noexcept {
-        return index == rhs.index;
+        return index == rhs.index && ptr == rhs.ptr;
       }
-      /* inline auto operator<=>(const iterator &rhs) const noexcept { */
-      /*   return index <=> rhs.index; */
-      /* } */
 
     private:
       const primes *ptr{nullptr};

@@ -42,7 +42,12 @@ namespace cyy::math {
     const integer &numerator() const { return p; }
     const integer &denominator() const { return q; }
     integer round_zero() const { return p / q; }
-    int compare(const rational &rhs) const;
+    std::strong_ordering operator<=>(const rational &rhs) const noexcept;
+
+    bool operator==(const rational &rhs) const noexcept {
+      return (*this <=> rhs) == std::strong_ordering::equal;
+    }
+
     rational reciprocal() const { return rational(q, p); }
 
   private:
@@ -50,29 +55,6 @@ namespace cyy::math {
     integer q; //分母，恒为正数
   };
 
-  inline bool operator==(const rational &a, const rational &b) {
-    return a.compare(b) == 0;
-  }
-
-  inline bool operator!=(const rational &a, const rational &b) {
-    return !(a == b);
-  }
-
-  inline bool operator<(const rational &a, const rational &b) {
-    return a.compare(b) < 0;
-  }
-
-  inline bool operator<=(const rational &a, const rational &b) {
-    return a.compare(b) <= 0;
-  }
-
-  inline bool operator>(const rational &a, const rational &b) {
-    return !(a <= b);
-  }
-
-  inline bool operator>=(const rational &a, const rational &b) {
-    return !(a < b);
-  }
   inline rational operator+(const rational &a, const rational &b) {
     return rational(a) += b;
   }

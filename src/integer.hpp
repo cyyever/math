@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <compare>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -91,7 +92,10 @@ namespace cyy::math {
       }
       non_negative = !non_negative;
     }
-    int compare(const integer &rhs) const;
+    std::strong_ordering operator<=>(const integer &rhs) const noexcept;
+    bool operator==(const integer &rhs) const noexcept {
+      return ((*this) <=> rhs) == std::strong_ordering::equal;
+    }
 
     std::pair<integer, integer> div(integer divisor) const;
 
@@ -124,29 +128,6 @@ namespace cyy::math {
     bool non_negative{true};
   };
 
-  inline bool operator==(const integer &a, const integer &b) {
-    return a.compare(b) == 0;
-  }
-
-  inline bool operator!=(const integer &a, const integer &b) {
-    return !(a == b);
-  }
-
-  inline bool operator<(const integer &a, const integer &b) {
-    return a.compare(b) < 0;
-  }
-
-  inline bool operator<=(const integer &a, const integer &b) {
-    return a.compare(b) <= 0;
-  }
-
-  inline bool operator>(const integer &a, const integer &b) {
-    return !(a <= b);
-  }
-
-  inline bool operator>=(const integer &a, const integer &b) {
-    return !(a < b);
-  }
   inline integer operator+(integer a, const integer &b) { return a += b; }
   inline integer operator-(integer a, const integer &b) { return a -= b; }
   inline integer operator*(integer a, const integer &b) { return a *= b; }
