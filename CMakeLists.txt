@@ -18,7 +18,7 @@ target_link_libraries(CyyMathLib PUBLIC range-v3)
 
 configure_file(src/config.hpp.in config.hpp)
 target_include_directories(CyyMathLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_compile_definitions(CyyMathLib PUBLIC RANGES_NO_STD_FORWARD_DECLARATIONS)
+# target_compile_definitions(CyyMathLib PUBLIC RANGES_NO_STD_FORWARD_DECLARATIONS)
 
 add_custom_command(
   OUTPUT ${DATA_DIR}/prime.txt
@@ -36,7 +36,7 @@ add_subdirectory(test)
 # install lib
 install(
   TARGETS CyyMathLib
-  EXPORT ${PROJECT_NAME}Targets
+  EXPORT CyyMathLibConfig
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib COMPONENT library
@@ -52,6 +52,4 @@ install(
 install(FILES ${DATA_DIR}/prime.txt DESTINATION lib)
 
 # install cmake config file
-install(
-  EXPORT ${PROJECT_NAME}Targets
-  DESTINATION lib/cmake/${PROJECT_NAME})
+install(EXPORT CyyMathLibConfig DESTINATION lib/cmake/CyyMathLib)
