@@ -83,8 +83,8 @@ namespace std {
   struct hash<cyy::math::rational> {
     std::size_t operator()(const cyy::math::rational &x) const noexcept {
           std::size_t seed = 0;
-        boost::hash_combine(seed,std::hash(x.numerator()));
-        boost::hash_combine(seed,std::hash(x.denominator()));
+        boost::hash_combine(seed,std::hash<cyy::math::integer>(x.numerator()));
+        boost::hash_combine(seed,std::hash<cyy::math::integer>(x.denominator()));
         return seed;
     }
   };
