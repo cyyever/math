@@ -98,9 +98,7 @@ namespace cyy::math {
     }
 
     std::pair<integer, integer> div(integer divisor) const;
-    auto const & get_digits() const {
-      return digits;
-    }
+    auto const &get_digits() const { return digits; }
 
   private:
     struct const_view {
@@ -143,10 +141,10 @@ namespace cyy::math {
 } // namespace cyy::math
 
 namespace std {
-  template <>
-  struct hash<cyy::math::integer> {
+  template <> struct hash<cyy::math::integer> {
     std::size_t operator()(const cyy::math::integer &x) const noexcept {
-      return boost::hash_range(std::begin(x.get_digits()), std::end(x.get_digits()));
+      return boost::hash_range(std::begin(x.get_digits()),
+                               std::end(x.get_digits()));
     }
   };
 } // namespace std

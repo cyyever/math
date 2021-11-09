@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include <boost/functional/hash.hpp>
 #include "integer.hpp"
+#include <boost/functional/hash.hpp>
 
 namespace cyy::math {
 
@@ -79,13 +79,13 @@ namespace cyy::math {
 } // namespace cyy::math
 
 namespace std {
-  template <>
-  struct hash<cyy::math::rational> {
+  template <> struct hash<cyy::math::rational> {
     std::size_t operator()(const cyy::math::rational &x) const noexcept {
-          std::size_t seed = 0;
-        boost::hash_combine(seed,std::hash<cyy::math::integer>()(x.numerator()));
-        boost::hash_combine(seed,std::hash<cyy::math::integer>()(x.denominator()));
-        return seed;
+      std::size_t seed = 0;
+      boost::hash_combine(seed, std::hash<cyy::math::integer>()(x.numerator()));
+      boost::hash_combine(seed,
+                          std::hash<cyy::math::integer>()(x.denominator()));
+      return seed;
     }
   };
 } // namespace std
