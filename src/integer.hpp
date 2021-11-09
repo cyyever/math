@@ -143,6 +143,7 @@ namespace cyy::math {
 } // namespace cyy::math
 
 namespace std {
+  template <>
   struct hash<cyy::math::integer> {
     std::size_t operator()(const cyy::math::integer &x) const noexcept {
       return boost::hash_range(std::begin(x.get_digits()), std::end(x.get_digits()));

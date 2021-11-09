@@ -79,6 +79,7 @@ namespace cyy::math {
 } // namespace cyy::math
 
 namespace std {
+  template <>
   struct hash<cyy::math::rational> {
     std::size_t operator()(const cyy::math::rational &x) const noexcept {
           std::size_t seed = 0;
