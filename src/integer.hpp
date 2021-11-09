@@ -7,7 +7,6 @@
 
 #include <compare>
 #include <cstdint>
-#include <iostream>
 #include <limits>
 #include <ranges>
 #include <span>
@@ -21,7 +20,7 @@ namespace cyy::math {
 
   class integer final {
   public:
-    integer() { digits.push_back(0); }
+    integer() : digits{0} {}
 
     template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
     integer(T num) {

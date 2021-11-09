@@ -9,6 +9,7 @@
 #include <compare>
 #include <cstdlib>
 #include <ranges>
+#include <range/v3/all.hpp>
 #include <regex>
 
 #include "exception.hpp"
@@ -60,13 +61,11 @@ namespace cyy::math {
       res = 1;
     else {
       res = 0;
-      auto it = digits.crbegin();
-      auto it2 = rhs.digits.crbegin();
-      for (; it != digits.crend() && it2 != rhs.digits.crend(); it++, it2++) {
-        if (*it < *it2) {
+      for( auto [a,b]:ranges::views::zip(digits,rhs.digits) ) {
+        if (a < b) {
           res = -1;
           break;
-        } else if (*it > *it2) {
+        } else if (a > b) {
           res = 1;
           break;
         }
@@ -83,6 +82,7 @@ namespace cyy::math {
   }
   integer integer::operator-() const {
     auto res = *this;
+    res.normalize();
     if (res != 0)
       res.non_negative = !res.non_negative;
     return res;

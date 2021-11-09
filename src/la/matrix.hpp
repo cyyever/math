@@ -172,7 +172,8 @@ namespace cyy::math::la {
           if (j == i || result[j][i] == 0) {
             continue;
           }
-          vector_view<T>(result[j]).scaled_sum(vector_view<T>(result[i]), -result[j][i]);
+          vector_view<T>(result[j]).scaled_sum(vector_view<T>(result[i]),
+                                               -result[j][i]);
         }
       }
       for (auto &vec : result) {
