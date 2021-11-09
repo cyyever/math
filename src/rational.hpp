@@ -7,6 +7,7 @@
 
 #include <string>
 
+#include <boost/functional/hash.hpp>
 #include "integer.hpp"
 
 namespace cyy::math {
@@ -76,3 +77,14 @@ namespace cyy::math {
     return os;
   }
 } // namespace cyy::math
+
+namespace std {
+  struct hash<cyy::math::rational> {
+    std::size_t operator()(const cyy::math::rational &x) const noexcept {
+          std::size_t seed = 0;
+        boost::hash_combine(seed,std::hash(x.numerator()));
+        boost::hash_combine(seed,std::hash(x.denominator()));
+        return seed;
+    }
+  };
+} // namespace std
