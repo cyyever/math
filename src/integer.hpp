@@ -82,7 +82,7 @@ namespace cyy::math {
     int64_t operator%(uint32_t b);
     integer operator%(const integer &rhs) const;
     integer &operator%=(const integer &rhs);
-    integer &multiply_2(uint32_t count);
+    integer &multiply(uint32_t count);
 
     void change_sign() {
       if (digits.back() == 0) {

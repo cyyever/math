@@ -8,8 +8,8 @@
 #include <cassert>
 #include <compare>
 #include <cstdlib>
-#include <ranges>
 #include <range/v3/all.hpp>
+#include <ranges>
 #include <regex>
 
 #include "exception.hpp"
@@ -61,7 +61,8 @@ namespace cyy::math {
       res = 1;
     else {
       res = 0;
-      for( auto [a,b]:ranges::views::zip(digits,rhs.digits) ) {
+      for (auto [a, b] :
+           ranges::views::zip(digits, rhs.digits) | ::ranges::views::reverse) {
         if (a < b) {
           res = -1;
           break;
@@ -82,7 +83,6 @@ namespace cyy::math {
   }
   integer integer::operator-() const {
     auto res = *this;
-    res.normalize();
     if (res != 0)
       res.non_negative = !res.non_negative;
     return res;
@@ -151,15 +151,13 @@ namespace cyy::math {
   integer &integer::operator-=(const_view rhs) {
     bool changed_sign = false;
     if (!non_negative && !rhs.non_negative) {
-      non_negative = true;
       changed_sign = true;
     }
 
-    std::vector<int64_t> diffrence(
-        std::max(digits.size(), static_cast<size_t>(rhs.digits.size())), 0);
+    std::vector<int64_t> diffrence(std::max(digits.size(), rhs.digits.size()),
+                                   0);
     size_t i = 0;
-    for (; i < std::min(digits.size(), static_cast<size_t>(rhs.digits.size()));
-         i++) {
+    for (; i < std::min(digits.size(), rhs.digits.size()); i++) {
       diffrence[i] =
           static_cast<int64_t>(digits[i]) - static_cast<int64_t>(rhs.digits[i]);
     }
@@ -195,7 +193,7 @@ namespace cyy::math {
     return *this;
   }
 
-  integer &integer::multiply_2(uint32_t count) {
+  integer &integer::multiply(uint32_t count) {
     auto whole_block_num = count / 32;
     auto remain_shift_num = count % 32;
     if (remain_shift_num) {
