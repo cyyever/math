@@ -18,7 +18,6 @@ target_link_libraries(CyyMathLib PUBLIC range-v3)
 
 configure_file(src/config.hpp.in config.hpp)
 target_include_directories(CyyMathLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-# target_compile_definitions(CyyMathLib PUBLIC RANGES_NO_STD_FORWARD_DECLARATIONS)
 
 add_custom_command(
   OUTPUT ${DATA_DIR}/prime.txt
