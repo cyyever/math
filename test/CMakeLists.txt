@@ -1,7 +1,7 @@
 find_package(doctest REQUIRED)
 
-file(GLOB test_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/la/*.cpp)
+file(GLOB test_sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+add_subdirectory(algebra)
 
 foreach(test_source IN LISTS test_sources)
   get_filename_component(test_prog ${test_source} NAME_WE)

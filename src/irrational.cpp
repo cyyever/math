@@ -5,20 +5,19 @@
  */
 
 #include "irrational.hpp"
+#include "rational.hpp"
 
-namespace cyy::math::irrational {
-
-  cyy::math::rational get_e(const cyy::math::rational &err) {
+namespace cyy::math {
+  rational e_natural::value_within_error(const cyy::math::rational &err) {
     integer n = 1;
-    cyy::math::rational sum = 2;
+    rational sum = 2;
     integer m = 1;
-
     while (1 / m >= err) {
       ++n;
       m *= n;
-
       sum += 1 / m;
     }
     return sum;
   }
-} // namespace cyy::math::irrational
+
+} // namespace cyy::math

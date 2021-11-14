@@ -19,9 +19,9 @@ namespace cyy::math {
     template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
     rational(T num) : rational(integer(num), integer(1)) {}
     rational(integer numerator, integer denominator);
-    rational(std::string_view str);
+    explicit rational(std::string_view str);
 
-    rational(integer a) : p(std::move(a)), q(1) {}
+    explicit rational(integer a) : p(std::move(a)), q(1) {}
     rational(const rational &) = default;
     rational &operator=(const rational &) = default;
 
@@ -49,7 +49,7 @@ namespace cyy::math {
       return (*this <=> rhs) == std::strong_ordering::equal;
     }
 
-    rational reciprocal() const { return rational(q, p); }
+    rational reciprocal() const { return {q, p}; }
 
   private:
     integer p; //分子，有理数的符号由它体现

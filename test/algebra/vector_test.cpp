@@ -5,7 +5,7 @@
  */
 #include <doctest/doctest.h>
 
-#include "src/la/vector.hpp"
+#include "src/algebra/vector.hpp"
 
 TEST_CASE("init") {
   std::vector<int> vec{1, 2, 3};

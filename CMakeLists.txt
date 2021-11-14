@@ -9,13 +9,16 @@ find_package(range-v3 REQUIRED)
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(INSTALLED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/la/*.cpp)
+file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CyyMathLib ${SOURCE})
 
 target_link_libraries(CyyMathLib PUBLIC range-v3)
+add_subdirectory(src/algebra)
 
+target_include_directories(
+  CyyMathLib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+                    $<INSTALL_INTERFACE:include/cyy/math>)
 configure_file(src/config.hpp.in config.hpp)
 target_include_directories(CyyMathLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

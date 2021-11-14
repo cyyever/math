@@ -9,6 +9,16 @@
 
 #include "rational.hpp"
 
-namespace cyy::math::irrational {
-  cyy::math::rational get_e(const cyy::math::rational &err);
-} // namespace cyy::math::irrational
+namespace cyy::math {
+  // we implements irrational as a convergent sequence
+  class irrational {
+  public:
+    virtual rational value_within_error(const cyy::math::rational &err) = 0;
+    virtual ~irrational() = default;
+  };
+  class e_natural final : public irrational {
+  public:
+    rational value_within_error(const cyy::math::rational &err) override;
+  };
+
+} // namespace cyy::math

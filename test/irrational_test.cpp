@@ -11,7 +11,8 @@ using namespace std;
 using namespace cyy::math;
 
 TEST_CASE("e") {
-  CHECK_EQ(stold(irrational::get_e(rational(1, 1000000))
+  CHECK_EQ(stold(e_natural()
+                     .value_within_error(rational(1, 1000000))
                      .to_string(rational(1, 1000000))),
            doctest::Approx(M_E));
 }

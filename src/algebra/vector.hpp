@@ -12,6 +12,8 @@
 #include "../numerical_type.hpp"
 
 namespace cyy::math::la {
+  /* typedef Matrix<double, Dynamic, Dynamic> MatrixXd; */
+
 
   template <typename T,
             typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>
