@@ -12,7 +12,8 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 namespace cyy::math::la {
-  using matrix=Eigen::Matrix<cyy::math::rational,Eigen::Dynamic,Eigen:: Dynamic>;
+  using matrix =
+      Eigen::Matrix<cyy::math::rational, Eigen::Dynamic, Eigen::Dynamic>;
 
   template <typename T,
             typename = std::enable_if_t<cyy::math::type::is_numerical_type<T>>>

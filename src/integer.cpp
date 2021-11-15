@@ -37,7 +37,7 @@ namespace cyy::math {
     }
   }
 
-  void integer::normalize() {
+  void integer::normalize() const {
     while (digits.back() == 0 && digits.size() > 1) {
       digits.pop_back();
     }

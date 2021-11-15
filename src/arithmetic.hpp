@@ -66,6 +66,14 @@ namespace cyy::math {
     return res;
   }
 
+  template <typename BASE_T,
+            typename = std::enable_if_t<(std::is_same_v<BASE_T, integer> ||
+                                         std::is_same_v<BASE_T, rational>)>>
+  BASE_T abs(BASE_T value) {
+    value.set_non_negative();
+    return value;
+  }
+
   rational ln(const rational &a);
   /* rational log(const integer &n, uint64_t base, size_t digit_num); */
 } // namespace cyy::math

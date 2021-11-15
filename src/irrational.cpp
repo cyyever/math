@@ -5,6 +5,7 @@
  */
 
 #include "irrational.hpp"
+#include "arithmetic.hpp"
 #include "rational.hpp"
 
 namespace cyy::math {
@@ -18,6 +19,14 @@ namespace cyy::math {
       sum += 1 / m;
     }
     return sum;
+  }
+
+  rational square_root::value_within_error(const cyy::math::rational &err) {
+    rational root = value / rational(2);
+    while (abs(exponent(root, 2) - value) > err) {
+      root = (root + value / root) / rational(2);
+    }
+    return root;
   }
 
 } // namespace cyy::math

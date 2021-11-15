@@ -40,14 +40,16 @@ namespace cyy::math {
     void normalize();
     rational &simplify();
 
+    void set_non_negative() {
+      p.set_non_negative();
+      q.set_non_negative();
+    }
     const integer &numerator() const { return p; }
     const integer &denominator() const { return q; }
     integer round_zero() const { return p / q; }
     std::strong_ordering operator<=>(const rational &rhs) const noexcept;
 
-    bool operator==(const rational &rhs) const noexcept {
-      return (*this <=> rhs) == std::strong_ordering::equal;
-    }
+    bool operator==(const rational &rhs) const noexcept = default;
 
     rational reciprocal() const { return {q, p}; }
 

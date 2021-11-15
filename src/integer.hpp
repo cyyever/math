@@ -94,7 +94,9 @@ namespace cyy::math {
     }
     std::strong_ordering operator<=>(const integer &rhs) const noexcept;
     bool operator==(const integer &rhs) const noexcept {
-      return ((*this) <=> rhs) == std::strong_ordering::equal;
+      normalize();
+      rhs.normalize();
+      return non_negative == rhs.non_negative && digits == rhs.digits;
     }
 
     std::pair<integer, integer> div(integer divisor) const;
@@ -119,14 +121,14 @@ namespace cyy::math {
   private:
     integer &operator+=(const_view rhs);
     integer &operator-=(const_view rhs);
-    void normalize();
+    void normalize() const;
 
   private:
-    std::vector<uint32_t> digits;
+    mutable std::vector<uint32_t> digits;
+    mutable bool non_negative{true};
     static constexpr uint64_t base =
         static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()) + 1;
     static constexpr uint64_t mask = base - 1;
-    bool non_negative{true};
   };
 
   inline integer operator+(integer a, const integer &b) { return a += b; }
