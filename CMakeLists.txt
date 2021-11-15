@@ -4,11 +4,6 @@ project(CyyMathLib LANGUAGES CXX)
 
 include(cmake/all.cmake)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  find_package(libcxx REQUIRED)
-  target_link_libraries(CyyMathLib PUBLIC libcxx::libcxx)
-endif()
-
 find_package(range-v3 REQUIRED)
 
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
@@ -17,6 +12,12 @@ set(INSTALLED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CyyMathLib ${SOURCE})
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  find_package(libcxx REQUIRED)
+  target_link_libraries(CyyMathLib PUBLIC libcxx::libcxx)
+endif()
+
 
 target_link_libraries(CyyMathLib PUBLIC range-v3)
 add_subdirectory(src/algebra)
