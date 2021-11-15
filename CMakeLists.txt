@@ -4,6 +4,11 @@ project(CyyMathLib LANGUAGES CXX)
 
 include(cmake/all.cmake)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  find_package(libcxx REQUIRED)
+  target_link_libraries(CyyMathLib PUBLIC libcxx::libcxx)
+endif()
+
 find_package(range-v3 REQUIRED)
 
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
