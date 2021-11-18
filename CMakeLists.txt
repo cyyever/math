@@ -41,6 +41,11 @@ add_dependencies(CyyMathLib decompress_data)
 # test
 add_subdirectory(test)
 
+option(BUILD_FUZZING "Build fuzzing" OFF)
+if(BUILD_FUZZING)
+  add_subdirectory(fuzz_test)
+endif()
+
 # install lib
 install(
   TARGETS CyyMathLib
