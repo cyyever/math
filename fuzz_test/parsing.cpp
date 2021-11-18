@@ -6,7 +6,7 @@
 #include "integer.hpp"
 using namespace cyy::math;
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+extern "C" static int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   try {
     if (Size == 0) {
       return 0;
