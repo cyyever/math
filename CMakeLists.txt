@@ -5,6 +5,7 @@ project(CyyMathLib LANGUAGES CXX)
 include(cmake/all.cmake)
 
 find_package(range-v3 REQUIRED)
+find_package(Boost REQUIRED)
 
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(INSTALLED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/lib")
@@ -20,6 +21,7 @@ endif()
 
 
 target_link_libraries(CyyMathLib PUBLIC range-v3)
+target_link_libraries(CyyMathLib PUBLIC Boost::headers)
 add_subdirectory(src/algebra)
 
 target_include_directories(
