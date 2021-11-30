@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "vector.hpp"
+#include "arithmetic.hpp"
 #include <Eigen/Core>
 #include <Eigen/LU>
 namespace cyy::math::la {

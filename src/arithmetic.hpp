@@ -12,15 +12,15 @@
 #include "rational.hpp"
 
 namespace std {
-  cyy::math::integer abs(cyy::math::integer n) {
+  inline cyy::math::integer abs(cyy::math::integer n) {
     n.set_non_negative();
     return n;
   }
-  cyy::math::rational abs(cyy::math::rational n) {
+  inline cyy::math::rational abs(cyy::math::rational n) {
     n.set_non_negative();
     return n;
   }
-}
+} // namespace std
 namespace cyy::math {
 
   template <typename BASE_T, typename POWER_T,
