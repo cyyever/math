@@ -149,7 +149,7 @@ namespace cyy::math {
     static constexpr size_t prime_count = 50000000;
     static constexpr uint64_t max_prime = 982451653;
     static constexpr size_t line_width = 10;
-    static inline std::vector<uint64_t> in_memory_primes;
+    static std::vector<uint64_t> in_memory_primes;
   };
 
 } // namespace cyy::math
