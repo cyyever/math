@@ -11,6 +11,7 @@
 #include <iostream>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
+#include <ranges>
 #include <vector>
 
 #include "exception.hpp"
@@ -93,6 +94,11 @@ namespace cyy::math {
 
     iterator cbegin() const noexcept { return iterator(this, 0); }
     iterator cend() const noexcept { return iterator(this, prime_count); }
+    auto get_view() const {
+      return std::ranges::views::iota(static_cast<size_t>(0), prime_count) |
+             std::ranges::views::transform(
+                 [this](auto idx) { return at(idx); });
+    }
 
     uint64_t at(size_t index) const;
     auto till(uint64_t upper_bound) -> auto {
