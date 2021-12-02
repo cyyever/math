@@ -48,8 +48,9 @@ namespace cyy::math {
     const integer &denominator() const { return q; }
     integer round_zero() const { return p / q; }
     std::strong_ordering operator<=>(const rational &rhs) const noexcept;
-
-    bool operator==(const rational &rhs) const noexcept = default;
+    bool operator==(const rational &rhs) const noexcept {
+      return operator<=>(rhs) == std::strong_ordering::equal;
+    }
 
     rational reciprocal() const { return {q, p}; }
 
