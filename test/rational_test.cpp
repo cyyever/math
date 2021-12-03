@@ -26,9 +26,11 @@ TEST_CASE("simplify") {
 }
 TEST_CASE("compare") {
   for (int64_t a = -1; a < 2; a++) {
+    if (a != 0) {
+      CHECK_EQ(rational(a, a), 1);
+    }
     for (int64_t b = -1; b < 2; b++) {
       CHECK_EQ(rational(a) < rational(b), a < b);
-      CHECK_EQ(rational(a, a), 1);
     }
   }
 }
