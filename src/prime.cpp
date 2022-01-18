@@ -52,8 +52,9 @@ namespace cyy::math {
   }
 
 #ifdef _MSC_VER
-#pragma warning(disable : 6262)
-#endif
+  std::vector<uint64_t> primes::in_memory_primes{
+      2,      3,      5,      7,      11,     13,     17,     19,     23};
+#else
   std::vector<uint64_t> primes::in_memory_primes{
       2,      3,      5,      7,      11,     13,     17,     19,     23,
       29,     31,     37,     41,     43,     47,     53,     59,     61,
@@ -1167,5 +1168,5 @@ namespace cyy::math {
       104551, 104561, 104579, 104593, 104597, 104623, 104639, 104651, 104659,
       104677, 104681, 104683, 104693, 104701, 104707, 104711, 104717, 104723,
       104729};
-
+#endif
 } // namespace cyy::math
