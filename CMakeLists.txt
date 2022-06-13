@@ -14,12 +14,6 @@ file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CyyMathLib ${SOURCE})
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  find_package(libcxx REQUIRED)
-  target_link_libraries(CyyMathLib PUBLIC libcxx::libcxx)
-endif()
-
-
 target_link_libraries(CyyMathLib PUBLIC range-v3)
 target_link_libraries(CyyMathLib PUBLIC Boost::headers)
 add_subdirectory(src/algebra)
