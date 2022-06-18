@@ -62,7 +62,7 @@ namespace cyy::math {
     else {
       res = 0;
       for (auto [a, b] :
-           ranges::views::zip(digits, rhs.digits) | ::ranges::views::reverse) {
+           ranges::views::zip(digits, rhs.digits) | std::views::reverse) {
         if (a < b) {
           res = -1;
           break;

@@ -9,8 +9,6 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
 #include <ranges>
 #include <vector>
 
@@ -95,8 +93,8 @@ namespace cyy::math {
     iterator cbegin() const noexcept { return iterator(this, 0); }
     iterator cend() const noexcept { return iterator(this, prime_count); }
     auto get_view() const {
-      return std::ranges::views::iota(static_cast<size_t>(0), prime_count) |
-             std::ranges::views::transform(
+      return std::views::iota(static_cast<size_t>(0), prime_count) |
+             std::views::transform(
                  [this](auto idx) { return at(idx); });
     }
 
@@ -105,22 +103,14 @@ namespace cyy::math {
       if (upper_bound > max_prime) {
         throw exception::out_of_range("more than max prime");
       }
-      seek(in_memory_primes.size());
-
-      return ranges::views::concat(in_memory_primes,
-                                   ranges::istream_view<uint64_t>(data_file)) |
-             ranges::views::take_while(
+      return get_view() | std::views::take_while(
                  [upper_bound](auto i) { return i <= upper_bound; });
     }
     auto from(uint64_t lower_bound) -> auto {
       if (lower_bound > max_prime) {
         throw exception::out_of_range("more than max prime");
       }
-      seek(in_memory_primes.size());
-
-      return ranges::views::concat(in_memory_primes,
-                                   ranges::istream_view<uint64_t>(data_file)) |
-             ranges::views::drop_while(
+      return get_view() | std::views::drop_while(
                  [lower_bound](auto i) { return i < lower_bound; });
     }
 

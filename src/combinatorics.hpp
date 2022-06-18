@@ -67,6 +67,6 @@ namespace cyy::math {
              }
              return *res;
            }) |
-           ranges::views::take_while([](auto const &v) { return !v.empty(); });
+           std::views::take_while([](auto const &v) { return !v.empty(); });
   }
 } // namespace cyy::math

@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/view.hpp>
 
 #include "config.hpp"
 #include "exception.hpp"
