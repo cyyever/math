@@ -14,7 +14,7 @@ file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CyyMathLib ${SOURCE})
 
-target_link_libraries(CyyMathLib PUBLIC range-v3)
+target_link_libraries(CyyMathLib PRIVATE range-v3)
 target_link_libraries(CyyMathLib PUBLIC Boost::headers)
 add_subdirectory(src/algebra)
 
