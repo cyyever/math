@@ -5,12 +5,7 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <memory>
-#include <range/v3/all.hpp>
-#include <vector>
 
-#include "exception.hpp"
 #include "integer.hpp"
 namespace cyy::math {
 
