@@ -4,7 +4,6 @@ project(CyyMathLib LANGUAGES CXX)
 
 include(cmake/all.cmake)
 
-find_package(range-v3 REQUIRED)
 find_package(Boost REQUIRED)
 
 set(DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/data")
@@ -14,7 +13,6 @@ file(GLOB SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_library(CyyMathLib ${SOURCE})
 
-target_link_libraries(CyyMathLib PRIVATE range-v3)
 target_link_libraries(CyyMathLib PUBLIC Boost::headers)
 add_subdirectory(src/algebra)
 

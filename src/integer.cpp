@@ -8,7 +8,6 @@
 #include <cassert>
 #include <compare>
 #include <cstdlib>
-#include <range/v3/all.hpp>
 #include <ranges>
 #include <regex>
 
@@ -54,32 +53,24 @@ namespace cyy::math {
         return std::strong_ordering::less;
     }
 
-    int res;
+    auto res = std::strong_ordering::equal;
     if (digits.size() < rhs.digits.size())
-      res = -1;
+      res = std::strong_ordering::less;
     else if (digits.size() > rhs.digits.size())
-      res = 1;
+      res = std::strong_ordering::greater;
     else {
-      res = 0;
-      for (auto [a, b] :
-           ranges::views::zip(digits, rhs.digits) | std::views::reverse) {
-        if (a < b) {
-          res = -1;
-          break;
-        } else if (a > b) {
-          res = 1;
-          break;
-        }
+      res = std::lexicographical_compare_three_way(
+          digits.rbegin(), digits.rend(), rhs.digits.rbegin(),
+          rhs.digits.rend());
+    }
+    if (!non_negative) { // 负数
+      if (res == std::strong_ordering::greater) {
+        res = std::strong_ordering::less;
+      } else if (res == std::strong_ordering::less) {
+        res = std::strong_ordering::greater;
       }
     }
-    if (!non_negative) //负数
-      res = -res;
-    if (res > 0) {
-      return std::strong_ordering::greater;
-    } else if (res == 0) {
-      return std::strong_ordering::equal;
-    }
-    return std::strong_ordering::less;
+    return res;
   }
   integer integer::operator-() const {
     auto res = *this;
@@ -89,7 +80,7 @@ namespace cyy::math {
   }
 
   integer &integer::operator+=(const integer &rhs) {
-    if (diffrent_sign(rhs)) //符号不同，转换成减法
+    if (diffrent_sign(rhs)) // 符号不同，转换成减法
     {
       if (!non_negative) {
         non_negative = !non_negative;
@@ -138,7 +129,7 @@ namespace cyy::math {
       return *this;
     }
 
-    //转换成加法
+    // 转换成加法
     if (diffrent_sign(rhs)) {
       non_negative = !non_negative;
       operator+=(rhs);
