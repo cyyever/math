@@ -5,7 +5,6 @@
  */
 #pragma once
 
-
 #include "integer.hpp"
 namespace cyy::math {
 

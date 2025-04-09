@@ -4,7 +4,6 @@
  */
 #define DOCTEST_CONFIG_NO_EXCEPTIONS
 #include <doctest/doctest.h>
-#include <vector>
 
 #include "../src/prime.hpp"
 using namespace std;

@@ -6,18 +6,7 @@
 #pragma once
 
 #include <boost/container_hash/hash.hpp>
-#include <compare>
-#include <cstdint>
-#include <iostream>
-#include <limits>
-#include <ranges>
-#include <span>
-#include <string>
-#include <string_view>
-#include <type_traits>
-#include <utility>
-#include <vector>
-
+import std;
 namespace cyy::math {
 
   class integer final {

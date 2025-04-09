@@ -5,10 +5,9 @@
  */
 #pragma once
 
-#include <string>
+#include <boost/functional/hash.hpp>
 
 #include "integer.hpp"
-#include <boost/functional/hash.hpp>
 
 namespace cyy::math {
 
@@ -55,8 +54,8 @@ namespace cyy::math {
     rational reciprocal() const { return {q, p}; }
 
   private:
-    integer p; //分子，有理数的符号由它体现
-    integer q; //分母，恒为正数
+    integer p; // 分子，有理数的符号由它体现
+    integer q; // 分母，恒为正数
   };
 
   inline rational operator+(const rational &a, const rational &b) {

@@ -2,7 +2,6 @@
  * \file arithmetic_test.cpp
  */
 #include <doctest/doctest.h>
-#include <vector>
 
 #include "../src/arithmetic.hpp"
 #include "../src/integer.hpp"

@@ -4,14 +4,11 @@
  * \brief primes related functions
  */
 
-#include <algorithm>
-#include <filesystem>
-#include <fstream>
-
+#include "prime.hpp"
 #include "config.hpp"
 #include "exception.hpp"
-#include "prime.hpp"
 
+import std;
 namespace cyy::math {
 
   uint64_t primes::at(size_t index) const {

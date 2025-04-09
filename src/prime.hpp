@@ -5,14 +5,6 @@
  */
 #pragma once
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <fstream>
-#include <iostream>
-#include <ranges>
-#include <vector>
-
 #include "exception.hpp"
 #include "integer.hpp"
 namespace cyy::math {
@@ -95,8 +87,7 @@ namespace cyy::math {
     iterator cend() const noexcept { return iterator(this, prime_count); }
     auto get_view() const {
       return std::views::iota(static_cast<size_t>(0), prime_count) |
-             std::views::transform(
-                 [this](auto idx) { return at(idx); });
+             std::views::transform([this](auto idx) { return at(idx); });
     }
 
     uint64_t at(size_t index) const;
@@ -104,15 +95,17 @@ namespace cyy::math {
       if (upper_bound > max_prime) {
         throw exception::out_of_range("more than max prime");
       }
-      return get_view() | std::views::take_while(
-                 [upper_bound](auto i) { return i <= upper_bound; });
+      return get_view() | std::views::take_while([upper_bound](auto i) {
+               return i <= upper_bound;
+             });
     }
     auto from(uint64_t lower_bound) -> auto {
       if (lower_bound > max_prime) {
         throw exception::out_of_range("more than max prime");
       }
-      return get_view() | std::views::drop_while(
-                 [lower_bound](auto i) { return i < lower_bound; });
+      return get_view() | std::views::drop_while([lower_bound](auto i) {
+               return i < lower_bound;
+             });
     }
 
     bool has(uint64_t num) const {

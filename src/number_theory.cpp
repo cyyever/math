@@ -7,9 +7,7 @@
 
 #include "number_theory.hpp"
 
-#include <iostream>
-#include <stdexcept>
-
+import std;
 namespace cyy::math {
   /*
    *	功能：计算两个整数的最大公约数
@@ -32,7 +30,7 @@ namespace cyy::math {
     if (q == 0) {
       return p;
     }
-    //用欧几里得算法找到最大公约数
+    // 用欧几里得算法找到最大公约数
 
     while (true) {
       auto remainder = p % q;

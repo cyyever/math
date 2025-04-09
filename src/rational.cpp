@@ -4,15 +4,12 @@
  * \brief
  */
 
-#include <compare>
-#include <regex>
-#include <sstream>
-
+#include "rational.hpp"
 #include "exception.hpp"
 #include "number_theory.hpp"
 #include "prime.hpp"
-#include "rational.hpp"
 
+import std;
 namespace cyy::math {
 
   rational::rational(integer numerator, integer denominator)
