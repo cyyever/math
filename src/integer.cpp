@@ -5,7 +5,6 @@
  */
 
 #include <cassert>
-#include <cstdlib>
 
 #include "exception.hpp"
 #include "integer.hpp"

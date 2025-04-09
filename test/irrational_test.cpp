@@ -3,7 +3,6 @@
  *
  * \brief 测试irrational类
  */
-#include <cmath>
 #include <doctest/doctest.h>
 
 #include "irrational.hpp"
